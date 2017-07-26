@@ -34,7 +34,6 @@
   },
   "homepage": "https://github.com/kellyselden/git-diff-apply#readme",
   "dependencies": {
-    "rimraf": "^2.6.1",
     "yargs": "^8.0.2"
   },
   "devDependencies": {
