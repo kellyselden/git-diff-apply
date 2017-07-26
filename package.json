@@ -1,0 +1,50 @@
+{
+  "name": "git-diff-apply",
+  "version": "0.0.0",
+  "description": "Use a remote repository to apply a git diff",
+  "main": "index.js",
+  "bin": {
+    "git-diff-apply": "bin/git-diff-apply.js"
+  },
+  "scripts": {
+    "test": "cross-env DEBUG=git-diff-apply mocha",
+    "posttest": "npm run lint",
+    "prelint": "eslint --version",
+    "lint": "eslint bin test",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kellyselden/git-diff-apply.git"
+  },
+  "keywords": [
+    "patch",
+    "tag",
+    "merge",
+    "commit",
+    "cherry-pick",
+    "mergetool",
+    "update",
+    "conflict"
+  ],
+  "author": "Kelly Selden",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kellyselden/git-diff-apply/issues"
+  },
+  "homepage": "https://github.com/kellyselden/git-diff-apply#readme",
+  "dependencies": {
+    "rimraf": "^2.6.1",
+    "yargs": "^8.0.2"
+  },
+  "devDependencies": {
+    "chai": "^4.1.0",
+    "cross-env": "^5.0.1",
+    "debug": "^2.6.8",
+    "eslint": "^4.3.0",
+    "eslint-config-sane": "^0.1.0",
+    "fixturify": "^0.3.3",
+    "fs-extra": "^4.0.0",
+    "mocha": "^3.4.2"
+  }
+}
