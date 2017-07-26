@@ -2,7 +2,7 @@
   "name": "git-diff-apply",
   "version": "0.0.1",
   "description": "Use a remote repository to apply a git diff",
-  "main": "index.js",
+  "main": "src/index.js",
   "bin": {
     "git-diff-apply": "bin/git-diff-apply.js"
   },
@@ -10,7 +10,7 @@
     "test": "cross-env DEBUG=git-diff-apply mocha",
     "posttest": "npm run lint",
     "prelint": "eslint --version",
-    "lint": "eslint bin test",
+    "lint": "eslint bin src test",
     "lint:fix": "npm run lint -- --fix"
   },
   "repository": {
