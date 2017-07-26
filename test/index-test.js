@@ -167,23 +167,23 @@ describe('test', function() {
 
   it('handles conflicts', function() {
     return merge(
-      'test/fixtures/remote-conflict'
+      'test/fixtures/remote/conflict'
     ).then(() => {
-      fixtureCompare('test/fixtures/merge-conflict');
+      fixtureCompare('test/fixtures/merge/conflict');
     });
   });
 
   it('handles no conflicts', function() {
     return merge(
-      'test/fixtures/remote-noconflict'
+      'test/fixtures/remote/noconflict'
     ).then(() => {
-      fixtureCompare('test/fixtures/merge-noconflict');
+      fixtureCompare('test/fixtures/merge/noconflict');
     });
   });
 
   it('handles aborts', function() {
     return merge(
-      'test/fixtures/remote-conflict',
+      'test/fixtures/remote/conflict',
       true
     ).then((/* stderr */) => {
       let actual = fixturify.readSync('tmp/local');
