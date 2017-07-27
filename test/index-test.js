@@ -6,6 +6,7 @@ const cp = require('child_process');
 const fs = require('fs-extra');
 const fixturify = require('fixturify');
 const run = require('../src/run');
+// const debug = require('debug')('git-diff-apply');
 
 function gitInit(cwd) {
   run('git init', {
@@ -27,6 +28,30 @@ function gitInit(cwd) {
   run('git config mergetool.keepBackup false', {
     cwd
   });
+
+  // run('git config core.autocrlf input', {
+  //   cwd
+  // });
+
+  // run('git config core.eol lf', {
+  //   cwd
+  // });
+
+  // run('echo "* text=auto" > .gitattributes', {
+  //   cwd
+  // });
+
+  // run('cat .gitattributes', {
+  //   cwd
+  // });
+
+  // run('git add -A', {
+  //   cwd
+  // });
+
+  // run('git commit -m ".gitattributes"', {
+  //   cwd
+  // });
 }
 
 function buildTmp(
@@ -59,6 +84,10 @@ function buildTmp(
     run(`git tag ${tag}`, {
       cwd: tmpPath
     });
+
+    // let files = fixturify.readSync(tmpPath);
+    // delete files['.git'];
+    // debug(files);
   }
 }
 
@@ -69,14 +98,6 @@ function fixtureCompare(mergeFixtures) {
   delete actual['.git'];
 
   expect(actual).to.deep.equal(expected);
-
-  let result = run('git log -1', {
-    cwd: 'tmp/local'
-  });
-
-  expect(result).to.contain('Author: Your Name <you@example.com>');
-  expect(result).to.contain('v1-v3');
-  expect(result).to.not.contain('local');
 }
 
 describe('Acceptance', function() {
@@ -112,8 +133,8 @@ describe('Acceptance', function() {
     return new Promise(resolve => {
       let ps = cp.spawn('node', [
         binFile,
-        '--remote-name',
-        'origin',
+        // '--remote-name',
+        // 'origin',
         '--remote-url',
         path.join(cwd, 'tmp/remote'),
         '--start-tag',
@@ -155,12 +176,41 @@ describe('Acceptance', function() {
 
       ps.stderr.pipe(process.stdout);
 
-      ps.on('exit', () => {
+      ps.once('exit', () => {
+        let status = run('git status', {
+          cwd: 'tmp/local'
+        });
+
         expect(stderr).to.not.contain('Error:');
         expect(stderr).to.not.contain('fatal:');
         expect(stderr).to.not.contain('Command failed');
 
-        resolve(stderr);
+        let result = run('git log -1', {
+          cwd: 'tmp/local'
+        });
+
+        // verify it is not committed
+        expect(result).to.contain('Author: Your Name <you@example.com>');
+        expect(result).to.contain('local');
+
+        result = run('git branch', {
+          cwd: 'tmp/local'
+        });
+
+        // verify branch was deleted
+        expect(result.trim()).to.contain('* master');
+
+        // if (!abort) {
+        //   // needed on Windows to convert crlf to lf
+        //   run('git commit -m "merge"', {
+        //     cwd: 'tmp/local'
+        //   });
+        // }
+
+        resolve({
+          status,
+          stderr
+        });
       });
     });
   }
@@ -168,16 +218,30 @@ describe('Acceptance', function() {
   it('handles conflicts', function() {
     return merge(
       'test/fixtures/remote/conflict'
-    ).then(() => {
+    ).then(result => {
+      let status = result.status;
+
       fixtureCompare('test/fixtures/merge/conflict');
+
+      expect(status).to.contain('new file:   added-changed.txt');
+      expect(status).to.contain('renamed:    removed-unchanged.txt -> added-unchanged.txt');
+      expect(status).to.contain('modified:   changed.txt');
+      expect(status).to.contain('deleted:    removed-changed.txt');
     });
   });
 
   it('handles no conflicts', function() {
     return merge(
       'test/fixtures/remote/noconflict'
-    ).then(() => {
+    ).then(result => {
+      let status = result.status;
+
       fixtureCompare('test/fixtures/merge/noconflict');
+
+      expect(status).to.contain('new file:   added-changed.txt');
+      expect(status).to.contain('new file:   added-unchanged.txt');
+      expect(status).to.contain('modified:   changed.txt');
+      expect(status).to.contain('modified:   removed-changed.txt');
     });
   });
 
@@ -185,18 +249,19 @@ describe('Acceptance', function() {
     return merge(
       'test/fixtures/remote/conflict',
       true
-    ).then((/* stderr */) => {
-      let actual = fixturify.readSync('tmp/local');
+    ).then(result => {
+      let status = result.status;
+      // let stderr = result.stderr;
 
-      expect(actual['changed.txt']).to.contain('<<<<<<< HEAD');
+      let actual = fs.readFileSync('tmp/local/changed.txt', 'utf8');
 
-      let result = run('git log -1', {
-        cwd: 'tmp/local'
-      });
+      expect(actual).to.contain('<<<<<<< HEAD');
 
-      expect(result).to.contain('Author: Your Name <you@example.com>');
-      expect(result).to.contain('local');
-      expect(result).to.not.contain('v1-v3');
+      expect(status).to.contain('new file:   added-changed.txt');
+      expect(status).to.contain('renamed:    removed-unchanged.txt -> added-unchanged.txt');
+      expect(status).to.contain('modified:   changed.txt');
+      expect(status).to.contain('deleted by us:   missing-changed.txt');
+      expect(status).to.contain('deleted by them: removed-changed.txt');
 
       // expect(stderr).to.contain('merge of changed.txt failed');
     });
