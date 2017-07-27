@@ -79,7 +79,7 @@ function fixtureCompare(mergeFixtures) {
   expect(result).to.not.contain('local');
 }
 
-describe('test', function() {
+describe('Acceptance', function() {
   this.timeout(30000);
 
   let cwd;
