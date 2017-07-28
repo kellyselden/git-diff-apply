@@ -152,6 +152,7 @@ describe('Acceptance - git-diff-apply', function() {
           if (abort) {
             ps.stdin.write(':qa!\n');
           } else {
+            ps.stdin.write(']c\n');
             ps.stdin.write(':diffg 3\n');
             ps.stdin.write(':wqa\n');
           }
