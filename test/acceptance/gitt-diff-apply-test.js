@@ -217,7 +217,7 @@ describe('Acceptance - git-diff-apply', function() {
 
   it('handles conflicts', function() {
     return merge(
-      'test/fixtures/local/local',
+      'test/fixtures/local/conflict',
       'test/fixtures/remote/conflict'
     ).then(result => {
       let status = result.status;
@@ -235,24 +235,20 @@ describe('Acceptance - git-diff-apply', function() {
 
   it('handles no conflicts', function() {
     return merge(
-      'test/fixtures/local/local',
-      'test/fixtures/remote/noconflict',
-      true
+      'test/fixtures/local/noconflict',
+      'test/fixtures/remote/noconflict'
     ).then(result => {
       let status = result.status;
 
       fixtureCompare('test/fixtures/merge/noconflict');
 
-      expect(status).to.contain('new file:   added-unchanged.txt');
-      expect(status).to.contain('modified:   present-changed.txt');
-      expect(status).to.contain('modified:   removed-changed.txt');
-      expect(status).to.contain('deleted:    removed-unchanged.txt');
+      expect(status).to.contain('modified:   changed.txt');
     });
   });
 
   it('handles aborts', function() {
     return merge(
-      'test/fixtures/local/local',
+      'test/fixtures/local/conflict',
       'test/fixtures/remote/conflict',
       true
     ).then(result => {
