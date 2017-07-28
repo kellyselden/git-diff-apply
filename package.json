@@ -7,10 +7,10 @@
     "git-diff-apply": "bin/git-diff-apply.js"
   },
   "scripts": {
-    "test": "cross-env DEBUG=git-diff-apply mocha",
+    "test": "cross-env DEBUG=git-diff-apply mocha \"test/!(fixtures)/**/*-test.js\"",
     "posttest": "npm run lint",
     "prelint": "eslint --version",
-    "lint": "eslint bin src test",
+    "lint": "eslint bin src \"test/!(fixtures)/**/*-test.js\"",
     "lint:fix": "npm run lint -- --fix"
   },
   "repository": {

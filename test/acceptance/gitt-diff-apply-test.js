@@ -5,7 +5,7 @@ const expect = require('chai').expect;
 const cp = require('child_process');
 const fs = require('fs-extra');
 const fixturify = require('fixturify');
-const run = require('../src/run');
+const run = require('../../src/run');
 // const debug = require('debug')('git-diff-apply');
 
 function gitInit(cwd) {
@@ -100,7 +100,7 @@ function fixtureCompare(mergeFixtures) {
   expect(actual).to.deep.equal(expected);
 }
 
-describe('Acceptance', function() {
+describe('Acceptance - git-diff-apply', function() {
   this.timeout(30000);
 
   let cwd;
