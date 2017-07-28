@@ -225,6 +225,7 @@ describe('Acceptance', function() {
 
       expect(status).to.contain('new file:   added-changed.txt');
       expect(status).to.contain('new file:   added-unchanged.txt');
+      expect(status).to.contain('modified:   present-added-changed.txt');
       expect(status).to.contain('modified:   present-changed.txt');
       expect(status).to.contain('deleted:    removed-changed.txt');
       expect(status).to.contain('deleted:    removed-unchanged.txt');
@@ -243,6 +244,7 @@ describe('Acceptance', function() {
       expect(status).to.contain('new file:   added-unchanged.txt');
       expect(status).to.contain('modified:   present-changed.txt');
       expect(status).to.contain('modified:   removed-changed.txt');
+      expect(status).to.contain('deleted:    removed-unchanged.txt');
     });
   });
 
@@ -263,6 +265,7 @@ describe('Acceptance', function() {
       expect(status).to.contain('deleted:    removed-unchanged.txt');
 
       expect(status).to.contain('deleted by us:   missing-changed.txt');
+      expect(status).to.contain('both added:      present-added-changed.txt');
       expect(status).to.contain('both modified:   present-changed.txt');
       expect(status).to.contain('deleted by them: removed-changed.txt');
 
