@@ -27,7 +27,8 @@ module.exports = function gitDiffApply(options) {
 
   return ncp(tmpDir, '.', {
     filter(filePath) {
-      return !filePath.startsWith(tmpGitDir);
+      // ignore .git folder but include files like .gitignore
+      return filePath !== tmpGitDir && !filePath.startsWith(`${tmpGitDir}${path.sep}`);
     }
     // filter: /.*\.git.*/
   }).then(() => {
