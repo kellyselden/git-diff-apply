@@ -1,2 +1,2 @@
-changed-local
-changed-v3
+removed-changed-local
+removed-changed-v3
