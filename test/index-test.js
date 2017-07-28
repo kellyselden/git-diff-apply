@@ -224,9 +224,10 @@ describe('Acceptance', function() {
       fixtureCompare('test/fixtures/merge/conflict');
 
       expect(status).to.contain('new file:   added-changed.txt');
-      expect(status).to.contain('renamed:    removed-unchanged.txt -> added-unchanged.txt');
+      expect(status).to.contain('new file:   added-unchanged.txt');
       expect(status).to.contain('modified:   present-changed.txt');
       expect(status).to.contain('deleted:    removed-changed.txt');
+      expect(status).to.contain('deleted:    removed-unchanged.txt');
     });
   });
 
@@ -239,7 +240,6 @@ describe('Acceptance', function() {
 
       fixtureCompare('test/fixtures/merge/noconflict');
 
-      expect(status).to.contain('new file:   added-changed.txt');
       expect(status).to.contain('new file:   added-unchanged.txt');
       expect(status).to.contain('modified:   present-changed.txt');
       expect(status).to.contain('modified:   removed-changed.txt');
@@ -259,9 +259,11 @@ describe('Acceptance', function() {
       expect(actual).to.contain('<<<<<<< HEAD');
 
       expect(status).to.contain('new file:   added-changed.txt');
-      expect(status).to.contain('renamed:    removed-unchanged.txt -> added-unchanged.txt');
-      expect(status).to.contain('modified:   present-changed.txt');
+      expect(status).to.contain('new file:   added-unchanged.txt');
+      expect(status).to.contain('deleted:    removed-unchanged.txt');
+
       expect(status).to.contain('deleted by us:   missing-changed.txt');
+      expect(status).to.contain('both modified:   present-changed.txt');
       expect(status).to.contain('deleted by them: removed-changed.txt');
 
       // expect(stderr).to.contain('merge of present-changed.txt failed');
