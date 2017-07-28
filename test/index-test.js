@@ -232,7 +232,8 @@ describe('Acceptance', function() {
 
   it('handles no conflicts', function() {
     return merge(
-      'test/fixtures/remote/noconflict'
+      'test/fixtures/remote/noconflict',
+      true
     ).then(result => {
       let status = result.status;
 
