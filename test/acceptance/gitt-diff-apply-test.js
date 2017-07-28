@@ -112,17 +112,17 @@ describe('Acceptance - git-diff-apply', function() {
   beforeEach(function() {
     fs.emptyDirSync('tmp/local');
     fs.emptyDirSync('tmp/remote');
-
-    buildTmp(
-      'test/fixtures/local',
-      'tmp/local'
-    );
   });
 
   function merge(
+    localFixtures,
     remoteFixtures,
     abort
   ) {
+    buildTmp(
+      localFixtures,
+      'tmp/local'
+    );
     buildTmp(
       remoteFixtures,
       'tmp/remote'
@@ -217,6 +217,7 @@ describe('Acceptance - git-diff-apply', function() {
 
   it('handles conflicts', function() {
     return merge(
+      'test/fixtures/local/local',
       'test/fixtures/remote/conflict'
     ).then(result => {
       let status = result.status;
@@ -234,6 +235,7 @@ describe('Acceptance - git-diff-apply', function() {
 
   it('handles no conflicts', function() {
     return merge(
+      'test/fixtures/local/local',
       'test/fixtures/remote/noconflict',
       true
     ).then(result => {
@@ -250,6 +252,7 @@ describe('Acceptance - git-diff-apply', function() {
 
   it('handles aborts', function() {
     return merge(
+      'test/fixtures/local/local',
       'test/fixtures/remote/conflict',
       true
     ).then(result => {
@@ -270,6 +273,19 @@ describe('Acceptance - git-diff-apply', function() {
       expect(status).to.contain('deleted by them: removed-changed.txt');
 
       // expect(stderr).to.contain('merge of present-changed.txt failed');
+    });
+  });
+
+  it('ignores .git folder', function() {
+    return merge(
+      'test/fixtures/local/git',
+      'test/fixtures/remote/git'
+    ).then(result => {
+      let status = result.status;
+
+      fixtureCompare('test/fixtures/merge/git');
+
+      expect(status).to.contain('modified:   .gitignore');
     });
   });
 });
