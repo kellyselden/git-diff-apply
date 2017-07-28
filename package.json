@@ -34,6 +34,7 @@
   },
   "homepage": "https://github.com/kellyselden/git-diff-apply#readme",
   "dependencies": {
+    "debug": "^2.6.8",
     "denodeify": "^1.2.1",
     "ncp": "^2.0.0",
     "tmp": "0.0.31",
@@ -43,7 +44,6 @@
   "devDependencies": {
     "chai": "^4.1.0",
     "cross-env": "^5.0.1",
-    "debug": "^2.6.8",
     "eslint": "^4.3.0",
     "eslint-config-sane": "^0.1.0",
     "fixturify": "^0.3.3",
