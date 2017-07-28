@@ -225,7 +225,7 @@ describe('Acceptance', function() {
 
       expect(status).to.contain('new file:   added-changed.txt');
       expect(status).to.contain('renamed:    removed-unchanged.txt -> added-unchanged.txt');
-      expect(status).to.contain('modified:   changed.txt');
+      expect(status).to.contain('modified:   present-changed.txt');
       expect(status).to.contain('deleted:    removed-changed.txt');
     });
   });
@@ -240,7 +240,7 @@ describe('Acceptance', function() {
 
       expect(status).to.contain('new file:   added-changed.txt');
       expect(status).to.contain('new file:   added-unchanged.txt');
-      expect(status).to.contain('modified:   changed.txt');
+      expect(status).to.contain('modified:   present-changed.txt');
       expect(status).to.contain('modified:   removed-changed.txt');
     });
   });
@@ -253,17 +253,17 @@ describe('Acceptance', function() {
       let status = result.status;
       // let stderr = result.stderr;
 
-      let actual = fs.readFileSync('tmp/local/changed.txt', 'utf8');
+      let actual = fs.readFileSync('tmp/local/present-changed.txt', 'utf8');
 
       expect(actual).to.contain('<<<<<<< HEAD');
 
       expect(status).to.contain('new file:   added-changed.txt');
       expect(status).to.contain('renamed:    removed-unchanged.txt -> added-unchanged.txt');
-      expect(status).to.contain('modified:   changed.txt');
+      expect(status).to.contain('modified:   present-changed.txt');
       expect(status).to.contain('deleted by us:   missing-changed.txt');
       expect(status).to.contain('deleted by them: removed-changed.txt');
 
-      // expect(stderr).to.contain('merge of changed.txt failed');
+      // expect(stderr).to.contain('merge of present-changed.txt failed');
     });
   });
 });
