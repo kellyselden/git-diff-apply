@@ -7,6 +7,7 @@ const uuidv1 = require('uuid/v1');
 const denodeify = require('denodeify');
 const ncp = denodeify(require('ncp'));
 const run = require('./run');
+const debug = require('debug')('git-diff-apply');
 
 const branchName = uuidv1();
 
@@ -52,6 +53,7 @@ module.exports = function gitDiffApply(options) {
     run(`git branch -D ${branchName}`);
 
     if (hasConflicts) {
+      debug('git mergetool');
       // let response = cp.spawnSync('git', ['mergetool'], {
       //   stdio: 'inherit'
       // });
