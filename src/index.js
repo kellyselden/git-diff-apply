@@ -31,7 +31,7 @@ module.exports = function gitDiffApply(options) {
       // ignore .git folder but include files like .gitignore
       return filePath !== tmpGitDir && !filePath.startsWith(`${tmpGitDir}${path.sep}`);
     }
-    // filter: /.*\.git.*/
+    // filter: /^(?:(?!\.git($|\/)).)+$/
   }).then(() => {
     run('git add -A');
     run(`git commit -m "${startTag}"`);
