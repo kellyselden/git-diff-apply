@@ -27,11 +27,11 @@ module.exports = function gitDiffApply(options) {
   run(`git --git-dir="${tmpGitDir}" --work-tree="${tmpDir}" checkout ${commit.trim()}`);
 
   return ncp(tmpDir, '.', {
-    filter(filePath) {
-      // ignore .git folder but include files like .gitignore
-      return filePath !== tmpGitDir && !filePath.startsWith(`${tmpGitDir}${path.sep}`);
-    }
-    // filter: /^(?:(?!\.git($|\/)).)+$/
+    // filter(filePath) {
+    //   // ignore .git folder but include files like .gitignore
+    //   return filePath !== tmpGitDir && !filePath.startsWith(`${tmpGitDir}${path.sep}`);
+    // }
+    filter: /^(?:(?!\.git($|\/)).)+$/
   }).then(() => {
     run('git add -A');
     run(`git commit -m "${startTag}"`);
