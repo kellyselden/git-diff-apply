@@ -26,6 +26,11 @@ module.exports = function gitDiffApply(options) {
   let commit = run(`git --git-dir="${tmpGitDir}" rev-parse ${startTag}`);
   run(`git --git-dir="${tmpGitDir}" --work-tree="${tmpDir}" checkout ${commit.trim()}`);
 
+  debug(`copy ${tmpDir} ${process.cwd()}`);
+  if (debug.enabled) {
+    debug(require('fs').readdirSync(tmpDir));
+  }
+
   return ncp(tmpDir, '.', {
     filter(filePath) {
       // ignore .git folder but include files like .gitignore
