@@ -7,10 +7,11 @@ const uuidv1 = require('uuid/v1');
 const denodeify = require('denodeify');
 const ncp = denodeify(require('ncp'));
 const copyRegex = require('./copy-regex');
+const getCheckedOutBranchName = require('./get-checked-out-branch-name');
 const run = require('./run');
 const debug = require('debug')('git-diff-apply');
 
-const branchName = uuidv1();
+const tempBranchName = uuidv1();
 
 module.exports = function gitDiffApply(options) {
   // let remoteName = options.remoteName;
@@ -22,7 +23,10 @@ module.exports = function gitDiffApply(options) {
   let tmpGitDir = path.join(tmpDir, '.git');
 
   run(`git clone --mirror ${remoteUrl} ${tmpGitDir}`);
-  run(`git checkout --orphan ${branchName}`);
+  let oldBranchName = getCheckedOutBranchName(
+    run('git branch')
+  );
+  run(`git checkout --orphan ${tempBranchName}`);
   run('git reset --hard');
   let commit = run(`git --git-dir="${tmpGitDir}" rev-parse ${startTag}`);
   run(`git --git-dir="${tmpGitDir}" --work-tree="${tmpDir}" checkout ${commit.trim()}`);
@@ -46,7 +50,7 @@ module.exports = function gitDiffApply(options) {
     run('git add -A');
     run('git commit -m "diff"');
     commit = run('git rev-parse HEAD');
-    run('git checkout master');
+    run(`git checkout ${oldBranchName}`);
 
     let hasConflicts = false;
 
@@ -56,7 +60,7 @@ module.exports = function gitDiffApply(options) {
       hasConflicts = true;
     }
 
-    run(`git branch -D ${branchName}`);
+    run(`git branch -D ${tempBranchName}`);
 
     if (hasConflicts) {
       debug('git mergetool');
