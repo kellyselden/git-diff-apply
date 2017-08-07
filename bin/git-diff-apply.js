@@ -30,4 +30,4 @@ gitDiffApply({
   remoteUrl,
   startTag,
   endTag
-});
+}).catch(console.error);

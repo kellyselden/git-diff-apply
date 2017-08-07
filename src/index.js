@@ -8,6 +8,7 @@ const denodeify = require('denodeify');
 const ncp = denodeify(require('ncp'));
 const copyRegex = require('./copy-regex');
 const getCheckedOutBranchName = require('./get-checked-out-branch-name');
+const isGitClean = require('./is-git-clean');
 const run = require('./run');
 const debug = require('debug')('git-diff-apply');
 
@@ -18,6 +19,10 @@ module.exports = function gitDiffApply(options) {
   let remoteUrl = options.remoteUrl;
   let startTag = options.startTag;
   let endTag = options.endTag;
+
+  if (!isGitClean(run('git status'))) {
+    return Promise.reject('You must start with a clean working directory');
+  }
 
   let tmpDir = tmp.dirSync().name;
   let tmpGitDir = path.join(tmpDir, '.git');

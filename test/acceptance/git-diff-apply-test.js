@@ -55,7 +55,8 @@ function gitInit(cwd) {
 
 function buildTmp(
   fixturesPath,
-  tmpPath
+  tmpPath,
+  dirty
 ) {
   gitInit(tmpPath);
 
@@ -96,6 +97,10 @@ function buildTmp(
   run('git checkout foo', {
     cwd: tmpPath
   });
+
+  if (dirty) {
+    fs.writeFileSync(path.join(tmpPath, 'a-random-new-file'), 'foo');
+  }
 }
 
 function fixtureCompare(mergeFixtures) {
@@ -125,11 +130,13 @@ describe('Acceptance - git-diff-apply', function() {
     localFixtures,
     remoteFixtures,
     messages,
+    dirty,
     abort
   ) {
     buildTmp(
       localFixtures,
-      'tmp/local'
+      'tmp/local',
+      dirty
     );
     buildTmp(
       remoteFixtures,
@@ -271,6 +278,7 @@ describe('Acceptance - git-diff-apply', function() {
       'test/fixtures/local/conflict',
       'test/fixtures/remote/conflict',
       2,
+      false,
       true
     ).then(result => {
       let status = result.status;
@@ -290,6 +298,19 @@ describe('Acceptance - git-diff-apply', function() {
       expect(status).to.contain('deleted by them: removed-changed.txt');
 
       // expect(stderr).to.contain('merge of present-changed.txt failed');
+    });
+  });
+
+  it('handles dirty', function() {
+    return merge(
+      'test/fixtures/local/conflict',
+      'test/fixtures/remote/conflict',
+      0,
+      true
+    ).then(result => {
+      let stderr = result.stderr;
+
+      expect(stderr).to.contain('You must start with a clean working directory');
     });
   });
 
