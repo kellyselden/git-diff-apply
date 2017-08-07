@@ -6,7 +6,6 @@ const cp = require('child_process');
 const fs = require('fs-extra');
 const fixturify = require('fixturify');
 const run = require('../../src/run');
-// const debug = require('debug')('git-diff-apply');
 
 function gitInit(cwd) {
   run('git init', {
