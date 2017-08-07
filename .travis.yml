@@ -1,7 +1,14 @@
 language: node_js
 node_js:
-  - "4"
-
+- '4'
 cache:
   directories:
-    - $HOME/.npm
+  - "$HOME/.npm"
+deploy:
+  provider: npm
+  email: kellyselden@gmail.com
+  api_key:
+    secure: feL3DFjcdKPL17nVV2eI1uv2RGC+RGMVSkcX0wuIpSOdvzIV9GKR6dgwEjrs607tpCqNTF7tEbica4bm/K+cOXEvPVt2N2bwwoZhkJGrRwb1jNkjYWJEUdJAUqXsdjaPoR+Z6qxV26ZEyb/IiRZKCG0ye0HqAfzTpI9n3iiJvAvrr98yMdxSymXIBAR6hHIhlzbgbwIOLAFNnZUS8QeOkTyVfDBSF/FNIMT0pb5otObLM1khLZ9VJKapw+bqW5SMSWdmuyksseXdYFp/E64Y7OqPXhrezdTA2Gwr/e30FSjOXSE8Q3Qt39qv9/GkY64iZgaCi9FLwR8XvLf1HCkU4d32o/9QoQJI1nf3zeAo8VvvHi3GMOjPh5nnHRTQJOUUSIVRHB+DmAvhGgjZMpAsXOWLMoGIr838fon/vbExPI73wTZ8sfZAKeWXGasFOf57p3ZX7iIytIWaOrQyJiqbn6aZsLC2MiRvL8M7JHh+BdAMPnIoOsZXQhuzLMHPRelaGZ7kZRtrTtHSRz88NtNHkvIansoucu2xZmdS7gkYqu6PQhLMFp4jp2MqE47CUQKbZbyD/SnBJ1EHoCdUi0j/tXB799ZEA3HJPvRfgLeLoXqzjQVUp1/8NqaEG/NAO7pILp+U2tHcY/bHirrVFk4e0YCgbrJWJW2r7k8+8D7Tn+Q=
+  on:
+    tags: true
+    repo: kellyselden/git-diff-apply
