@@ -59,14 +59,19 @@ module.exports = function gitDiffApply(options) {
 
     if (hasConflicts) {
       debug('git mergetool');
-      // let response = cp.spawnSync('git', ['mergetool'], {
+
+      // inherit has issues in node 4 windows
+      // https://github.com/nodejs/node/issues/3596
+      // cp.spawnSync('git', ['mergetool'], {
       //   stdio: 'inherit'
       // });
-      // if (response.status > 0) {
-      //   process.exit();
-      // }
-      cp.spawnSync('git', ['mergetool'], {
-        stdio: 'inherit'
+
+      return new Promise(resolve => {
+        let ps = cp.spawn('git', ['mergetool']);
+        process.stdin.pipe(ps.stdin);
+        ps.stdout.pipe(process.stdout);
+        ps.stderr.pipe(process.stderr);
+        ps.on('exit', resolve);
       });
     }
 
