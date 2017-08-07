@@ -117,6 +117,7 @@ describe('Acceptance - git-diff-apply', function() {
   function merge(
     localFixtures,
     remoteFixtures,
+    messages,
     abort
   ) {
     buildTmp(
@@ -146,6 +147,7 @@ describe('Acceptance - git-diff-apply', function() {
         env: process.env
       });
 
+      let i = 0;
       ps.stdout.on('data', data => {
         let str = data.toString();
         if (str.includes('Normal merge conflict')) {
@@ -156,16 +158,24 @@ describe('Acceptance - git-diff-apply', function() {
             ps.stdin.write(':diffg 3\n');
             ps.stdin.write(':wqa\n');
           }
+          i++;
         } else if (str.includes('Deleted merge conflict')) {
           if (abort) {
             ps.stdin.write('a\n');
           } else {
             ps.stdin.write('d\n');
           }
+          i++;
         } else if (str.includes('Was the merge successful')) {
           ps.stdin.write('n\n');
+          i++;
         } else if (str.includes('Continue merging other unresolved paths')) {
           ps.stdin.write('n\n');
+          i++;
+        }
+        if (i === messages) {
+          // this is only needed because 'inherit' isn't working in node 4 windows
+          ps.stdin.end();
         }
       });
 
@@ -219,7 +229,8 @@ describe('Acceptance - git-diff-apply', function() {
   it('handles conflicts', function() {
     return merge(
       'test/fixtures/local/conflict',
-      'test/fixtures/remote/conflict'
+      'test/fixtures/remote/conflict',
+      4
     ).then(result => {
       let status = result.status;
 
@@ -237,7 +248,8 @@ describe('Acceptance - git-diff-apply', function() {
   it('handles no conflicts', function() {
     return merge(
       'test/fixtures/local/noconflict',
-      'test/fixtures/remote/noconflict'
+      'test/fixtures/remote/noconflict',
+      0
     ).then(result => {
       let status = result.status;
 
@@ -251,6 +263,7 @@ describe('Acceptance - git-diff-apply', function() {
     return merge(
       'test/fixtures/local/conflict',
       'test/fixtures/remote/conflict',
+      2,
       true
     ).then(result => {
       let status = result.status;
@@ -276,7 +289,8 @@ describe('Acceptance - git-diff-apply', function() {
   it('ignores .git folder', function() {
     return merge(
       'test/fixtures/local/git',
-      'test/fixtures/remote/git'
+      'test/fixtures/remote/git',
+      1
     ).then(result => {
       let status = result.status;
 
