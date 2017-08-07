@@ -88,6 +88,14 @@ function buildTmp(
     // delete files['.git'];
     // debug(files);
   }
+
+  run('git branch foo', {
+    cwd: tmpPath
+  });
+
+  run('git checkout foo', {
+    cwd: tmpPath
+  });
 }
 
 function fixtureCompare(mergeFixtures) {
@@ -208,7 +216,7 @@ describe('Acceptance - git-diff-apply', function() {
         });
 
         // verify branch was deleted
-        expect(result.trim()).to.equal('* master');
+        expect(result.trim()).to.match(/\* foo\r?\n {2}master/);
 
         // if (!abort) {
         //   // needed on Windows to convert crlf to lf
