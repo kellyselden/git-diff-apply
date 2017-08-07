@@ -6,6 +6,7 @@ const tmp = require('tmp');
 const uuidv1 = require('uuid/v1');
 const denodeify = require('denodeify');
 const ncp = denodeify(require('ncp'));
+const copyRegex = require('./copy-regex');
 const run = require('./run');
 const debug = require('debug')('git-diff-apply');
 
@@ -36,7 +37,7 @@ module.exports = function gitDiffApply(options) {
     //   // ignore .git folder but include files like .gitignore
     //   return filePath !== tmpGitDir && !filePath.startsWith(`${tmpGitDir}${path.sep}`);
     // }
-    filter: /^(?:(?!\.git($|\/)).)+$/
+    filter: copyRegex
   }).then(() => {
     run('git add -A');
     run(`git commit -m "${startTag}"`);
