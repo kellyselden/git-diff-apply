@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/kellyselden/git-diff-apply#readme",
   "dependencies": {
-    "debug": "^2.6.8",
+    "debug": "^3.0.0",
     "denodeify": "^1.2.1",
     "ncp": "^2.0.0",
     "tmp": "0.0.31",
