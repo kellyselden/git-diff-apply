@@ -18,6 +18,8 @@ const argv = require('yargs')
       type: 'string'
     }
   })
+  .version()
+  .help()
   .argv;
 
 // const remoteName = argv['remote-name'];
