@@ -15,7 +15,6 @@ const debug = require('debug')('git-diff-apply');
 const tempBranchName = uuidv1();
 
 module.exports = function gitDiffApply(options) {
-  // let remoteName = options.remoteName;
   let remoteUrl = options.remoteUrl;
   let startTag = options.startTag;
   let endTag = options.endTag;
@@ -43,10 +42,6 @@ module.exports = function gitDiffApply(options) {
   }
 
   return ncp(tmpDir, '.', {
-    // filter(filePath) {
-    //   // ignore .git folder but include files like .gitignore
-    //   return filePath !== tmpGitDir && !filePath.startsWith(`${tmpGitDir}${path.sep}`);
-    // }
     filter: copyRegex
   }).then(() => {
     run('git add -A');
@@ -74,7 +69,5 @@ module.exports = function gitDiffApply(options) {
         stdio: 'inherit'
       });
     }
-
-    // run(`git commit -m "git-diff-apply: ${startTag} => ${endTag}"`);
   });
 };

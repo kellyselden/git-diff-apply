@@ -27,30 +27,6 @@ function gitInit(cwd) {
   run('git config mergetool.keepBackup false', {
     cwd
   });
-
-  // run('git config core.autocrlf input', {
-  //   cwd
-  // });
-
-  // run('git config core.eol lf', {
-  //   cwd
-  // });
-
-  // run('echo "* text=auto" > .gitattributes', {
-  //   cwd
-  // });
-
-  // run('cat .gitattributes', {
-  //   cwd
-  // });
-
-  // run('git add -A', {
-  //   cwd
-  // });
-
-  // run('git commit -m ".gitattributes"', {
-  //   cwd
-  // });
 }
 
 function buildTmp(
@@ -84,10 +60,6 @@ function buildTmp(
     run(`git tag ${tag}`, {
       cwd: tmpPath
     });
-
-    // let files = fixturify.readSync(tmpPath);
-    // delete files['.git'];
-    // debug(files);
   }
 
   run('git branch foo', {
@@ -147,8 +119,6 @@ describe('Acceptance - git-diff-apply', function() {
     return new Promise(resolve => {
       let ps = cp.spawn('node', [
         binFile,
-        // '--remote-name',
-        // 'origin',
         '--remote-url',
         path.join(cwd, 'tmp/remote'),
         '--start-tag',
@@ -204,13 +174,6 @@ describe('Acceptance - git-diff-apply', function() {
 
         // verify branch was deleted
         expect(result.trim()).to.match(/\* foo\r?\n {2}master/);
-
-        // if (!abort) {
-        //   // needed on Windows to convert crlf to lf
-        //   run('git commit -m "merge"', {
-        //     cwd: 'tmp/local'
-        //   });
-        // }
 
         resolve({
           status,

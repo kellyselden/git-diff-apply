@@ -5,9 +5,6 @@ const gitDiffApply = require('../src');
 
 const argv = require('yargs')
   .options({
-    // 'remote-name': {
-    //   type: 'string'
-    // },
     'remote-url': {
       type: 'string'
     },
@@ -25,14 +22,12 @@ const argv = require('yargs')
   .help()
   .argv;
 
-// const remoteName = argv['remote-name'];
 const remoteUrl = argv['remote-url'];
 const startTag = argv['start-tag'];
 const endTag = argv['end-tag'];
 const ignoreConflicts = argv['ignore-conflicts'];
 
 gitDiffApply({
-  // remoteName,
   remoteUrl,
   startTag,
   endTag,
