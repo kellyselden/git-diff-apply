@@ -132,7 +132,6 @@ describe('Acceptance - git-diff-apply', function() {
     let messages = options.messages || 0;
     let dirty = options.dirty;
     let ignoreConflicts = !!options.ignoreConflicts;
-    let abort = options.abort;
 
     buildTmp(
       localFixtures,
@@ -168,26 +167,12 @@ describe('Acceptance - git-diff-apply', function() {
       ps.stdout.on('data', data => {
         let str = data.toString();
         if (str.includes('Normal merge conflict')) {
-          if (abort) {
-            ps.stdin.write(':qa!\n');
-          } else {
-            ps.stdin.write(']c\n');
-            ps.stdin.write(':diffg 3\n');
-            ps.stdin.write(':wqa\n');
-          }
+          ps.stdin.write(']c\n');
+          ps.stdin.write(':diffg 3\n');
+          ps.stdin.write(':wqa\n');
           i++;
         } else if (str.includes('Deleted merge conflict')) {
-          if (abort) {
-            ps.stdin.write('a\n');
-          } else {
-            ps.stdin.write('d\n');
-          }
-          i++;
-        } else if (str.includes('Was the merge successful')) {
-          ps.stdin.write('n\n');
-          i++;
-        } else if (str.includes('Continue merging other unresolved paths')) {
-          ps.stdin.write('n\n');
+          ps.stdin.write('d\n');
           i++;
         }
         if (i === messages) {
@@ -272,33 +257,6 @@ describe('Acceptance - git-diff-apply', function() {
       fixtureCompare('test/fixtures/merge/noconflict');
 
       expect(status).to.contain('modified:   changed.txt');
-    });
-  });
-
-  it('handles aborts', function() {
-    return merge({
-      localFixtures: 'test/fixtures/local/conflict',
-      remoteFixtures: 'test/fixtures/remote/conflict',
-      messages: 2,
-      abort: true
-    }).then(result => {
-      let status = result.status;
-      // let stderr = result.stderr;
-
-      let actual = fs.readFileSync('tmp/local/present-changed.txt', 'utf8');
-
-      expect(actual).to.contain('<<<<<<< HEAD');
-
-      expect(status).to.contain('new file:   added-changed.txt');
-      expect(status).to.contain('new file:   added-unchanged.txt');
-      expect(status).to.contain('deleted:    removed-unchanged.txt');
-
-      expect(status).to.contain('deleted by us:   missing-changed.txt');
-      expect(status).to.contain('both added:      present-added-changed.txt');
-      expect(status).to.contain('both modified:   present-changed.txt');
-      expect(status).to.contain('deleted by them: removed-changed.txt');
-
-      // expect(stderr).to.contain('merge of present-changed.txt failed');
     });
   });
 
