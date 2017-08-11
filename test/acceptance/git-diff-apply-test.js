@@ -131,6 +131,7 @@ describe('Acceptance - git-diff-apply', function() {
     let remoteFixtures = options.remoteFixtures;
     let messages = options.messages || 0;
     let dirty = options.dirty;
+    let ignoreConflicts = !!options.ignoreConflicts;
     let abort = options.abort;
 
     buildTmp(
@@ -155,7 +156,9 @@ describe('Acceptance - git-diff-apply', function() {
         '--start-tag',
         'v1',
         '--end-tag',
-        'v3'
+        'v3',
+        '--ignore-conflicts',
+        ignoreConflicts
       ], {
         cwd: 'tmp/local',
         env: process.env
@@ -308,6 +311,29 @@ describe('Acceptance - git-diff-apply', function() {
       let stderr = result.stderr;
 
       expect(stderr).to.contain('You must start with a clean working directory');
+    });
+  });
+
+  it('handles ignoreConflicts', function() {
+    return merge({
+      localFixtures: 'test/fixtures/local/conflict',
+      remoteFixtures: 'test/fixtures/remote/conflict',
+      ignoreConflicts: true
+    }).then(result => {
+      let status = result.status;
+
+      let actual = fs.readFileSync('tmp/local/present-changed.txt', 'utf8');
+
+      expect(actual).to.contain('<<<<<<< HEAD');
+
+      expect(status).to.contain('new file:   added-changed.txt');
+      expect(status).to.contain('new file:   added-unchanged.txt');
+      expect(status).to.contain('deleted:    removed-unchanged.txt');
+
+      expect(status).to.contain('deleted by us:   missing-changed.txt');
+      expect(status).to.contain('both added:      present-added-changed.txt');
+      expect(status).to.contain('both modified:   present-changed.txt');
+      expect(status).to.contain('deleted by them: removed-changed.txt');
     });
   });
 
