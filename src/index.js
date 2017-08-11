@@ -19,6 +19,7 @@ module.exports = function gitDiffApply(options) {
   let remoteUrl = options.remoteUrl;
   let startTag = options.startTag;
   let endTag = options.endTag;
+  let ignoreConflicts = options.ignoreConflicts;
 
   if (!isGitClean(run('git status'))) {
     return Promise.reject('You must start with a clean working directory');
@@ -67,7 +68,7 @@ module.exports = function gitDiffApply(options) {
 
     run(`git branch -D ${tempBranchName}`);
 
-    if (hasConflicts) {
+    if (hasConflicts && !ignoreConflicts) {
       debug('git mergetool');
       cp.spawnSync('git', ['mergetool'], {
         stdio: 'inherit'
