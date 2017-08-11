@@ -126,13 +126,13 @@ describe('Acceptance - git-diff-apply', function() {
     fs.emptyDirSync('tmp/remote');
   });
 
-  function merge(
-    localFixtures,
-    remoteFixtures,
-    messages,
-    dirty,
-    abort
-  ) {
+  function merge(options) {
+    let localFixtures = options.localFixtures;
+    let remoteFixtures = options.remoteFixtures;
+    let messages = options.messages || 0;
+    let dirty = options.dirty;
+    let abort = options.abort;
+
     buildTmp(
       localFixtures,
       'tmp/local',
@@ -241,11 +241,11 @@ describe('Acceptance - git-diff-apply', function() {
   }
 
   it('handles conflicts', function() {
-    return merge(
-      'test/fixtures/local/conflict',
-      'test/fixtures/remote/conflict',
-      4
-    ).then(result => {
+    return merge({
+      localFixtures: 'test/fixtures/local/conflict',
+      remoteFixtures: 'test/fixtures/remote/conflict',
+      messages: 4
+    }).then(result => {
       let status = result.status;
 
       fixtureCompare('test/fixtures/merge/conflict');
@@ -260,11 +260,10 @@ describe('Acceptance - git-diff-apply', function() {
   });
 
   it('handles no conflicts', function() {
-    return merge(
-      'test/fixtures/local/noconflict',
-      'test/fixtures/remote/noconflict',
-      0
-    ).then(result => {
+    return merge({
+      localFixtures: 'test/fixtures/local/noconflict',
+      remoteFixtures: 'test/fixtures/remote/noconflict'
+    }).then(result => {
       let status = result.status;
 
       fixtureCompare('test/fixtures/merge/noconflict');
@@ -274,13 +273,12 @@ describe('Acceptance - git-diff-apply', function() {
   });
 
   it('handles aborts', function() {
-    return merge(
-      'test/fixtures/local/conflict',
-      'test/fixtures/remote/conflict',
-      2,
-      false,
-      true
-    ).then(result => {
+    return merge({
+      localFixtures: 'test/fixtures/local/conflict',
+      remoteFixtures: 'test/fixtures/remote/conflict',
+      messages: 2,
+      abort: true
+    }).then(result => {
       let status = result.status;
       // let stderr = result.stderr;
 
@@ -302,12 +300,11 @@ describe('Acceptance - git-diff-apply', function() {
   });
 
   it('handles dirty', function() {
-    return merge(
-      'test/fixtures/local/conflict',
-      'test/fixtures/remote/conflict',
-      0,
-      true
-    ).then(result => {
+    return merge({
+      localFixtures: 'test/fixtures/local/conflict',
+      remoteFixtures: 'test/fixtures/remote/conflict',
+      dirty: true
+    }).then(result => {
       let stderr = result.stderr;
 
       expect(stderr).to.contain('You must start with a clean working directory');
@@ -315,11 +312,11 @@ describe('Acceptance - git-diff-apply', function() {
   });
 
   it('ignores .git folder', function() {
-    return merge(
-      'test/fixtures/local/git',
-      'test/fixtures/remote/git',
-      1
-    ).then(result => {
+    return merge({
+      localFixtures: 'test/fixtures/local/git',
+      remoteFixtures: 'test/fixtures/remote/git',
+      messages: 1
+    }).then(result => {
       let status = result.status;
 
       fixtureCompare('test/fixtures/merge/git');
