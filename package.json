@@ -1,6 +1,6 @@
 {
   "name": "git-diff-apply",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Use an unrelated remote repository to apply a git diff",
   "main": "src/index.js",
   "bin": {
