@@ -75,27 +75,22 @@ function buildTmp(
   }
 }
 
-function fixtureCompare(mergeFixtures) {
-  let actual = fixturify.readSync('tmp/local');
-  let expected = fixturify.readSync(mergeFixtures);
-
-  delete actual['.git'];
-
-  expect(actual).to.deep.equal(expected);
-}
-
 describe('Acceptance - git-diff-apply', function() {
   this.timeout(30000);
 
   let cwd;
+  let localDir;
+  let remoteDir;
 
   before(function() {
     cwd = process.cwd();
   });
 
   beforeEach(function() {
-    fs.emptyDirSync('tmp/local');
-    fs.emptyDirSync('tmp/remote');
+    localDir = path.join(cwd, 'tmp/local');
+    remoteDir = path.join(cwd, 'tmp/remote');
+    fs.emptyDirSync(localDir);
+    fs.emptyDirSync(remoteDir);
   });
 
   function merge(options) {
@@ -106,12 +101,12 @@ describe('Acceptance - git-diff-apply', function() {
 
     buildTmp(
       localFixtures,
-      'tmp/local',
+      localDir,
       dirty
     );
     buildTmp(
       remoteFixtures,
-      'tmp/remote'
+      remoteDir
     );
 
     let binFile = path.join(cwd, 'bin/git-diff-apply');
@@ -120,7 +115,7 @@ describe('Acceptance - git-diff-apply', function() {
       let ps = cp.spawn('node', [
         binFile,
         '--remote-url',
-        path.join(cwd, 'tmp/remote'),
+        remoteDir,
         '--start-tag',
         'v1',
         '--end-tag',
@@ -128,7 +123,7 @@ describe('Acceptance - git-diff-apply', function() {
         '--ignore-conflicts',
         ignoreConflicts
       ], {
-        cwd: 'tmp/local',
+        cwd: localDir,
         env: process.env
       });
 
@@ -153,7 +148,7 @@ describe('Acceptance - git-diff-apply', function() {
 
       ps.once('exit', () => {
         let status = run('git status', {
-          cwd: 'tmp/local'
+          cwd: localDir
         });
 
         expect(stderr).to.not.contain('Error:');
@@ -161,7 +156,7 @@ describe('Acceptance - git-diff-apply', function() {
         expect(stderr).to.not.contain('Command failed');
 
         let result = run('git log -1', {
-          cwd: 'tmp/local'
+          cwd: localDir
         });
 
         // verify it is not committed
@@ -169,7 +164,7 @@ describe('Acceptance - git-diff-apply', function() {
         expect(result).to.contain('local');
 
         result = run('git branch', {
-          cwd: 'tmp/local'
+          cwd: localDir
         });
 
         // verify branch was deleted
@@ -181,6 +176,15 @@ describe('Acceptance - git-diff-apply', function() {
         });
       });
     });
+  }
+
+  function fixtureCompare(mergeFixtures) {
+    let actual = fixturify.readSync(localDir);
+    let expected = fixturify.readSync(mergeFixtures);
+
+    delete actual['.git'];
+
+    expect(actual).to.deep.equal(expected);
   }
 
   it('handles conflicts', function() {
@@ -234,7 +238,7 @@ describe('Acceptance - git-diff-apply', function() {
     }).then(result => {
       let status = result.status;
 
-      let actual = fs.readFileSync('tmp/local/present-changed.txt', 'utf8');
+      let actual = fs.readFileSync(path.join(localDir, 'present-changed.txt'), 'utf8');
 
       expect(actual).to.contain('<<<<<<< HEAD');
 
