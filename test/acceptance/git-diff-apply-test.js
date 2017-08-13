@@ -2,6 +2,7 @@
 
 const path = require('path');
 const expect = require('chai').expect;
+const tmp = require('tmp');
 const cp = require('child_process');
 const fs = require('fs-extra');
 const fixturify = require('fixturify');
@@ -87,10 +88,8 @@ describe('Acceptance - git-diff-apply', function() {
   });
 
   beforeEach(function() {
-    localDir = path.join(cwd, 'tmp/local');
-    remoteDir = path.join(cwd, 'tmp/remote');
-    fs.emptyDirSync(localDir);
-    fs.emptyDirSync(remoteDir);
+    localDir = tmp.dirSync().name;
+    remoteDir = tmp.dirSync().name;
   });
 
   function merge(options) {
