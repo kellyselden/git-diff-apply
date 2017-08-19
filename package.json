@@ -7,7 +7,7 @@
     "git-diff-apply": "bin/git-diff-apply.js"
   },
   "scripts": {
-    "test": "cross-env DEBUG=git-diff-apply mocha test/**/*-test.js",
+    "test": "cross-env DEBUG=git-diff-apply,git-fixtures mocha test/**/*-test.js",
     "posttest": "npm run lint",
     "prelint": "eslint --version",
     "lint": "eslint bin src test",
@@ -48,6 +48,7 @@
     "eslint-config-sane": "^0.1.0",
     "fixturify": "^0.3.3",
     "fs-extra": "^4.0.0",
+    "git-fixtures": "^0.1.0",
     "mocha": "^3.4.2"
   }
 }
