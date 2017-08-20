@@ -16,7 +16,9 @@ function buildTmp(
   tmpPath,
   dirty
 ) {
-  gitInit(tmpPath);
+  gitInit({
+    cwd: tmpPath
+  });
 
   let tags = fs.readdirSync(fixturesPath);
 
