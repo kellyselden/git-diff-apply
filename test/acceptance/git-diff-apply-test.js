@@ -10,6 +10,7 @@ const gitFixtures = require('git-fixtures');
 const run = require('../../src/run');
 
 const gitInit = gitFixtures.gitInit;
+const commit = gitFixtures.commit;
 
 function buildTmp(
   fixturesPath,
@@ -33,15 +34,8 @@ function buildTmp(
 
     fs.copySync(path.join(fixturesPath, tag), tmpPath);
 
-    run('git add -A', {
-      cwd: tmpPath
-    });
-
-    run(`git commit -m "${tag}"`, {
-      cwd: tmpPath
-    });
-
-    run(`git tag ${tag}`, {
+    commit({
+      tag,
       cwd: tmpPath
     });
   }
