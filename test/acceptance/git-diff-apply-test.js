@@ -35,6 +35,7 @@ function buildTmp(
     fs.copySync(path.join(fixturesPath, tag), tmpPath);
 
     commit({
+      m: tag,
       tag,
       cwd: tmpPath
     });
