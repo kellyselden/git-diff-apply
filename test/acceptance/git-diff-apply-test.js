@@ -46,11 +46,7 @@ function buildTmp(
     });
   }
 
-  run('git branch foo', {
-    cwd: tmpPath
-  });
-
-  run('git checkout foo', {
+  run('git checkout -b foo', {
     cwd: tmpPath
   });
 
@@ -169,7 +165,7 @@ describe('Acceptance - git-diff-apply', function() {
     expect(actual).to.deep.equal(expected);
   }
 
-  it('handles conflicts', function() {
+  it.only('handles conflicts', function() {
     return merge({
       localFixtures: 'test/fixtures/local/conflict',
       remoteFixtures: 'test/fixtures/remote/conflict'
