@@ -20,7 +20,7 @@ module.exports = function gitDiffApply(options) {
   let endTag = options.endTag;
   let ignoreConflicts = options.ignoreConflicts;
 
-  if (!isGitClean(run('git status'))) {
+  if (!isGitClean(run('git status --porcelain'))) {
     return Promise.reject('You must start with a clean working directory');
   }
 
