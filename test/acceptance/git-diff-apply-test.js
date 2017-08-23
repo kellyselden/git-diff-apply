@@ -200,6 +200,7 @@ describe('Acceptance - git-diff-apply', function() {
       let stderr = result.stderr;
 
       expect(stderr).to.contain('You must start with a clean working directory');
+      expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
     });
   });
 
