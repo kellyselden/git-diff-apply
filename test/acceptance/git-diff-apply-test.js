@@ -41,6 +41,7 @@ function buildTmp(
     });
   }
 
+  // non-master branch test
   run('git checkout -b foo', {
     cwd: tmpPath
   });
