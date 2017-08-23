@@ -5,12 +5,12 @@ const expect = require('chai').expect;
 const tmp = require('tmp');
 const cp = require('child_process');
 const fs = require('fs-extra');
-const fixturify = require('fixturify');
 const gitFixtures = require('git-fixtures');
 const run = require('../../src/run');
 
 const gitInit = gitFixtures.gitInit;
 const commit = gitFixtures.commit;
+const _fixtureCompare = gitFixtures.fixtureCompare;
 
 function buildTmp(
   fixturesPath,
@@ -153,12 +153,11 @@ describe('Acceptance - git-diff-apply', function() {
   }
 
   function fixtureCompare(mergeFixtures) {
-    let actual = fixturify.readSync(localDir);
-    let expected = fixturify.readSync(mergeFixtures);
-
-    delete actual['.git'];
-
-    expect(actual).to.deep.equal(expected);
+    _fixtureCompare({
+      expect,
+      actual: localDir,
+      expected: mergeFixtures
+    });
   }
 
   it('handles conflicts', function() {
