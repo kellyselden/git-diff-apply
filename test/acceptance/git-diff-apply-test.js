@@ -160,7 +160,7 @@ describe('Acceptance - git-diff-apply', function() {
     expect(actual).to.deep.equal(expected);
   }
 
-  it.only('handles conflicts', function() {
+  it('handles conflicts', function() {
     return merge({
       localFixtures: 'test/fixtures/local/conflict',
       remoteFixtures: 'test/fixtures/remote/conflict'
