@@ -9,6 +9,7 @@ const run = require('../../src/run');
 
 const gitInit = gitFixtures.gitInit;
 const commit = gitFixtures.commit;
+const postCommit = gitFixtures.postCommit;
 const processBin = gitFixtures.processBin;
 const _fixtureCompare = gitFixtures.fixtureCompare;
 
@@ -41,14 +42,10 @@ function buildTmp(
     });
   }
 
-  // non-master branch test
-  run('git checkout -b foo', {
-    cwd: tmpPath
+  postCommit({
+    cwd: tmpPath,
+    dirty
   });
-
-  if (dirty) {
-    fs.writeFileSync(path.join(tmpPath, 'a-random-new-file'), 'foo');
-  }
 }
 
 describe('Acceptance - git-diff-apply', function() {
