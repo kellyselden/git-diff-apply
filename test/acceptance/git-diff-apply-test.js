@@ -3,14 +3,13 @@
 const path = require('path');
 const expect = require('chai').expect;
 const tmp = require('tmp');
-const cp = require('child_process');
 const fs = require('fs-extra');
 const gitFixtures = require('git-fixtures');
 const run = require('../../src/run');
 
 const gitInit = gitFixtures.gitInit;
 const commit = gitFixtures.commit;
-const processIo = gitFixtures.processIo;
+const processBin = gitFixtures.processBin;
 const _fixtureCompare = gitFixtures.fixtureCompare;
 
 function buildTmp(
@@ -55,13 +54,8 @@ function buildTmp(
 describe('Acceptance - git-diff-apply', function() {
   this.timeout(30000);
 
-  let cwd;
   let localDir;
   let remoteDir;
-
-  before(function() {
-    cwd = process.cwd();
-  });
 
   beforeEach(function() {
     localDir = tmp.dirSync().name;
@@ -84,25 +78,18 @@ describe('Acceptance - git-diff-apply', function() {
       remoteDir
     );
 
-    let binFile = path.join(cwd, 'bin/git-diff-apply');
-
-    let ps = cp.spawn('node', [
-      binFile,
-      '--remote-url',
-      remoteDir,
-      '--start-tag',
-      'v1',
-      '--end-tag',
-      'v3',
-      '--ignore-conflicts',
-      ignoreConflicts
-    ], {
-      cwd: localDir,
-      env: process.env
-    });
-
-    return processIo({
-      ps,
+    return processBin({
+      binFile: 'git-diff-apply',
+      args: [
+        '--remote-url',
+        remoteDir,
+        '--start-tag',
+        'v1',
+        '--end-tag',
+        'v3',
+        '--ignore-conflicts',
+        ignoreConflicts
+      ],
       cwd: localDir,
       commitMessage: 'local',
       expect
