@@ -19,6 +19,7 @@ module.exports = function gitDiffApply(options) {
   let startTag = options.startTag;
   let endTag = options.endTag;
   let ignoreConflicts = options.ignoreConflicts;
+  let ignoredFiles = options.ignoredFiles;
 
   if (!isGitClean(run('git status --porcelain'))) {
     return Promise.reject('You must start with a clean working directory');
@@ -48,6 +49,11 @@ module.exports = function gitDiffApply(options) {
     run(`git commit -m "${startTag}"`);
 
     run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} | git apply`);
+
+    for (let ignoredFile of ignoredFiles) {
+      run(`git checkout -- ${ignoredFile}`);
+    }
+
     run('git add -A');
     run('git commit -m "diff"');
     commit = run('git rev-parse HEAD');

@@ -16,6 +16,9 @@ const argv = require('yargs')
     },
     'ignore-conflicts': {
       type: 'boolean'
+    },
+    'ignored-files': {
+      type: 'array'
     }
   })
   .version()
@@ -26,10 +29,12 @@ const remoteUrl = argv['remote-url'];
 const startTag = argv['start-tag'];
 const endTag = argv['end-tag'];
 const ignoreConflicts = argv['ignore-conflicts'];
+const ignoredFiles = argv['ignored-files'];
 
 gitDiffApply({
   remoteUrl,
   startTag,
   endTag,
-  ignoreConflicts
+  ignoreConflicts,
+  ignoredFiles
 }).catch(console.error);

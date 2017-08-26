@@ -64,6 +64,7 @@ describe('Acceptance - git-diff-apply', function() {
     let remoteFixtures = options.remoteFixtures;
     let dirty = options.dirty;
     let ignoreConflicts = !!options.ignoreConflicts;
+    let ignoredFiles = options.ignoredFiles || [];
 
     buildTmp(
       localFixtures,
@@ -85,8 +86,9 @@ describe('Acceptance - git-diff-apply', function() {
         '--end-tag',
         'v3',
         '--ignore-conflicts',
-        ignoreConflicts
-      ],
+        ignoreConflicts,
+        '--ignored-files'
+      ].concat(ignoredFiles),
       cwd: localDir,
       commitMessage: 'local',
       expect
@@ -104,7 +106,8 @@ describe('Acceptance - git-diff-apply', function() {
   it('handles conflicts', function() {
     return merge({
       localFixtures: 'test/fixtures/local/conflict',
-      remoteFixtures: 'test/fixtures/remote/conflict'
+      remoteFixtures: 'test/fixtures/remote/conflict',
+      ignoredFiles: ['present-ignored-changed.txt']
     }).then(result => {
       let status = result.status;
 
@@ -116,6 +119,8 @@ describe('Acceptance - git-diff-apply', function() {
       expect(status).to.contain('modified:   present-changed.txt');
       expect(status).to.contain('deleted:    removed-changed.txt');
       expect(status).to.contain('deleted:    removed-unchanged.txt');
+
+      expect(status).to.not.contain('modified:   present-ignored-changed.txt');
     });
   });
 
