@@ -5,48 +5,10 @@ const expect = require('chai').expect;
 const tmp = require('tmp');
 const fs = require('fs-extra');
 const gitFixtures = require('git-fixtures');
-const run = require('../../src/run');
+const buildTmp = require('../helpers/build-tmp');
 
-const gitInit = gitFixtures.gitInit;
-const commit = gitFixtures.commit;
-const postCommit = gitFixtures.postCommit;
 const processBin = gitFixtures.processBin;
 const _fixtureCompare = gitFixtures.fixtureCompare;
-
-function buildTmp(
-  fixturesPath,
-  tmpPath,
-  dirty
-) {
-  gitInit({
-    cwd: tmpPath
-  });
-
-  let tags = fs.readdirSync(fixturesPath);
-
-  for (let i = 0; i < tags.length; i++) {
-    if (i !== 0) {
-      run('git rm -r *', {
-        cwd: tmpPath
-      });
-    }
-
-    let tag = tags[i];
-
-    fs.copySync(path.join(fixturesPath, tag), tmpPath);
-
-    commit({
-      m: tag,
-      tag,
-      cwd: tmpPath
-    });
-  }
-
-  postCommit({
-    cwd: tmpPath,
-    dirty
-  });
-}
 
 describe('Acceptance - git-diff-apply', function() {
   this.timeout(30000);
@@ -121,32 +83,6 @@ describe('Acceptance - git-diff-apply', function() {
       expect(status).to.contain('deleted:    removed-unchanged.txt');
 
       expect(status).to.not.contain('modified:   present-ignored-changed.txt');
-    });
-  });
-
-  it('handles no conflicts', function() {
-    return merge({
-      localFixtures: 'test/fixtures/local/noconflict',
-      remoteFixtures: 'test/fixtures/remote/noconflict'
-    }).then(result => {
-      let status = result.status;
-
-      fixtureCompare('test/fixtures/merge/noconflict');
-
-      expect(status).to.contain('modified:   changed.txt');
-    });
-  });
-
-  it('handles dirty', function() {
-    return merge({
-      localFixtures: 'test/fixtures/local/conflict',
-      remoteFixtures: 'test/fixtures/remote/conflict',
-      dirty: true
-    }).then(result => {
-      let stderr = result.stderr;
-
-      expect(stderr).to.contain('You must start with a clean working directory');
-      expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
     });
   });
 
