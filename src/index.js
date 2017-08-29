@@ -4,6 +4,7 @@ const cp = require('child_process');
 const path = require('path');
 const tmp = require('tmp');
 const uuidv1 = require('uuid/v1');
+const fixturify = require('fixturify');
 const utils = require('./utils');
 const copyRegex = require('./copy-regex');
 const getCheckedOutBranchName = require('./get-checked-out-branch-name');
@@ -11,6 +12,19 @@ const isGitClean = require('./is-git-clean');
 const debug = require('debug')('git-diff-apply');
 
 const tempBranchName = uuidv1();
+
+function checkOutTag(tmpDir, tmpGitDir, tag) {
+  let commit = utils.run(`git --git-dir="${tmpGitDir}" rev-parse ${tag}`);
+  utils.run(`git --git-dir="${tmpGitDir}" --work-tree="${tmpDir}" checkout ${commit.trim()}`);
+}
+
+function convertToObj(dir, include) {
+  let obj = fixturify.readSync(dir, {
+    include
+  });
+  delete obj['.git'];
+  return obj;
+}
 
 module.exports = function gitDiffApply(options) {
   let remoteUrl = options.remoteUrl;
@@ -22,6 +36,7 @@ module.exports = function gitDiffApply(options) {
   let tmpDir;
   let tmpGitDir;
   let oldBranchName;
+  let from;
   let commit;
   let hasConflicts;
 
@@ -49,8 +64,7 @@ module.exports = function gitDiffApply(options) {
     isTempBranchCheckedOut = true;
 
     utils.run('git reset --hard');
-    commit = utils.run(`git --git-dir="${tmpGitDir}" rev-parse ${startTag}`);
-    utils.run(`git --git-dir="${tmpGitDir}" --work-tree="${tmpDir}" checkout ${commit.trim()}`);
+    checkOutTag(tmpDir, tmpGitDir, startTag);
 
     debug(`copy ${tmpDir} ${process.cwd()}`);
     if (debug.enabled) {
@@ -66,6 +80,8 @@ module.exports = function gitDiffApply(options) {
     utils.run('git commit -m "startTag"');
     isTempBranchUntracked = false;
     isTempBranchCommitted = true;
+
+    from = convertToObj('.', ignoredFiles);
 
     isTempBranchUntracked = true;
     isTempBranchModified = true;
@@ -126,5 +142,14 @@ module.exports = function gitDiffApply(options) {
         stdio: 'inherit'
       });
     }
+
+    checkOutTag(tmpDir, tmpGitDir, endTag);
+
+    let to = convertToObj(tmpDir, ignoredFiles);
+
+    return {
+      from,
+      to
+    };
   });
 };
