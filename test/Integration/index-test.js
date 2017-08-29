@@ -97,4 +97,19 @@ describe('Integration - index', function() {
       expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
     });
   });
+
+  it('ignores files', function() {
+    return merge({
+      localFixtures: 'test/fixtures/local/ignored',
+      remoteFixtures: 'test/fixtures/remote/ignored',
+      ignoredFiles: ['ignored-changed.txt']
+    }).then(result => {
+      let status = result.status;
+
+      fixtureCompare('test/fixtures/merge/ignored');
+
+      expect(status).to.contain('modified:   changed.txt');
+      expect(status).to.not.contain('modified:   ignored-changed.txt');
+    });
+  });
 });
