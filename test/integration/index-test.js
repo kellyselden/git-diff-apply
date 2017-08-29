@@ -5,6 +5,7 @@ const expect = require('chai').expect;
 const tmp = require('tmp');
 const fs = require('fs');
 const sinon = require('sinon');
+const fixturify = require('fixturify');
 const gitFixtures = require('git-fixtures');
 const gitDiffApply = require('../../src');
 const utils = require('../../src/utils');
@@ -139,13 +140,18 @@ describe('Integration - index', function() {
       localFixtures: 'test/fixtures/local/ignored',
       remoteFixtures: 'test/fixtures/remote/ignored',
       ignoredFiles: ['ignored-changed.txt']
-    }).then(result => {
-      let status = result.status;
+    }).then(_result => {
+      let status = _result.status;
+      let result = _result.result;
 
       fixtureCompare('test/fixtures/merge/ignored');
 
       expect(status).to.contain('modified:   changed.txt');
       expect(status).to.not.contain('modified:   ignored-changed.txt');
+
+      expect(result).to.deep.equal(
+        fixturify.readSync(path.join(cwd, 'test/fixtures/ignored'))
+      );
     });
   });
 
