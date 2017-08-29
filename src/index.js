@@ -46,7 +46,7 @@ module.exports = function gitDiffApply(options) {
     filter: copyRegex
   }).then(() => {
     run('git add -A');
-    run(`git commit -m "${startTag}"`);
+    run('git commit -m "startTag"');
 
     run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} | git apply`);
 
