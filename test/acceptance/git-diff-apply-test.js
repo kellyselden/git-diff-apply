@@ -68,8 +68,7 @@ describe('Acceptance - git-diff-apply', function() {
   it('handles conflicts', function() {
     return merge({
       localFixtures: 'test/fixtures/local/conflict',
-      remoteFixtures: 'test/fixtures/remote/conflict',
-      ignoredFiles: ['present-ignored-changed.txt']
+      remoteFixtures: 'test/fixtures/remote/conflict'
     }).then(result => {
       let status = result.status;
 
@@ -81,8 +80,6 @@ describe('Acceptance - git-diff-apply', function() {
       expect(status).to.contain('modified:   present-changed.txt');
       expect(status).to.contain('deleted:    removed-changed.txt');
       expect(status).to.contain('deleted:    removed-unchanged.txt');
-
-      expect(status).to.not.contain('modified:   present-ignored-changed.txt');
     });
   });
 
