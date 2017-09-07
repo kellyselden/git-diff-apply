@@ -21,6 +21,10 @@ module.exports = function gitDiffApply(options) {
   let ignoreConflicts = options.ignoreConflicts;
   let ignoredFiles = options.ignoredFiles || [];
 
+  if (startTag === endTag) {
+    return Promise.reject('Tags match, nothing to apply');
+  }
+
   if (!isGitClean(run('git status --porcelain'))) {
     return Promise.reject('You must start with a clean working directory');
   }
