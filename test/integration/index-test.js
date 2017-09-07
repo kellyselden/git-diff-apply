@@ -31,6 +31,8 @@ describe('Integration - index', function() {
     let dirty = options.dirty;
     let ignoreConflicts = !!options.ignoreConflicts;
     let ignoredFiles = options.ignoredFiles || [];
+    let startTag = options.startTag || 'v1';
+    let endTag = options.endTag || 'v3';
 
     buildTmp(
       localFixtures,
@@ -46,8 +48,8 @@ describe('Integration - index', function() {
 
     let promise = gitDiffApply({
       remoteUrl: remoteDir,
-      startTag: 'v1',
-      endTag: 'v3',
+      startTag,
+      endTag,
       ignoreConflicts,
       ignoredFiles
     });
@@ -110,6 +112,20 @@ describe('Integration - index', function() {
 
       expect(status).to.contain('modified:   changed.txt');
       expect(status).to.not.contain('modified:   ignored-changed.txt');
+    });
+  });
+
+  it('does nothing when tags match', function() {
+    return merge({
+      localFixtures: 'test/fixtures/local/noconflict',
+      remoteFixtures: 'test/fixtures/remote/noconflict',
+      startTag: 'v3',
+      endTag: 'v3'
+    }).then(result => {
+      let stderr = result.stderr;
+
+      expect(stderr).to.contain('Tags match, nothing to apply');
+      expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
     });
   });
 });
