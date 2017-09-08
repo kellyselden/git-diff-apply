@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const expect = require('chai').expect;
 const tmp = require('tmp');
 const gitFixtures = require('git-fixtures');
@@ -23,6 +24,10 @@ describe('Integration - index', function() {
   beforeEach(function() {
     localDir = tmp.dirSync().name;
     remoteDir = tmp.dirSync().name;
+  });
+
+  afterEach(function() {
+    process.chdir(cwd);
   });
 
   function merge(options) {
@@ -59,10 +64,6 @@ describe('Integration - index', function() {
       cwd: localDir,
       commitMessage: 'local',
       expect
-    }).then(retVal => {
-      process.chdir(cwd);
-
-      return retVal;
     });
   }
 
@@ -70,7 +71,7 @@ describe('Integration - index', function() {
     _fixtureCompare({
       expect,
       actual: localDir,
-      expected: mergeFixtures
+      expected: path.join(cwd, mergeFixtures)
     });
   }
 
