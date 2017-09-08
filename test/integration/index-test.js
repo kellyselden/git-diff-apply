@@ -3,8 +3,12 @@
 const path = require('path');
 const expect = require('chai').expect;
 const tmp = require('tmp');
+const sinon = require('sinon');
 const gitFixtures = require('git-fixtures');
 const gitDiffApply = require('../../src');
+const utils = require('../../src/utils');
+const isGitClean = require('../../src/is-git-clean');
+const getCheckedOutBranchName = require('../../src/get-checked-out-branch-name');
 const buildTmp = require('../helpers/build-tmp');
 
 const processExit = gitFixtures.processExit;
@@ -14,6 +18,7 @@ describe('Integration - index', function() {
   this.timeout(30000);
 
   let cwd;
+  let sandbox;
   let localDir;
   let remoteDir;
 
@@ -22,12 +27,16 @@ describe('Integration - index', function() {
   });
 
   beforeEach(function() {
+    sandbox = sinon.sandbox.create();
+
     localDir = tmp.dirSync().name;
     remoteDir = tmp.dirSync().name;
   });
 
   afterEach(function() {
     process.chdir(cwd);
+
+    sandbox.restore();
   });
 
   function merge(options) {
@@ -127,6 +136,79 @@ describe('Integration - index', function() {
 
       expect(stderr).to.contain('Tags match, nothing to apply');
       expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
+    });
+  });
+
+  it('deletes temporary branch when error', function() {
+    sandbox.stub(utils, 'copy').callsFake(() => {
+      expect(isGitClean()).to.be.ok;
+      expect(getCheckedOutBranchName()).to.not.equal('foo');
+
+      return Promise.reject('test copy failed');
+    });
+
+    return merge({
+      localFixtures: 'test/fixtures/local/noconflict',
+      remoteFixtures: 'test/fixtures/remote/noconflict'
+    }).then(result => {
+      let stderr = result.stderr;
+
+      expect(isGitClean()).to.be.ok;
+      expect(getCheckedOutBranchName()).to.equal('foo');
+
+      expect(stderr).to.contain('test copy failed');
+    });
+  });
+
+  it('reverts temporary files after copy when error', function() {
+    let copy = utils.copy;
+    sandbox.stub(utils, 'copy').callsFake(function() {
+      return copy.apply(this, arguments).then(() => {
+        expect(isGitClean()).to.not.be.ok;
+        expect(getCheckedOutBranchName()).to.not.equal('foo');
+
+        throw 'test copy failed';
+      });
+    });
+
+    return merge({
+      localFixtures: 'test/fixtures/local/noconflict',
+      remoteFixtures: 'test/fixtures/remote/noconflict'
+    }).then(result => {
+      let stderr = result.stderr;
+
+      expect(isGitClean()).to.be.ok;
+      expect(getCheckedOutBranchName()).to.equal('foo');
+
+      expect(stderr).to.contain('test copy failed');
+    });
+  });
+
+  it('reverts temporary files after apply when error', function() {
+    let run = utils.run;
+    sandbox.stub(utils, 'run').callsFake(function(command) {
+      let result = run.apply(this, arguments);
+
+      if (command.indexOf('git apply') > -1) {
+        expect(isGitClean()).to.not.be.ok;
+        expect(getCheckedOutBranchName()).to.not.equal('foo');
+
+        throw 'test apply failed';
+      }
+
+      return result;
+    });
+
+    return merge({
+      localFixtures: 'test/fixtures/local/noconflict',
+      remoteFixtures: 'test/fixtures/remote/noconflict'
+    }).then(result => {
+      let stderr = result.stderr;
+
+      expect(isGitClean()).to.be.ok;
+      expect(getCheckedOutBranchName()).to.equal('foo');
+
+      expect(stderr).to.contain('test apply failed');
     });
   });
 });

@@ -1,12 +1,10 @@
 'use strict';
 
-const regex = /^\* .*$/m;
+const run = require('./run');
 
-module.exports = function(output) {
-  let match = output.match(regex);
-  if (!match) {
-    return '';
-  }
+module.exports = function() {
+  // "git branch" doesn't show orphaned branches
+  let str = run('git symbolic-ref --short HEAD');
 
-  return match[0].slice(2);
+  return str.replace(/\r?\n/g, '');
 };
