@@ -104,12 +104,16 @@ module.exports = function gitDiffApply(options) {
       utils.run(`git checkout ${oldBranchName}`);
     }
 
+    return err;
+  }).then(err => {
     if (isTempBranchCommitted) {
       utils.run(`git branch -D ${tempBranchName}`);
     }
 
-    throw err;
-  }).then(() => {
+    if (err) {
+      throw err;
+    }
+
     if (hasConflicts && !ignoreConflicts) {
       debug('git mergetool');
       cp.spawnSync('git', ['mergetool'], {
