@@ -1,9 +1,7 @@
 'use strict';
 
-const path = require('path');
 const expect = require('chai').expect;
 const tmp = require('tmp');
-const fs = require('fs-extra');
 const gitFixtures = require('git-fixtures');
 const buildTmp = require('../helpers/build-tmp');
 
@@ -80,29 +78,6 @@ describe('Acceptance - git-diff-apply', function() {
       expect(status).to.contain('modified:   present-changed.txt');
       expect(status).to.contain('deleted:    removed-changed.txt');
       expect(status).to.contain('deleted:    removed-unchanged.txt');
-    });
-  });
-
-  it('handles ignoreConflicts', function() {
-    return merge({
-      localFixtures: 'test/fixtures/local/conflict',
-      remoteFixtures: 'test/fixtures/remote/conflict',
-      ignoreConflicts: true
-    }).then(result => {
-      let status = result.status;
-
-      let actual = fs.readFileSync(path.join(localDir, 'present-changed.txt'), 'utf8');
-
-      expect(actual).to.contain('<<<<<<< HEAD');
-
-      expect(status).to.contain('new file:   added-changed.txt');
-      expect(status).to.contain('new file:   added-unchanged.txt');
-      expect(status).to.contain('deleted:    removed-unchanged.txt');
-
-      expect(status).to.contain('deleted by us:   missing-changed.txt');
-      expect(status).to.contain('both added:      present-added-changed.txt');
-      expect(status).to.contain('both modified:   present-changed.txt');
-      expect(status).to.contain('deleted by them: removed-changed.txt');
     });
   });
 
