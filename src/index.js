@@ -85,8 +85,6 @@ module.exports = function gitDiffApply(options) {
     utils.run(`git checkout ${oldBranchName}`);
     isTempBranchCheckedOut = false;
 
-    hasConflicts = false;
-
     try {
       utils.run(`git cherry-pick --no-commit ${commit.trim()}`);
     } catch (err) {
