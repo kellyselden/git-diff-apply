@@ -149,6 +149,20 @@ describe('Integration - index', function() {
     });
   });
 
+  it('doesn\'t error if no changes', function() {
+    return merge({
+      localFixtures: 'test/fixtures/local/nochange',
+      remoteFixtures: 'test/fixtures/remote/nochange',
+      ignoredFiles: ['changed.txt']
+    }).then(result => {
+      let status = result.status;
+
+      fixtureCompare('test/fixtures/merge/nochange');
+
+      expect(status).to.not.contain('modified:   changed.txt');
+    });
+  });
+
   it('does nothing when tags match', function() {
     return merge({
       localFixtures: 'test/fixtures/local/noconflict',

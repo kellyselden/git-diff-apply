@@ -75,20 +75,28 @@ module.exports = function gitDiffApply(options) {
       utils.run(`git checkout -- ${ignoredFile}`);
     }
 
-    utils.run('git add -A');
-    utils.run('git commit -m "diff"');
+    let wereThereAnyChanged = !isGitClean();
+
+    if (wereThereAnyChanged) {
+      utils.run('git add -A');
+      utils.run('git commit -m "diff"');
+    }
     isTempBranchUntracked = false;
     isTempBranchModified = false;
 
-    commit = utils.run('git rev-parse HEAD');
+    if (wereThereAnyChanged) {
+      commit = utils.run('git rev-parse HEAD');
+    }
 
     utils.run(`git checkout ${oldBranchName}`);
     isTempBranchCheckedOut = false;
 
-    try {
-      utils.run(`git cherry-pick --no-commit ${commit.trim()}`);
-    } catch (err) {
-      hasConflicts = true;
+    if (wereThereAnyChanged) {
+      try {
+        utils.run(`git cherry-pick --no-commit ${commit.trim()}`);
+      } catch (err) {
+        hasConflicts = true;
+      }
     }
   }).catch(err => {
     if (isTempBranchUntracked) {
