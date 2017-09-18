@@ -21,8 +21,6 @@ const argv = require('yargs')
       type: 'array'
     }
   })
-  .version()
-  .help()
   .argv;
 
 const remoteUrl = argv['remote-url'];
