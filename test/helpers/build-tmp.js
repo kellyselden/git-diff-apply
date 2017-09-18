@@ -13,10 +13,13 @@ module.exports = function(options) {
   let fixturesPath = options.fixturesPath;
   let tmpPath = options.tmpPath;
   let dirty = options.dirty;
+  let subDir = options.subDir || '';
 
   gitInit({
     cwd: tmpPath
   });
+
+  let tmpSubPath = path.join(tmpPath, subDir);
 
   let tags = fs.readdirSync(fixturesPath);
 
@@ -29,7 +32,9 @@ module.exports = function(options) {
 
     let tag = tags[i];
 
-    fs.copySync(path.join(fixturesPath, tag), tmpPath);
+    fs.ensureDirSync(tmpSubPath);
+
+    fs.copySync(path.join(fixturesPath, tag), tmpSubPath);
 
     commit({
       m: tag,

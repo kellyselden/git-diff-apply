@@ -45,6 +45,7 @@ describe('Integration - index', function() {
     let localFixtures = options.localFixtures;
     let remoteFixtures = options.remoteFixtures;
     let dirty = options.dirty;
+    let subDir = options.subDir || '';
     let ignoreConflicts = options.ignoreConflicts;
     let ignoredFiles = options.ignoredFiles || [];
     let startTag = options.startTag || 'v1';
@@ -53,14 +54,21 @@ describe('Integration - index', function() {
     buildTmp({
       fixturesPath: localFixtures,
       tmpPath: localDir,
-      dirty
+      dirty,
+      subDir
     });
     buildTmp({
       fixturesPath: remoteFixtures,
       tmpPath: remoteDir
     });
 
+    localDir = path.join(localDir, subDir);
+
     process.chdir(localDir);
+
+    // this prefixes /private in OSX...
+    // let's us do === against it later
+    localDir = process.cwd();
 
     let promise = gitDiffApply({
       remoteUrl: remoteDir,
@@ -180,6 +188,7 @@ D  removed-unchanged.txt
       });
 
       expect(isGitClean({ cwd: localDir })).to.be.ok;
+      expect(process.cwd()).to.equal(localDir);
     });
   });
 
@@ -193,6 +202,7 @@ D  removed-unchanged.txt
       let stderr = result.stderr;
 
       expect(isGitClean({ cwd: localDir })).to.be.ok;
+      expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('Tags match, nothing to apply');
       expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
@@ -215,6 +225,7 @@ D  removed-unchanged.txt
 
       expect(isGitClean({ cwd: localDir })).to.be.ok;
       expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+      expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test copy failed');
     });
@@ -224,6 +235,10 @@ D  removed-unchanged.txt
     let copy = utils.copy;
     sandbox.stub(utils, 'copy').callsFake(function() {
       return copy.apply(this, arguments).then(() => {
+        if (arguments[1] !== localDir) {
+          return;
+        }
+
         expect(isGitClean({ cwd: localDir })).to.not.be.ok;
         expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
 
@@ -239,6 +254,7 @@ D  removed-unchanged.txt
 
       expect(isGitClean({ cwd: localDir })).to.be.ok;
       expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+      expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test copy failed');
     });
@@ -267,8 +283,74 @@ D  removed-unchanged.txt
 
       expect(isGitClean({ cwd: localDir })).to.be.ok;
       expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+      expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test apply failed');
+    });
+  });
+
+  it('scopes to sub dir if run from there', function() {
+    return merge({
+      localFixtures: 'test/fixtures/local/noconflict',
+      remoteFixtures: 'test/fixtures/remote/noconflict',
+      subDir: 'foo/bar'
+    }).then(result => {
+      let status = result.status;
+
+      fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/noconflict'
+      });
+
+      expect(status).to.equal(`M  foo/bar/changed.txt
+`);
+    });
+  });
+
+  it('handles sub dir with ignored files', function() {
+    return merge({
+      localFixtures: 'test/fixtures/local/ignored',
+      remoteFixtures: 'test/fixtures/remote/ignored',
+      subDir: 'foo/bar',
+      ignoredFiles: ['ignored-changed.txt']
+    }).then(_result => {
+      let status = _result.status;
+      let result = _result.result;
+
+      fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/ignored'
+      });
+
+      expect(status).to.equal(`M  foo/bar/changed.txt
+`);
+
+      expect(result).to.deep.equal(
+        fixturify.readSync(path.join(cwd, 'test/fixtures/ignored'))
+      );
+    });
+  });
+
+  it('preserves cwd when erroring during the orphan step', function() {
+    let run = utils.run;
+    sandbox.stub(utils, 'run').callsFake(function(command) {
+      if (command.indexOf('git checkout --orphan') > -1) {
+        throw 'test orphan failed';
+      }
+
+      return run.apply(this, arguments);
+    });
+
+    return merge({
+      localFixtures: 'test/fixtures/local/noconflict',
+      remoteFixtures: 'test/fixtures/remote/noconflict',
+      subDir: 'foo/bar'
+    }).then(result => {
+      let stderr = result.stderr;
+
+      expect(isGitClean({ cwd: localDir })).to.be.ok;
+      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+      expect(process.cwd()).to.equal(localDir);
+
+      expect(stderr).to.contain('test orphan failed');
     });
   });
 });
