@@ -72,12 +72,13 @@ describe('Acceptance - git-diff-apply', function() {
 
       fixtureCompare('test/fixtures/merge/conflict');
 
-      expect(status).to.contain('new file:   added-changed.txt');
-      expect(status).to.contain('new file:   added-unchanged.txt');
-      expect(status).to.contain('modified:   present-added-changed.txt');
-      expect(status).to.contain('modified:   present-changed.txt');
-      expect(status).to.contain('deleted:    removed-changed.txt');
-      expect(status).to.contain('deleted:    removed-unchanged.txt');
+      expect(status).to.equal(`A  added-changed.txt
+A  added-unchanged.txt
+M  present-added-changed.txt
+M  present-changed.txt
+D  removed-changed.txt
+D  removed-unchanged.txt
+`);
     });
   });
 
@@ -90,7 +91,8 @@ describe('Acceptance - git-diff-apply', function() {
 
       fixtureCompare('test/fixtures/merge/git');
 
-      expect(status).to.contain('modified:   .gitignore');
+      expect(status).to.equal(`M  .gitignore
+`);
     });
   });
 });

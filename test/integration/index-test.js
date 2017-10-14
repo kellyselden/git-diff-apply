@@ -95,7 +95,8 @@ describe('Integration - index', function() {
 
       fixtureCompare('test/fixtures/merge/noconflict');
 
-      expect(status).to.contain('modified:   changed.txt');
+      expect(status).to.equal(`M  changed.txt
+`);
     });
   });
 
@@ -124,14 +125,14 @@ describe('Integration - index', function() {
 
       expect(actual).to.contain('<<<<<<< HEAD');
 
-      expect(status).to.contain('new file:   added-changed.txt');
-      expect(status).to.contain('new file:   added-unchanged.txt');
-      expect(status).to.contain('deleted:    removed-unchanged.txt');
-
-      expect(status).to.contain('deleted by us:   missing-changed.txt');
-      expect(status).to.contain('both added:      present-added-changed.txt');
-      expect(status).to.contain('both modified:   present-changed.txt');
-      expect(status).to.contain('deleted by them: removed-changed.txt');
+      expect(status).to.equal(`A  added-changed.txt
+A  added-unchanged.txt
+DU missing-changed.txt
+AA present-added-changed.txt
+UU present-changed.txt
+UD removed-changed.txt
+D  removed-unchanged.txt
+`);
     });
   });
 
@@ -146,8 +147,8 @@ describe('Integration - index', function() {
 
       fixtureCompare('test/fixtures/merge/ignored');
 
-      expect(status).to.contain('modified:   changed.txt');
-      expect(status).to.not.contain('modified:   ignored-changed.txt');
+      expect(status).to.equal(`M  changed.txt
+`);
 
       expect(result).to.deep.equal(
         fixturify.readSync(path.join(cwd, 'test/fixtures/ignored'))
