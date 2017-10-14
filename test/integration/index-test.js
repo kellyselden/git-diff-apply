@@ -160,12 +160,10 @@ describe('Integration - index', function() {
       localFixtures: 'test/fixtures/local/nochange',
       remoteFixtures: 'test/fixtures/remote/nochange',
       ignoredFiles: ['changed.txt']
-    }).then(result => {
-      let status = result.status;
-
+    }).then(() => {
       fixtureCompare('test/fixtures/merge/nochange');
 
-      expect(status).to.not.contain('modified:   changed.txt');
+      expect(isGitClean()).to.be.ok;
     });
   });
 
@@ -177,6 +175,8 @@ describe('Integration - index', function() {
       endTag: 'v3'
     }).then(result => {
       let stderr = result.stderr;
+
+      expect(isGitClean()).to.be.ok;
 
       expect(stderr).to.contain('Tags match, nothing to apply');
       expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
