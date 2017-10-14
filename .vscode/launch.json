@@ -15,7 +15,7 @@
         "--timeout",
         "999999",
         "--colors",
-        "${workspaceRoot}/test"
+        "${workspaceRoot}/test/**/*-test.js"
       ],
       "env": {
         "DEBUG": "git-diff-apply,git-fixtures"
