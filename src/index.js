@@ -153,3 +153,5 @@ module.exports = function gitDiffApply(options) {
     };
   });
 };
+
+module.exports.isGitClean = isGitClean;

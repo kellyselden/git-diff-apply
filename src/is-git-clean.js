@@ -2,6 +2,6 @@
 
 const run = require('./run');
 
-module.exports = function() {
+module.exports = function isGitClean() {
   return !run('git status --porcelain');
 };
