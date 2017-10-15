@@ -168,7 +168,7 @@ D  removed-unchanged.txt
     }).then(() => {
       fixtureCompare('test/fixtures/merge/nochange');
 
-      expect(isGitClean()).to.be.ok;
+      expect(isGitClean({ cwd: localDir })).to.be.ok;
     });
   });
 
@@ -181,7 +181,7 @@ D  removed-unchanged.txt
     }).then(result => {
       let stderr = result.stderr;
 
-      expect(isGitClean()).to.be.ok;
+      expect(isGitClean({ cwd: localDir })).to.be.ok;
 
       expect(stderr).to.contain('Tags match, nothing to apply');
       expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
@@ -190,8 +190,8 @@ D  removed-unchanged.txt
 
   it('deletes temporary branch when error', function() {
     sandbox.stub(utils, 'copy').callsFake(() => {
-      expect(isGitClean()).to.be.ok;
-      expect(getCheckedOutBranchName()).to.not.equal('foo');
+      expect(isGitClean({ cwd: localDir })).to.be.ok;
+      expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
 
       return Promise.reject('test copy failed');
     });
@@ -202,8 +202,8 @@ D  removed-unchanged.txt
     }).then(result => {
       let stderr = result.stderr;
 
-      expect(isGitClean()).to.be.ok;
-      expect(getCheckedOutBranchName()).to.equal('foo');
+      expect(isGitClean({ cwd: localDir })).to.be.ok;
+      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
 
       expect(stderr).to.contain('test copy failed');
     });
@@ -213,8 +213,8 @@ D  removed-unchanged.txt
     let copy = utils.copy;
     sandbox.stub(utils, 'copy').callsFake(function() {
       return copy.apply(this, arguments).then(() => {
-        expect(isGitClean()).to.not.be.ok;
-        expect(getCheckedOutBranchName()).to.not.equal('foo');
+        expect(isGitClean({ cwd: localDir })).to.not.be.ok;
+        expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
 
         throw 'test copy failed';
       });
@@ -226,8 +226,8 @@ D  removed-unchanged.txt
     }).then(result => {
       let stderr = result.stderr;
 
-      expect(isGitClean()).to.be.ok;
-      expect(getCheckedOutBranchName()).to.equal('foo');
+      expect(isGitClean({ cwd: localDir })).to.be.ok;
+      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
 
       expect(stderr).to.contain('test copy failed');
     });
@@ -239,8 +239,8 @@ D  removed-unchanged.txt
       let result = run.apply(this, arguments);
 
       if (command.indexOf('git apply') > -1) {
-        expect(isGitClean()).to.not.be.ok;
-        expect(getCheckedOutBranchName()).to.not.equal('foo');
+        expect(isGitClean({ cwd: localDir })).to.not.be.ok;
+        expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
 
         throw 'test apply failed';
       }
@@ -254,8 +254,8 @@ D  removed-unchanged.txt
     }).then(result => {
       let stderr = result.stderr;
 
-      expect(isGitClean()).to.be.ok;
-      expect(getCheckedOutBranchName()).to.equal('foo');
+      expect(isGitClean({ cwd: localDir })).to.be.ok;
+      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
 
       expect(stderr).to.contain('test apply failed');
     });
