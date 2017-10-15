@@ -23,14 +23,14 @@ describe('Acceptance - git-diff-apply', function() {
     let localFixtures = options.localFixtures;
     let remoteFixtures = options.remoteFixtures;
 
-    buildTmp(
-      localFixtures,
-      localDir
-    );
-    buildTmp(
-      remoteFixtures,
-      remoteDir
-    );
+    buildTmp({
+      fixturesPath: localFixtures,
+      tmpPath: localDir
+    });
+    buildTmp({
+      fixturesPath: remoteFixtures,
+      tmpPath: remoteDir
+    });
 
     return processBin({
       binFile: 'git-diff-apply',
