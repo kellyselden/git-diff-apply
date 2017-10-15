@@ -2,7 +2,7 @@
 
 const run = require('./run');
 
-module.exports = function() {
+module.exports = function getCheckedOutBranchName() {
   // "git branch" doesn't show orphaned branches
   let str = run('git symbolic-ref --short HEAD');
 
