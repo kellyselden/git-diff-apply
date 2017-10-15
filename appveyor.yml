@@ -2,6 +2,11 @@ environment:
   matrix:
     - nodejs_version: "4"
 
+branches:
+  only:
+    - master
+    - /^greenkeeper\/.*$/
+
 # Fix line endings in Windows. (runs before repo cloning)
 init:
   - git config --global core.autocrlf true
