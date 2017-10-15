@@ -22,14 +22,10 @@ describe('Acceptance - git-diff-apply', function() {
   function merge(options) {
     let localFixtures = options.localFixtures;
     let remoteFixtures = options.remoteFixtures;
-    let dirty = options.dirty;
-    let ignoreConflicts = !!options.ignoreConflicts;
-    let ignoredFiles = options.ignoredFiles || [];
 
     buildTmp(
       localFixtures,
-      localDir,
-      dirty
+      localDir
     );
     buildTmp(
       remoteFixtures,
@@ -44,11 +40,8 @@ describe('Acceptance - git-diff-apply', function() {
         '--start-tag',
         'v1',
         '--end-tag',
-        'v3',
-        '--ignore-conflicts',
-        ignoreConflicts,
-        '--ignored-files'
-      ].concat(ignoredFiles),
+        'v3'
+      ],
       cwd: localDir,
       commitMessage: 'local',
       expect
