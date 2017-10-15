@@ -50,15 +50,15 @@ describe('Integration - index', function() {
     let startTag = options.startTag || 'v1';
     let endTag = options.endTag || 'v3';
 
-    buildTmp(
-      localFixtures,
-      localDir,
+    buildTmp({
+      fixturesPath: localFixtures,
+      tmpPath: localDir,
       dirty
-    );
-    buildTmp(
-      remoteFixtures,
-      remoteDir
-    );
+    });
+    buildTmp({
+      fixturesPath: remoteFixtures,
+      tmpPath: remoteDir
+    });
 
     process.chdir(localDir);
 
