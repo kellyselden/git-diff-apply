@@ -45,7 +45,7 @@ describe('Integration - index', function() {
     let localFixtures = options.localFixtures;
     let remoteFixtures = options.remoteFixtures;
     let dirty = options.dirty;
-    let ignoreConflicts = !!options.ignoreConflicts;
+    let ignoreConflicts = options.ignoreConflicts;
     let ignoredFiles = options.ignoredFiles || [];
     let startTag = options.startTag || 'v1';
     let endTag = options.endTag || 'v3';
