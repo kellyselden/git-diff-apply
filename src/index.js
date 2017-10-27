@@ -72,6 +72,25 @@ module.exports = function gitDiffApply(options) {
     };
   }
 
+  function downloadAndExtract(tag) {
+    let downloadDir = tmp.dirSync().name;
+
+    return utils.download(
+      `${remoteUrl}/archive/${tag}.zip`,
+      downloadDir,
+      { extract: true }
+    ).then(() => downloadDir);
+  }
+
+  function copyAndCommit(downloadDir, tag) {
+    let dirName = fs.readdirSync(downloadDir)[0];
+    let thePath = path.join(downloadDir, dirName);
+
+    return utils.copy(thePath, tmpDir).then(() => {
+      commitAndTag(tag, { cwd: tmpDir });
+    });
+  }
+
   function namespaceRepoWithSubDir(subDir) {
     let newTmpDir = tmp.dirSync().name;
 
@@ -121,8 +140,21 @@ module.exports = function gitDiffApply(options) {
     tmpGitDir = path.join(tmpDir, '.git');
     tmpWorkingDir = tmpDir;
 
-    utils.run(`git clone --mirror ${remoteUrl} ${tmpGitDir}`);
+    gitInit({ cwd: tmpDir });
 
+    return Promise.all([
+      downloadAndExtract(startTag),
+      downloadAndExtract(endTag)
+    ]);
+  }).then(([
+    startTagDownloadDir,
+    endTagDownloadDir
+  ]) => {
+    return copyAndCommit(startTagDownloadDir, startTag).then(() => {
+      utils.run('git rm -r *', { cwd: tmpDir });
+      return copyAndCommit(endTagDownloadDir, endTag);
+    });
+  }).then(() => {
     returnObject = buildReturnObject();
 
     root = getRootDir();

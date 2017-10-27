@@ -9,6 +9,7 @@ const fixturify = require('fixturify');
 const gitFixtures = require('git-fixtures');
 const gitDiffApply = require('../../src');
 const utils = require('../../src/utils');
+const copy = require('../../src/copy');
 const isGitClean = gitDiffApply.isGitClean;
 const getCheckedOutBranchName = require('../../src/get-checked-out-branch-name');
 const buildTmp = require('../helpers/build-tmp');
@@ -16,7 +17,7 @@ const buildTmp = require('../helpers/build-tmp');
 const processExit = gitFixtures.processExit;
 const _fixtureCompare = gitFixtures.fixtureCompare;
 
-describe('Integration - index', function() {
+describe.only('Integration - index', function() {
   this.timeout(30000);
 
   let cwd;
@@ -59,9 +60,13 @@ describe('Integration - index', function() {
       noGit,
       subDir
     });
-    buildTmp({
-      fixturesPath: remoteFixtures,
-      tmpPath: remoteDir
+
+    sandbox.stub(utils, 'download').callsFake((uri, output) => {
+      let fileName = path.basename(uri);
+      let tag = fileName.substr(0, fileName.length - 4);
+      let src = path.join(cwd, remoteFixtures, tag);
+      let dest = path.join(output, 'asdf');
+      return copy(src, dest);
     });
 
     if (noGit) {
