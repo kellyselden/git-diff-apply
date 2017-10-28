@@ -3,22 +3,14 @@
 const path = require('path');
 const tmp = require('tmp');
 const uuidv1 = require('uuid/v1');
-const fixturify = require('fixturify');
 const utils = require('./utils');
 const getCheckedOutBranchName = require('./get-checked-out-branch-name');
 const isGitClean = require('./is-git-clean');
 const checkOutTag = require('./check-out-tag');
+const convertToObj = require('./convert-to-obj');
 const resolveConflicts = require('./resolve-conflicts');
 
 const tempBranchName = uuidv1();
-
-function convertToObj(dir, include) {
-  let obj = fixturify.readSync(dir, {
-    include
-  });
-  delete obj['.git'];
-  return obj;
-}
 
 module.exports = function gitDiffApply(options) {
   let remoteUrl = options.remoteUrl;
