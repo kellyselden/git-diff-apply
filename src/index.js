@@ -26,6 +26,17 @@ function convertToObj(dir, include) {
   return obj;
 }
 
+function copy(tmpDir) {
+  if (debug.enabled) {
+    debug(require('fs').readdirSync(tmpDir));
+  }
+
+  debug(`copy ${tmpDir} ${process.cwd()}`);
+  return utils.copy(tmpDir, '.', {
+    filter: copyRegex
+  });
+}
+
 module.exports = function gitDiffApply(options) {
   let remoteUrl = options.remoteUrl;
   let startTag = options.startTag;
@@ -67,15 +78,8 @@ module.exports = function gitDiffApply(options) {
 
     utils.run('git reset --hard');
 
-    if (debug.enabled) {
-      debug(require('fs').readdirSync(tmpDir));
-    }
-
     isTempBranchUntracked = true;
-    debug(`copy ${tmpDir} ${process.cwd()}`);
-    return utils.copy(tmpDir, '.', {
-      filter: copyRegex
-    });
+    return copy(tmpDir);
   }).then(() => {
     utils.run('git add -A');
     utils.run('git commit -m "startTag"');
