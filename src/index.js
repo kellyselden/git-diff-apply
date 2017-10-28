@@ -58,20 +58,21 @@ module.exports = function gitDiffApply(options) {
     tmpGitDir = path.join(tmpDir, '.git');
 
     utils.run(`git clone --mirror ${remoteUrl} ${tmpGitDir}`);
-    oldBranchName = getCheckedOutBranchName();
 
+    checkOutTag(tmpDir, tmpGitDir, startTag);
+
+    oldBranchName = getCheckedOutBranchName();
     utils.run(`git checkout --orphan ${tempBranchName}`);
     isTempBranchCheckedOut = true;
 
     utils.run('git reset --hard');
-    checkOutTag(tmpDir, tmpGitDir, startTag);
 
-    debug(`copy ${tmpDir} ${process.cwd()}`);
     if (debug.enabled) {
       debug(require('fs').readdirSync(tmpDir));
     }
 
     isTempBranchUntracked = true;
+    debug(`copy ${tmpDir} ${process.cwd()}`);
     return utils.copy(tmpDir, '.', {
       filter: copyRegex
     });
