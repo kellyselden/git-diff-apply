@@ -92,23 +92,23 @@ module.exports = function gitDiffApply(options) {
       utils.run(`git checkout -- ${ignoredFile}`);
     }
 
-    let wereThereAnyChanged = !isGitClean();
+    let wereAnyChanged = !isGitClean();
 
-    if (wereThereAnyChanged) {
+    if (wereAnyChanged) {
       utils.run('git add -A');
       utils.run('git commit -m "diff"');
     }
     isTempBranchUntracked = false;
     isTempBranchModified = false;
 
-    if (wereThereAnyChanged) {
+    if (wereAnyChanged) {
       commit = utils.run('git rev-parse HEAD');
     }
 
     utils.run(`git checkout ${oldBranchName}`);
     isTempBranchCheckedOut = false;
 
-    if (wereThereAnyChanged) {
+    if (wereAnyChanged) {
       try {
         utils.run(`git cherry-pick --no-commit ${commit.trim()}`);
       } catch (err) {
