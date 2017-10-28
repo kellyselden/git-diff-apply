@@ -7,14 +7,10 @@ const fixturify = require('fixturify');
 const utils = require('./utils');
 const getCheckedOutBranchName = require('./get-checked-out-branch-name');
 const isGitClean = require('./is-git-clean');
+const checkOutTag = require('./check-out-tag');
 const resolveConflicts = require('./resolve-conflicts');
 
 const tempBranchName = uuidv1();
-
-function checkOutTag(tmpDir, tmpGitDir, tag) {
-  let commit = utils.run(`git --git-dir="${tmpGitDir}" rev-parse ${tag}`);
-  utils.run(`git --git-dir="${tmpGitDir}" --work-tree="${tmpDir}" checkout ${commit.trim()}`);
-}
 
 function convertToObj(dir, include) {
   let obj = fixturify.readSync(dir, {
