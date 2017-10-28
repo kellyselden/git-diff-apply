@@ -45,7 +45,7 @@ module.exports = function gitDiffApply(options) {
 
     utils.run(`git clone --mirror ${remoteUrl} ${tmpGitDir}`);
 
-    checkOutTag(tmpDir, tmpGitDir, startTag);
+    checkOutTag(tmpDir, startTag);
 
     oldBranchName = getCheckedOutBranchName();
     utils.run(`git checkout --orphan ${tempBranchName}`);
@@ -120,7 +120,7 @@ module.exports = function gitDiffApply(options) {
       resolveConflicts();
     }
 
-    checkOutTag(tmpDir, tmpGitDir, endTag);
+    checkOutTag(tmpDir, endTag);
 
     let to = convertToObj(tmpDir, ignoredFiles);
 
