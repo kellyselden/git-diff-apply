@@ -6,7 +6,6 @@ const tmp = require('tmp');
 const uuidv1 = require('uuid/v1');
 const fixturify = require('fixturify');
 const utils = require('./utils');
-const copyRegex = require('./copy-regex');
 const getCheckedOutBranchName = require('./get-checked-out-branch-name');
 const isGitClean = require('./is-git-clean');
 const debug = require('debug')('git-diff-apply');
@@ -24,17 +23,6 @@ function convertToObj(dir, include) {
   });
   delete obj['.git'];
   return obj;
-}
-
-function copy(tmpDir) {
-  if (debug.enabled) {
-    debug(require('fs').readdirSync(tmpDir));
-  }
-
-  debug(`copy ${tmpDir} ${process.cwd()}`);
-  return utils.copy(tmpDir, '.', {
-    filter: copyRegex
-  });
 }
 
 function resolveConflicts() {
@@ -86,7 +74,7 @@ module.exports = function gitDiffApply(options) {
     utils.run('git reset --hard');
 
     isTempBranchUntracked = true;
-    return copy(tmpDir);
+    return utils.copy(tmpDir);
   }).then(() => {
     utils.run('git add -A');
     utils.run('git commit -m "startTag"');
