@@ -1,6 +1,5 @@
 'use strict';
 
-const cp = require('child_process');
 const path = require('path');
 const tmp = require('tmp');
 const uuidv1 = require('uuid/v1');
@@ -8,7 +7,7 @@ const fixturify = require('fixturify');
 const utils = require('./utils');
 const getCheckedOutBranchName = require('./get-checked-out-branch-name');
 const isGitClean = require('./is-git-clean');
-const debug = require('debug')('git-diff-apply');
+const resolveConflicts = require('./resolve-conflicts');
 
 const tempBranchName = uuidv1();
 
@@ -23,13 +22,6 @@ function convertToObj(dir, include) {
   });
   delete obj['.git'];
   return obj;
-}
-
-function resolveConflicts() {
-  debug('git mergetool');
-  cp.spawnSync('git', ['mergetool'], {
-    stdio: 'inherit'
-  });
 }
 
 module.exports = function gitDiffApply(options) {
