@@ -37,6 +37,13 @@ function copy(tmpDir) {
   });
 }
 
+function resolveConflicts() {
+  debug('git mergetool');
+  cp.spawnSync('git', ['mergetool'], {
+    stdio: 'inherit'
+  });
+}
+
 module.exports = function gitDiffApply(options) {
   let remoteUrl = options.remoteUrl;
   let startTag = options.startTag;
@@ -142,10 +149,7 @@ module.exports = function gitDiffApply(options) {
     }
 
     if (hasConflicts && !ignoreConflicts) {
-      debug('git mergetool');
-      cp.spawnSync('git', ['mergetool'], {
-        stdio: 'inherit'
-      });
+      resolveConflicts();
     }
 
     checkOutTag(tmpDir, tmpGitDir, endTag);
