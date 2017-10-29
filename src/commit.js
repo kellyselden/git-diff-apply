@@ -2,7 +2,7 @@
 
 const run = require('./run');
 
-module.exports = function commit() {
-  run('git add -A');
-  run('git commit -m "message"');
+module.exports = function commit(options) {
+  run('git add -A', options);
+  run('git commit -m "message"', options);
 };
