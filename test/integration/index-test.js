@@ -78,11 +78,16 @@ describe('Integration - index', function() {
     });
   }
 
-  function fixtureCompare(mergeFixtures) {
+  function fixtureCompare(options) {
+    let mergeFixtures = options.mergeFixtures;
+
+    let actual = localDir;
+    let expected = path.join(cwd, mergeFixtures);
+
     _fixtureCompare({
       expect,
-      actual: localDir,
-      expected: path.join(cwd, mergeFixtures)
+      actual,
+      expected
     });
   }
 
@@ -93,7 +98,9 @@ describe('Integration - index', function() {
     }).then(result => {
       let status = result.status;
 
-      fixtureCompare('test/fixtures/merge/noconflict');
+      fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/noconflict'
+      });
 
       expect(status).to.equal(`M  changed.txt
 `);
@@ -149,7 +156,9 @@ D  removed-unchanged.txt
       let status = _result.status;
       let result = _result.result;
 
-      fixtureCompare('test/fixtures/merge/ignored');
+      fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/ignored'
+      });
 
       expect(status).to.equal(`M  changed.txt
 `);
@@ -166,7 +175,9 @@ D  removed-unchanged.txt
       remoteFixtures: 'test/fixtures/remote/nochange',
       ignoredFiles: ['changed.txt']
     }).then(() => {
-      fixtureCompare('test/fixtures/merge/nochange');
+      fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/nochange'
+      });
 
       expect(isGitClean({ cwd: localDir })).to.be.ok;
     });
