@@ -6,6 +6,7 @@ const uuidv1 = require('uuid/v1');
 const utils = require('./utils');
 const getCheckedOutBranchName = require('./get-checked-out-branch-name');
 const isGitClean = require('./is-git-clean');
+const commit = require('./commit');
 const checkOutTag = require('./check-out-tag');
 const convertToObj = require('./convert-to-obj');
 const resolveConflicts = require('./resolve-conflicts');
@@ -22,7 +23,6 @@ module.exports = function gitDiffApply(options) {
   let tmpDir;
   let tmpGitDir;
   let oldBranchName;
-  let commit;
   let hasConflicts;
   let returnObject;
 
@@ -73,8 +73,7 @@ module.exports = function gitDiffApply(options) {
     isTempBranchUntracked = true;
     return utils.copy(tmpDir, process.cwd());
   }).then(() => {
-    utils.run('git add -A');
-    utils.run('git commit -m "startTag"');
+    commit();
     isTempBranchUntracked = false;
     isTempBranchCommitted = true;
 
@@ -89,14 +88,14 @@ module.exports = function gitDiffApply(options) {
     let wereAnyChanged = !isGitClean();
 
     if (wereAnyChanged) {
-      utils.run('git add -A');
-      utils.run('git commit -m "diff"');
+      commit();
     }
     isTempBranchUntracked = false;
     isTempBranchModified = false;
 
+    let sha;
     if (wereAnyChanged) {
-      commit = utils.run('git rev-parse HEAD');
+      sha = utils.run('git rev-parse HEAD');
     }
 
     utils.run(`git checkout ${oldBranchName}`);
@@ -104,7 +103,7 @@ module.exports = function gitDiffApply(options) {
 
     if (wereAnyChanged) {
       try {
-        utils.run(`git cherry-pick --no-commit ${commit.trim()}`);
+        utils.run(`git cherry-pick --no-commit ${sha.trim()}`);
       } catch (err) {
         hasConflicts = true;
       }
