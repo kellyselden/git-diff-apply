@@ -48,11 +48,16 @@ describe('Acceptance - git-diff-apply', function() {
     });
   }
 
-  function fixtureCompare(mergeFixtures) {
+  function fixtureCompare(options) {
+    let mergeFixtures = options.mergeFixtures;
+
+    let actual = localDir;
+    let expected = mergeFixtures;
+
     _fixtureCompare({
       expect,
-      actual: localDir,
-      expected: mergeFixtures
+      actual,
+      expected
     });
   }
 
@@ -63,7 +68,9 @@ describe('Acceptance - git-diff-apply', function() {
     }).then(result => {
       let status = result.status;
 
-      fixtureCompare('test/fixtures/merge/conflict');
+      fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/conflict'
+      });
 
       expect(status).to.equal(`A  added-changed.txt
 A  added-unchanged.txt
@@ -82,7 +89,9 @@ D  removed-unchanged.txt
     }).then(result => {
       let status = result.status;
 
-      fixtureCompare('test/fixtures/merge/git');
+      fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/git'
+      });
 
       expect(status).to.equal(`M  .gitignore
 `);
