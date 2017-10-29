@@ -22,14 +22,29 @@ module.exports = function gitDiffApply(options) {
   let tmpDir;
   let tmpGitDir;
   let oldBranchName;
-  let from;
   let commit;
   let hasConflicts;
+  let returnObject;
 
   let isTempBranchCheckedOut;
   let isTempBranchUntracked;
   let isTempBranchModified;
   let isTempBranchCommitted;
+
+  function buildReturnObject() {
+    checkOutTag(tmpDir, startTag);
+
+    let from = convertToObj(tmpDir, ignoredFiles);
+
+    checkOutTag(tmpDir, endTag);
+
+    let to = convertToObj(tmpDir, ignoredFiles);
+
+    return {
+      from,
+      to
+    };
+  }
 
   return Promise.resolve().then(() => {
     if (startTag === endTag) {
@@ -44,6 +59,8 @@ module.exports = function gitDiffApply(options) {
     tmpGitDir = path.join(tmpDir, '.git');
 
     utils.run(`git clone --mirror ${remoteUrl} ${tmpGitDir}`);
+
+    returnObject = buildReturnObject();
 
     checkOutTag(tmpDir, startTag);
 
@@ -60,8 +77,6 @@ module.exports = function gitDiffApply(options) {
     utils.run('git commit -m "startTag"');
     isTempBranchUntracked = false;
     isTempBranchCommitted = true;
-
-    from = convertToObj('.', ignoredFiles);
 
     isTempBranchUntracked = true;
     isTempBranchModified = true;
@@ -120,14 +135,7 @@ module.exports = function gitDiffApply(options) {
       resolveConflicts();
     }
 
-    checkOutTag(tmpDir, endTag);
-
-    let to = convertToObj(tmpDir, ignoredFiles);
-
-    return {
-      from,
-      to
-    };
+    return returnObject;
   });
 };
 
