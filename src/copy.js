@@ -5,13 +5,13 @@ const ncp = denodeify(require('ncp'));
 const copyRegex = require('./copy-regex');
 const debug = require('debug')('git-diff-apply');
 
-module.exports = function copy(tmpDir) {
+module.exports = function copy(from, to) {
   if (debug.enabled) {
-    debug(require('fs').readdirSync(tmpDir));
+    debug(require('fs').readdirSync(from));
   }
 
-  debug(`copy ${tmpDir} ${process.cwd()}`);
-  return ncp(tmpDir, '.', {
+  debug(`copy ${from} ${to}`);
+  return ncp(from, to, {
     filter: copyRegex
   });
 };

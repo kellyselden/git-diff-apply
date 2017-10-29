@@ -54,7 +54,7 @@ module.exports = function gitDiffApply(options) {
     utils.run('git reset --hard');
 
     isTempBranchUntracked = true;
-    return utils.copy(tmpDir);
+    return utils.copy(tmpDir, process.cwd());
   }).then(() => {
     utils.run('git add -A');
     utils.run('git commit -m "startTag"');
