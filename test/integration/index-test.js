@@ -210,7 +210,12 @@ D  removed-unchanged.txt
   });
 
   it('deletes temporary branch when error', function() {
-    sandbox.stub(utils, 'copy').callsFake(() => {
+    let copy = utils.copy;
+    sandbox.stub(utils, 'copy').callsFake(function() {
+      if (arguments[1] !== localDir) {
+        return copy.apply(this, arguments);
+      }
+
       expect(isGitClean({ cwd: localDir })).to.be.ok;
       expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
 
