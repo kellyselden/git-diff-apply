@@ -1,6 +1,9 @@
 language: node_js
 node_js:
 - '4'
+os:
+- linux
+- osx
 branches:
   only:
   - master
