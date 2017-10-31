@@ -3,7 +3,7 @@
 const path = require('path');
 const expect = require('chai').expect;
 const tmp = require('tmp');
-const fs = require('fs');
+const fs = require('fs-extra');
 const sinon = require('sinon');
 const fixturify = require('fixturify');
 const gitFixtures = require('git-fixtures');
@@ -45,6 +45,7 @@ describe('Integration - index', function() {
     let localFixtures = options.localFixtures;
     let remoteFixtures = options.remoteFixtures;
     let dirty = options.dirty;
+    let noGit = options.noGit;
     let subDir = options.subDir || '';
     let ignoreConflicts = options.ignoreConflicts;
     let ignoredFiles = options.ignoredFiles || [];
@@ -55,12 +56,17 @@ describe('Integration - index', function() {
       fixturesPath: localFixtures,
       tmpPath: localDir,
       dirty,
+      noGit,
       subDir
     });
     buildTmp({
       fixturesPath: remoteFixtures,
       tmpPath: remoteDir
     });
+
+    if (noGit) {
+      fs.removeSync(path.join(localDir, '.git'));
+    }
 
     localDir = path.join(localDir, subDir);
 
@@ -82,6 +88,7 @@ describe('Integration - index', function() {
       promise,
       cwd: localDir,
       commitMessage: 'local',
+      noGit,
       expect
     });
   }
@@ -205,6 +212,21 @@ D  removed-unchanged.txt
       expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('Tags match, nothing to apply');
+      expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
+    });
+  });
+
+  it('does nothing when not a git repo', function() {
+    return merge({
+      localFixtures: 'test/fixtures/local/noconflict',
+      remoteFixtures: 'test/fixtures/remote/noconflict',
+      noGit: true
+    }).then(result => {
+      let stderr = result.stderr;
+
+      expect(process.cwd()).to.equal(localDir);
+
+      expect(stderr).to.contain('Not a git repository');
       expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
     });
   });

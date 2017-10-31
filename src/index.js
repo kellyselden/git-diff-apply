@@ -105,7 +105,15 @@ module.exports = function gitDiffApply(options) {
       throw 'Tags match, nothing to apply';
     }
 
-    if (!isGitClean()) {
+    let isClean;
+
+    try {
+      isClean = isGitClean();
+    } catch (err) {
+      throw 'Not a git repository';
+    }
+
+    if (!isClean) {
       throw 'You must start with a clean working directory';
     }
 
