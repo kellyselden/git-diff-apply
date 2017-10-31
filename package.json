@@ -49,7 +49,7 @@
     "eslint": "^4.3.0",
     "eslint-config-sane": "^0.2.0",
     "eslint-plugin-mocha": "^4.11.0",
-    "git-fixtures": "^0.9.0",
+    "git-fixtures": "^0.10.0",
     "mocha": "^4.0.0",
     "sinon": "^4.0.0"
   }
