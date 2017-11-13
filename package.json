@@ -47,7 +47,7 @@
     "chai": "^4.1.0",
     "cross-env": "^5.0.1",
     "eslint": "^4.3.0",
-    "eslint-config-sane": "^0.2.0",
+    "eslint-config-sane": "^0.3.0",
     "eslint-plugin-mocha": "^4.11.0",
     "git-fixtures": "^0.10.0",
     "mocha": "^4.0.0",
