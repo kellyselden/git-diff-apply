@@ -47,7 +47,6 @@ describe('Integration - index', function() {
     let dirty = options.dirty;
     let noGit = options.noGit;
     let subDir = options.subDir || '';
-    let ignoreConflicts = options.ignoreConflicts;
     let ignoredFiles = options.ignoredFiles || [];
     let startTag = options.startTag || 'v1';
     let endTag = options.endTag || 'v3';
@@ -80,7 +79,6 @@ describe('Integration - index', function() {
       remoteUrl: remoteDir,
       startTag,
       endTag,
-      ignoreConflicts,
       ignoredFiles
     });
 
@@ -139,11 +137,10 @@ describe('Integration - index', function() {
     });
   });
 
-  it('handles ignoreConflicts', function() {
+  it('doesn\'t resolve conflicts by default', function() {
     return merge({
       localFixtures: 'test/fixtures/local/conflict',
-      remoteFixtures: 'test/fixtures/remote/conflict',
-      ignoreConflicts: true
+      remoteFixtures: 'test/fixtures/remote/conflict'
     }).then(result => {
       let status = result.status;
 

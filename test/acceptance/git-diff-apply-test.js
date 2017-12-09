@@ -40,7 +40,8 @@ describe('Acceptance - git-diff-apply', function() {
         '--start-tag',
         'v1',
         '--end-tag',
-        'v3'
+        'v3',
+        '--resolve-conflicts'
       ],
       cwd: localDir,
       commitMessage: 'local',

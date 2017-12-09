@@ -37,7 +37,7 @@ module.exports = function gitDiffApply(options) {
   let remoteUrl = options.remoteUrl;
   let startTag = options.startTag;
   let endTag = options.endTag;
-  let ignoreConflicts = options.ignoreConflicts;
+  let _resolveConflicts = options.resolveConflicts;
   let ignoredFiles = options.ignoredFiles || [];
 
   let tmpDir;
@@ -212,7 +212,7 @@ module.exports = function gitDiffApply(options) {
       throw err;
     }
 
-    if (hasConflicts && !ignoreConflicts) {
+    if (hasConflicts && _resolveConflicts) {
       resolveConflicts();
     }
 
