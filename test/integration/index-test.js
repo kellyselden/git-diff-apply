@@ -422,6 +422,20 @@ D  removed-unchanged.txt
       });
     });
 
+    it('ignores matching tags', function() {
+      return merge({
+        localFixtures: 'test/fixtures/local/reset',
+        remoteFixtures: 'test/fixtures/remote/reset',
+        reset: true,
+        ignoredFiles: ['ignored-changed.txt'],
+        startTag: 'v3'
+      }).then(() => {
+        fixtureCompare({
+          mergeFixtures: 'test/fixtures/merge/reset'
+        });
+      });
+    });
+
     it('reverts files after remove when error', function() {
       let run = utils.run;
       sandbox.stub(utils, 'run').callsFake(function(command) {
