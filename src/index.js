@@ -114,6 +114,14 @@ module.exports = function gitDiffApply(options) {
     }
   }
 
+  function applyDiff() {
+    let patchFile = path.join(tmp.dirSync().name, 'file.patch');
+    utils.run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} > ${patchFile}`);
+    if (fs.readFileSync(patchFile, 'utf8') !== '') {
+      utils.run(`git apply ${patchFile}`);
+    }
+  }
+
   return Promise.resolve().then(() => {
     if (startTag === endTag) {
       throw 'Tags match, nothing to apply';
@@ -195,7 +203,7 @@ module.exports = function gitDiffApply(options) {
 
       isCodeUntracked = true;
       isCodeModified = true;
-      utils.run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} | git apply`);
+      applyDiff();
 
       resetIgnoredFiles();
 
