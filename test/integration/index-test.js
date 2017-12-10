@@ -228,153 +228,157 @@ D  removed-unchanged.txt
     });
   });
 
-  it('deletes temporary branch when error', function() {
-    let copy = utils.copy;
-    sandbox.stub(utils, 'copy').callsFake(function() {
-      if (arguments[1] !== localDir) {
-        return copy.apply(this, arguments);
-      }
+  describe('sub dir', function() {
+    it('scopes to sub dir if run from there', function() {
+      return merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures: 'test/fixtures/remote/noconflict',
+        subDir: 'foo/bar'
+      }).then(result => {
+        let status = result.status;
 
-      expect(isGitClean({ cwd: localDir })).to.be.ok;
-      expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
+        fixtureCompare({
+          mergeFixtures: 'test/fixtures/merge/noconflict'
+        });
 
-      return Promise.reject('test copy failed');
+        expect(status).to.equal(`M  foo/bar/changed.txt
+`);
+      });
     });
 
-    return merge({
-      localFixtures: 'test/fixtures/local/noconflict',
-      remoteFixtures: 'test/fixtures/remote/noconflict'
-    }).then(result => {
-      let stderr = result.stderr;
+    it('handles sub dir with ignored files', function() {
+      return merge({
+        localFixtures: 'test/fixtures/local/ignored',
+        remoteFixtures: 'test/fixtures/remote/ignored',
+        subDir: 'foo/bar',
+        ignoredFiles: ['ignored-changed.txt']
+      }).then(_result => {
+        let status = _result.status;
+        let result = _result.result;
 
-      expect(isGitClean({ cwd: localDir })).to.be.ok;
-      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-      expect(process.cwd()).to.equal(localDir);
+        fixtureCompare({
+          mergeFixtures: 'test/fixtures/merge/ignored'
+        });
 
-      expect(stderr).to.contain('test copy failed');
+        expect(status).to.equal(`M  foo/bar/changed.txt
+`);
+
+        expect(result).to.deep.equal(
+          fixturify.readSync(path.join(cwd, 'test/fixtures/ignored'))
+        );
+      });
     });
   });
 
-  it('reverts temporary files after copy when error', function() {
-    let copy = utils.copy;
-    sandbox.stub(utils, 'copy').callsFake(function() {
-      return copy.apply(this, arguments).then(() => {
+  describe('error recovery', function() {
+    it('deletes temporary branch when error', function() {
+      let copy = utils.copy;
+      sandbox.stub(utils, 'copy').callsFake(function() {
         if (arguments[1] !== localDir) {
-          return;
+          return copy.apply(this, arguments);
         }
 
-        expect(isGitClean({ cwd: localDir })).to.not.be.ok;
+        expect(isGitClean({ cwd: localDir })).to.be.ok;
         expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
 
-        throw 'test copy failed';
+        return Promise.reject('test copy failed');
+      });
+
+      return merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures: 'test/fixtures/remote/noconflict'
+      }).then(result => {
+        let stderr = result.stderr;
+
+        expect(isGitClean({ cwd: localDir })).to.be.ok;
+        expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+        expect(process.cwd()).to.equal(localDir);
+
+        expect(stderr).to.contain('test copy failed');
       });
     });
 
-    return merge({
-      localFixtures: 'test/fixtures/local/noconflict',
-      remoteFixtures: 'test/fixtures/remote/noconflict'
-    }).then(result => {
-      let stderr = result.stderr;
+    it('reverts temporary files after copy when error', function() {
+      let copy = utils.copy;
+      sandbox.stub(utils, 'copy').callsFake(function() {
+        return copy.apply(this, arguments).then(() => {
+          if (arguments[1] !== localDir) {
+            return;
+          }
 
-      expect(isGitClean({ cwd: localDir })).to.be.ok;
-      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-      expect(process.cwd()).to.equal(localDir);
+          expect(isGitClean({ cwd: localDir })).to.not.be.ok;
+          expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
 
-      expect(stderr).to.contain('test copy failed');
-    });
-  });
-
-  it('reverts temporary files after apply when error', function() {
-    let run = utils.run;
-    sandbox.stub(utils, 'run').callsFake(function(command) {
-      let result = run.apply(this, arguments);
-
-      if (command.indexOf('git apply') > -1) {
-        expect(isGitClean({ cwd: localDir })).to.not.be.ok;
-        expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
-
-        throw 'test apply failed';
-      }
-
-      return result;
-    });
-
-    return merge({
-      localFixtures: 'test/fixtures/local/noconflict',
-      remoteFixtures: 'test/fixtures/remote/noconflict'
-    }).then(result => {
-      let stderr = result.stderr;
-
-      expect(isGitClean({ cwd: localDir })).to.be.ok;
-      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-      expect(process.cwd()).to.equal(localDir);
-
-      expect(stderr).to.contain('test apply failed');
-    });
-  });
-
-  it('scopes to sub dir if run from there', function() {
-    return merge({
-      localFixtures: 'test/fixtures/local/noconflict',
-      remoteFixtures: 'test/fixtures/remote/noconflict',
-      subDir: 'foo/bar'
-    }).then(result => {
-      let status = result.status;
-
-      fixtureCompare({
-        mergeFixtures: 'test/fixtures/merge/noconflict'
+          throw 'test copy failed';
+        });
       });
 
-      expect(status).to.equal(`M  foo/bar/changed.txt
-`);
+      return merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures: 'test/fixtures/remote/noconflict'
+      }).then(result => {
+        let stderr = result.stderr;
+
+        expect(isGitClean({ cwd: localDir })).to.be.ok;
+        expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+        expect(process.cwd()).to.equal(localDir);
+
+        expect(stderr).to.contain('test copy failed');
+      });
     });
-  });
 
-  it('handles sub dir with ignored files', function() {
-    return merge({
-      localFixtures: 'test/fixtures/local/ignored',
-      remoteFixtures: 'test/fixtures/remote/ignored',
-      subDir: 'foo/bar',
-      ignoredFiles: ['ignored-changed.txt']
-    }).then(_result => {
-      let status = _result.status;
-      let result = _result.result;
+    it('reverts temporary files after apply when error', function() {
+      let run = utils.run;
+      sandbox.stub(utils, 'run').callsFake(function(command) {
+        let result = run.apply(this, arguments);
 
-      fixtureCompare({
-        mergeFixtures: 'test/fixtures/merge/ignored'
+        if (command.indexOf('git apply') > -1) {
+          expect(isGitClean({ cwd: localDir })).to.not.be.ok;
+          expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
+
+          throw 'test apply failed';
+        }
+
+        return result;
       });
 
-      expect(status).to.equal(`M  foo/bar/changed.txt
-`);
+      return merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures: 'test/fixtures/remote/noconflict'
+      }).then(result => {
+        let stderr = result.stderr;
 
-      expect(result).to.deep.equal(
-        fixturify.readSync(path.join(cwd, 'test/fixtures/ignored'))
-      );
-    });
-  });
+        expect(isGitClean({ cwd: localDir })).to.be.ok;
+        expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+        expect(process.cwd()).to.equal(localDir);
 
-  it('preserves cwd when erroring during the orphan step', function() {
-    let run = utils.run;
-    sandbox.stub(utils, 'run').callsFake(function(command) {
-      if (command.indexOf('git checkout --orphan') > -1) {
-        throw 'test orphan failed';
-      }
-
-      return run.apply(this, arguments);
+        expect(stderr).to.contain('test apply failed');
+      });
     });
 
-    return merge({
-      localFixtures: 'test/fixtures/local/noconflict',
-      remoteFixtures: 'test/fixtures/remote/noconflict',
-      subDir: 'foo/bar'
-    }).then(result => {
-      let stderr = result.stderr;
+    it('preserves cwd when erroring during the orphan step', function() {
+      let run = utils.run;
+      sandbox.stub(utils, 'run').callsFake(function(command) {
+        if (command.indexOf('git checkout --orphan') > -1) {
+          throw 'test orphan failed';
+        }
 
-      expect(isGitClean({ cwd: localDir })).to.be.ok;
-      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-      expect(process.cwd()).to.equal(localDir);
+        return run.apply(this, arguments);
+      });
 
-      expect(stderr).to.contain('test orphan failed');
+      return merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures: 'test/fixtures/remote/noconflict',
+        subDir: 'foo/bar'
+      }).then(result => {
+        let stderr = result.stderr;
+
+        expect(isGitClean({ cwd: localDir })).to.be.ok;
+        expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+        expect(process.cwd()).to.equal(localDir);
+
+        expect(stderr).to.contain('test orphan failed');
+      });
     });
   });
 });
