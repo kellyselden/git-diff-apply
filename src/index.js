@@ -123,7 +123,7 @@ module.exports = function gitDiffApply(options) {
   }
 
   return Promise.resolve().then(() => {
-    if (startTag === endTag) {
+    if (startTag === endTag && !reset) {
       throw 'Tags match, nothing to apply';
     }
 
