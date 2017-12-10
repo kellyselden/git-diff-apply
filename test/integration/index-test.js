@@ -230,6 +230,24 @@ D  removed-unchanged.txt
     });
   });
 
+  it('does not error when no changes between tags', function() {
+    return merge({
+      localFixtures: 'test/fixtures/local/no-change-between-tags',
+      remoteFixtures: 'test/fixtures/remote/no-change-between-tags'
+    }).then(result => {
+      let stderr = result.stderr;
+
+      expect(isGitClean({ cwd: localDir })).to.be.ok;
+      expect(process.cwd()).to.equal(localDir);
+
+      fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/no-change-between-tags'
+      });
+
+      expect(stderr).to.be.undefined;
+    });
+  });
+
   describe('sub dir', function() {
     it('scopes to sub dir if run from there', function() {
       return merge({
