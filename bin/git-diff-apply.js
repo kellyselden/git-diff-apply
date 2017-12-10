@@ -19,6 +19,9 @@ const argv = require('yargs')
     },
     'ignored-files': {
       type: 'array'
+    },
+    'reset': {
+      type: 'boolean'
     }
   })
   .argv;
@@ -28,11 +31,13 @@ const startTag = argv['start-tag'];
 const endTag = argv['end-tag'];
 const resolveConflicts = argv['resolve-conflicts'];
 const ignoredFiles = argv['ignored-files'];
+const reset = argv['reset'];
 
 gitDiffApply({
   remoteUrl,
   startTag,
   endTag,
   resolveConflicts,
-  ignoredFiles
+  ignoredFiles,
+  reset
 }).catch(console.error);

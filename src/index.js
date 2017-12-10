@@ -1,5 +1,6 @@
 'use strict';
 
+const os = require('os');
 const path = require('path');
 const tmp = require('tmp');
 const fs = require('fs-extra');
@@ -17,6 +18,8 @@ const convertToObj = require('./convert-to-obj');
 const resolveConflicts = require('./resolve-conflicts');
 
 const tempBranchName = uuidv1();
+
+const isUnix = os.platform() !== 'win32';
 
 function commitAndTag(tag, options) {
   commit(options);
@@ -39,6 +42,7 @@ module.exports = function gitDiffApply(options) {
   let endTag = options.endTag;
   let _resolveConflicts = options.resolveConflicts;
   let ignoredFiles = options.ignoredFiles || [];
+  let reset = options.reset;
 
   let tmpDir;
   let tmpGitDir;
@@ -49,8 +53,8 @@ module.exports = function gitDiffApply(options) {
   let returnObject;
 
   let isTempBranchCheckedOut;
-  let isTempBranchUntracked;
-  let isTempBranchModified;
+  let isCodeUntracked;
+  let isCodeModified;
   let isTempBranchCommitted;
 
   let root;
@@ -100,6 +104,16 @@ module.exports = function gitDiffApply(options) {
     });
   }
 
+  function copy() {
+    return utils.copy(tmpWorkingDir, cwd);
+  }
+
+  function resetIgnoredFiles() {
+    for (let ignoredFile of ignoredFiles) {
+      utils.run(`git checkout -- ${ignoredFile}`);
+    }
+  }
+
   return Promise.resolve().then(() => {
     if (startTag === endTag) {
       throw 'Tags match, nothing to apply';
@@ -131,9 +145,34 @@ module.exports = function gitDiffApply(options) {
       return namespaceRepoWithSubDir(subDir);
     }
   }).then(() => {
+    cwd = process.cwd();
+
+    if (reset) {
+      checkOutTag(tmpDir, endTag);
+
+      isCodeUntracked = true;
+      isCodeModified = true;
+      if (isUnix) {
+        shouldResetCwd = true;
+      }
+      utils.run(`git rm -r ${cwd}`);
+
+      if (isUnix) {
+        ensureDir(cwd);
+        chdir(cwd);
+      }
+
+      return copy().then(() => {
+        utils.run('git reset');
+
+        resetIgnoredFiles();
+        isCodeModified = true;
+        isCodeUntracked = true;
+      });
+    }
+
     checkOutTag(tmpDir, startTag);
 
-    cwd = process.cwd();
     chdir(root);
     shouldResetCwd = true;
 
@@ -148,53 +187,51 @@ module.exports = function gitDiffApply(options) {
     chdir(cwd);
     shouldResetCwd = false;
 
-    isTempBranchUntracked = true;
-    return utils.copy(tmpWorkingDir, cwd);
-  }).then(() => {
-    commit();
-    isTempBranchUntracked = false;
-    isTempBranchCommitted = true;
-
-    isTempBranchUntracked = true;
-    isTempBranchModified = true;
-    utils.run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} | git apply`);
-
-    for (let ignoredFile of ignoredFiles) {
-      utils.run(`git checkout -- ${ignoredFile}`);
-    }
-
-    let wereAnyChanged = !isGitClean();
-
-    if (wereAnyChanged) {
+    isCodeUntracked = true;
+    return copy().then(() => {
       commit();
-    }
-    isTempBranchUntracked = false;
-    isTempBranchModified = false;
+      isCodeUntracked = false;
+      isTempBranchCommitted = true;
 
-    let sha;
-    if (wereAnyChanged) {
-      sha = utils.run('git rev-parse HEAD');
-    }
+      isCodeUntracked = true;
+      isCodeModified = true;
+      utils.run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} | git apply`);
 
-    utils.run(`git checkout ${oldBranchName}`);
-    isTempBranchCheckedOut = false;
+      resetIgnoredFiles();
 
-    if (wereAnyChanged) {
-      try {
-        utils.run(`git cherry-pick --no-commit ${sha.trim()}`);
-      } catch (err) {
-        hasConflicts = true;
+      let wereAnyChanged = !isGitClean();
+
+      if (wereAnyChanged) {
+        commit();
       }
-    }
+      isCodeUntracked = false;
+      isCodeModified = false;
+
+      let sha;
+      if (wereAnyChanged) {
+        sha = utils.run('git rev-parse HEAD');
+      }
+
+      utils.run(`git checkout ${oldBranchName}`);
+      isTempBranchCheckedOut = false;
+
+      if (wereAnyChanged) {
+        try {
+          utils.run(`git cherry-pick --no-commit ${sha.trim()}`);
+        } catch (err) {
+          hasConflicts = true;
+        }
+      }
+    });
   }).catch(err => {
     if (shouldResetCwd) {
       chdir(cwd);
     }
 
-    if (isTempBranchUntracked) {
+    if (isCodeUntracked) {
       utils.run('git clean -f');
     }
-    if (isTempBranchModified) {
+    if (isCodeModified) {
       utils.run('git reset --hard');
     }
 

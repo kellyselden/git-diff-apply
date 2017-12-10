@@ -50,6 +50,7 @@ describe('Integration - index', function() {
     let ignoredFiles = options.ignoredFiles || [];
     let startTag = options.startTag || 'v1';
     let endTag = options.endTag || 'v3';
+    let reset = options.reset;
 
     buildTmp({
       fixturesPath: localFixtures,
@@ -79,7 +80,8 @@ describe('Integration - index', function() {
       remoteUrl: remoteDir,
       startTag,
       endTag,
-      ignoredFiles
+      ignoredFiles,
+      reset
     });
 
     return processExit({
@@ -378,6 +380,107 @@ D  removed-unchanged.txt
         expect(process.cwd()).to.equal(localDir);
 
         expect(stderr).to.contain('test orphan failed');
+      });
+    });
+  });
+
+  describe('reset', function() {
+    it('resets files to new version', function() {
+      return merge({
+        localFixtures: 'test/fixtures/local/reset',
+        remoteFixtures: 'test/fixtures/remote/reset',
+        reset: true,
+        ignoredFiles: ['ignored-changed.txt'],
+        subDir: 'foo/bar'
+      }).then(result => {
+        let status = result.status;
+
+        fixtureCompare({
+          mergeFixtures: 'test/fixtures/merge/reset'
+        });
+
+        expect(status).to.equal(` M foo/bar/changed.txt
+`);
+      });
+    });
+
+    it('reverts files after remove when error', function() {
+      let run = utils.run;
+      sandbox.stub(utils, 'run').callsFake(function(command) {
+        if (command.indexOf('git rm -r') > -1) {
+          throw 'test remove failed';
+        }
+
+        return run.apply(this, arguments);
+      });
+
+      return merge({
+        localFixtures: 'test/fixtures/local/reset',
+        remoteFixtures: 'test/fixtures/remote/reset',
+        reset: true
+      }).then(result => {
+        let stderr = result.stderr;
+
+        expect(isGitClean({ cwd: localDir })).to.be.ok;
+        expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+        expect(process.cwd()).to.equal(localDir);
+
+        expect(stderr).to.contain('test remove failed');
+      });
+    });
+
+    it('reverts files after copy when error', function() {
+      let copy = utils.copy;
+      sandbox.stub(utils, 'copy').callsFake(function() {
+        return copy.apply(this, arguments).then(() => {
+          if (arguments[1] !== localDir) {
+            return;
+          }
+
+          expect(isGitClean({ cwd: localDir })).to.not.be.ok;
+          expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+
+          throw 'test copy failed';
+        });
+      });
+
+      return merge({
+        localFixtures: 'test/fixtures/local/reset',
+        remoteFixtures: 'test/fixtures/remote/reset',
+        reset: true
+      }).then(result => {
+        let stderr = result.stderr;
+
+        expect(isGitClean({ cwd: localDir })).to.be.ok;
+        expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+        expect(process.cwd()).to.equal(localDir);
+
+        expect(stderr).to.contain('test copy failed');
+      });
+    });
+
+    it('reverts files after reset when error', function() {
+      let run = utils.run;
+      sandbox.stub(utils, 'run').callsFake(function(command) {
+        if (command === 'git reset') {
+          throw 'test reset failed';
+        }
+
+        return run.apply(this, arguments);
+      });
+
+      return merge({
+        localFixtures: 'test/fixtures/local/reset',
+        remoteFixtures: 'test/fixtures/remote/reset',
+        reset: true
+      }).then(result => {
+        let stderr = result.stderr;
+
+        expect(isGitClean({ cwd: localDir })).to.be.ok;
+        expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+        expect(process.cwd()).to.equal(localDir);
+
+        expect(stderr).to.contain('test reset failed');
       });
     });
   });
