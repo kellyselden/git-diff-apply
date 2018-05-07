@@ -8,6 +8,7 @@ module.exports = function commit(options) {
 
   // it's possible for there to be no changes between tags
   if (!isGitClean(options)) {
-    run('git commit -m "message"', options);
+    // run with --no-verify to skip pre-commit application level hooks
+    run('git commit -m "message" --no-verify', options);
   }
 };
