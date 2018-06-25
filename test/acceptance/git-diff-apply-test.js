@@ -1,12 +1,12 @@
 'use strict';
 
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const tmp = require('tmp');
-const gitFixtures = require('git-fixtures');
+const {
+  processBin,
+  fixtureCompare: _fixtureCompare
+} = require('git-fixtures');
 const buildTmp = require('../helpers/build-tmp');
-
-const processBin = gitFixtures.processBin;
-const _fixtureCompare = gitFixtures.fixtureCompare;
 
 describe('Acceptance - git-diff-apply', function() {
   this.timeout(30000);
@@ -19,10 +19,10 @@ describe('Acceptance - git-diff-apply', function() {
     remoteDir = tmp.dirSync().name;
   });
 
-  function merge(options) {
-    let localFixtures = options.localFixtures;
-    let remoteFixtures = options.remoteFixtures;
-
+  function merge({
+    localFixtures,
+    remoteFixtures
+  }) {
     buildTmp({
       fixturesPath: localFixtures,
       tmpPath: localDir
@@ -49,9 +49,9 @@ describe('Acceptance - git-diff-apply', function() {
     });
   }
 
-  function fixtureCompare(options) {
-    let mergeFixtures = options.mergeFixtures;
-
+  function fixtureCompare({
+    mergeFixtures
+  }) {
     let actual = localDir;
     let expected = mergeFixtures;
 
@@ -66,9 +66,9 @@ describe('Acceptance - git-diff-apply', function() {
     return merge({
       localFixtures: 'test/fixtures/local/conflict',
       remoteFixtures: 'test/fixtures/remote/conflict'
-    }).then(result => {
-      let status = result.status;
-
+    }).then(({
+      status
+    }) => {
       fixtureCompare({
         mergeFixtures: 'test/fixtures/merge/conflict'
       });
@@ -87,9 +87,9 @@ D  removed-unchanged.txt
     return merge({
       localFixtures: 'test/fixtures/local/git',
       remoteFixtures: 'test/fixtures/remote/git'
-    }).then(result => {
-      let status = result.status;
-
+    }).then(({
+      status
+    }) => {
       fixtureCompare({
         mergeFixtures: 'test/fixtures/merge/git'
       });
