@@ -264,5 +264,3 @@ module.exports = function gitDiffApply(options) {
     return returnObject;
   });
 };
-
-module.exports.isGitClean = isGitClean;

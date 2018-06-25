@@ -9,7 +9,7 @@ const fixturify = require('fixturify');
 const gitFixtures = require('git-fixtures');
 const gitDiffApply = require('../../src');
 const utils = require('../../src/utils');
-const isGitClean = gitDiffApply.isGitClean;
+const isGitClean = require('../../src/is-git-clean');
 const getCheckedOutBranchName = require('../../src/get-checked-out-branch-name');
 const buildTmp = require('../helpers/build-tmp');
 
