@@ -1,20 +1,20 @@
 'use strict';
 
 const path = require('path');
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const tmp = require('tmp');
 const fs = require('fs-extra');
 const sinon = require('sinon');
 const fixturify = require('fixturify');
-const gitFixtures = require('git-fixtures');
+const {
+  processExit,
+  fixtureCompare: _fixtureCompare
+} = require('git-fixtures');
 const gitDiffApply = require('../../src');
 const utils = require('../../src/utils');
 const isGitClean = require('../../src/is-git-clean');
 const getCheckedOutBranchName = require('../../src/get-checked-out-branch-name');
 const buildTmp = require('../helpers/build-tmp');
-
-const processExit = gitFixtures.processExit;
-const _fixtureCompare = gitFixtures.fixtureCompare;
 
 describe('Integration - index', function() {
   this.timeout(30000);
@@ -41,17 +41,17 @@ describe('Integration - index', function() {
     sandbox.restore();
   });
 
-  function merge(options) {
-    let localFixtures = options.localFixtures;
-    let remoteFixtures = options.remoteFixtures;
-    let dirty = options.dirty;
-    let noGit = options.noGit;
-    let subDir = options.subDir || '';
-    let ignoredFiles = options.ignoredFiles || [];
-    let startTag = options.startTag || 'v1';
-    let endTag = options.endTag || 'v3';
-    let reset = options.reset;
-
+  function merge({
+    localFixtures,
+    remoteFixtures,
+    dirty,
+    noGit,
+    subDir = '',
+    ignoredFiles = [],
+    startTag = 'v1',
+    endTag = 'v3',
+    reset
+  }) {
     buildTmp({
       fixturesPath: localFixtures,
       tmpPath: localDir,
@@ -93,9 +93,9 @@ describe('Integration - index', function() {
     });
   }
 
-  function fixtureCompare(options) {
-    let mergeFixtures = options.mergeFixtures;
-
+  function fixtureCompare({
+    mergeFixtures
+  }) {
     let actual = localDir;
     let expected = path.join(cwd, mergeFixtures);
 
@@ -110,9 +110,9 @@ describe('Integration - index', function() {
     return merge({
       localFixtures: 'test/fixtures/local/noconflict',
       remoteFixtures: 'test/fixtures/remote/noconflict'
-    }).then(result => {
-      let status = result.status;
-
+    }).then(({
+      status
+    }) => {
       fixtureCompare({
         mergeFixtures: 'test/fixtures/merge/noconflict'
       });
@@ -127,10 +127,10 @@ describe('Integration - index', function() {
       localFixtures: 'test/fixtures/local/conflict',
       remoteFixtures: 'test/fixtures/remote/conflict',
       dirty: true
-    }).then(result => {
-      let status = result.status;
-      let stderr = result.stderr;
-
+    }).then(({
+      status,
+      stderr
+    }) => {
       expect(status).to.equal(`?? a-random-new-file
 `);
 
@@ -143,9 +143,9 @@ describe('Integration - index', function() {
     return merge({
       localFixtures: 'test/fixtures/local/conflict',
       remoteFixtures: 'test/fixtures/remote/conflict'
-    }).then(result => {
-      let status = result.status;
-
+    }).then(({
+      status
+    }) => {
       let actual = fs.readFileSync(path.join(localDir, 'present-changed.txt'), 'utf8');
 
       expect(actual).to.contain('<<<<<<< HEAD');
@@ -166,10 +166,10 @@ D  removed-unchanged.txt
       localFixtures: 'test/fixtures/local/ignored',
       remoteFixtures: 'test/fixtures/remote/ignored',
       ignoredFiles: ['ignored-changed.txt']
-    }).then(_result => {
-      let status = _result.status;
-      let result = _result.result;
-
+    }).then(({
+      status,
+      result
+    }) => {
       fixtureCompare({
         mergeFixtures: 'test/fixtures/merge/ignored'
       });
@@ -204,9 +204,9 @@ D  removed-unchanged.txt
       remoteFixtures: 'test/fixtures/remote/noconflict',
       startTag: 'v3',
       endTag: 'v3'
-    }).then(result => {
-      let stderr = result.stderr;
-
+    }).then(({
+      stderr
+    }) => {
       expect(isGitClean({ cwd: localDir })).to.be.ok;
       expect(process.cwd()).to.equal(localDir);
 
@@ -220,9 +220,9 @@ D  removed-unchanged.txt
       localFixtures: 'test/fixtures/local/noconflict',
       remoteFixtures: 'test/fixtures/remote/noconflict',
       noGit: true
-    }).then(result => {
-      let stderr = result.stderr;
-
+    }).then(({
+      stderr
+    }) => {
       expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('Not a git repository');
@@ -234,9 +234,9 @@ D  removed-unchanged.txt
     return merge({
       localFixtures: 'test/fixtures/local/no-change-between-tags',
       remoteFixtures: 'test/fixtures/remote/no-change-between-tags'
-    }).then(result => {
-      let stderr = result.stderr;
-
+    }).then(({
+      stderr
+    }) => {
       expect(isGitClean({ cwd: localDir })).to.be.ok;
       expect(process.cwd()).to.equal(localDir);
 
@@ -254,9 +254,9 @@ D  removed-unchanged.txt
         localFixtures: 'test/fixtures/local/noconflict',
         remoteFixtures: 'test/fixtures/remote/noconflict',
         subDir: 'foo/bar'
-      }).then(result => {
-        let status = result.status;
-
+      }).then(({
+        status
+      }) => {
         fixtureCompare({
           mergeFixtures: 'test/fixtures/merge/noconflict'
         });
@@ -272,10 +272,10 @@ D  removed-unchanged.txt
         remoteFixtures: 'test/fixtures/remote/ignored',
         subDir: 'foo/bar',
         ignoredFiles: ['ignored-changed.txt']
-      }).then(_result => {
-        let status = _result.status;
-        let result = _result.result;
-
+      }).then(({
+        status,
+        result
+      }) => {
         fixtureCompare({
           mergeFixtures: 'test/fixtures/merge/ignored'
         });
@@ -292,7 +292,7 @@ D  removed-unchanged.txt
 
   describe('error recovery', function() {
     it('deletes temporary branch when error', function() {
-      let copy = utils.copy;
+      let { copy } = utils;
       sandbox.stub(utils, 'copy').callsFake(function() {
         if (arguments[1] !== localDir) {
           return copy.apply(this, arguments);
@@ -307,9 +307,9 @@ D  removed-unchanged.txt
       return merge({
         localFixtures: 'test/fixtures/local/noconflict',
         remoteFixtures: 'test/fixtures/remote/noconflict'
-      }).then(result => {
-        let stderr = result.stderr;
-
+      }).then(({
+        stderr
+      }) => {
         expect(isGitClean({ cwd: localDir })).to.be.ok;
         expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
         expect(process.cwd()).to.equal(localDir);
@@ -319,7 +319,7 @@ D  removed-unchanged.txt
     });
 
     it('reverts temporary files after copy when error', function() {
-      let copy = utils.copy;
+      let { copy } = utils;
       sandbox.stub(utils, 'copy').callsFake(function() {
         return copy.apply(this, arguments).then(() => {
           if (arguments[1] !== localDir) {
@@ -336,9 +336,9 @@ D  removed-unchanged.txt
       return merge({
         localFixtures: 'test/fixtures/local/noconflict',
         remoteFixtures: 'test/fixtures/remote/noconflict'
-      }).then(result => {
-        let stderr = result.stderr;
-
+      }).then(({
+        stderr
+      }) => {
         expect(isGitClean({ cwd: localDir })).to.be.ok;
         expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
         expect(process.cwd()).to.equal(localDir);
@@ -348,7 +348,7 @@ D  removed-unchanged.txt
     });
 
     it('reverts temporary files after apply when error', function() {
-      let run = utils.run;
+      let { run } = utils;
       sandbox.stub(utils, 'run').callsFake(function(command) {
         let result = run.apply(this, arguments);
 
@@ -365,9 +365,9 @@ D  removed-unchanged.txt
       return merge({
         localFixtures: 'test/fixtures/local/noconflict',
         remoteFixtures: 'test/fixtures/remote/noconflict'
-      }).then(result => {
-        let stderr = result.stderr;
-
+      }).then(({
+        stderr
+      }) => {
         expect(isGitClean({ cwd: localDir })).to.be.ok;
         expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
         expect(process.cwd()).to.equal(localDir);
@@ -377,7 +377,7 @@ D  removed-unchanged.txt
     });
 
     it('preserves cwd when erroring during the orphan step', function() {
-      let run = utils.run;
+      let { run } = utils;
       sandbox.stub(utils, 'run').callsFake(function(command) {
         if (command.indexOf('git checkout --orphan') > -1) {
           throw 'test orphan failed';
@@ -390,9 +390,9 @@ D  removed-unchanged.txt
         localFixtures: 'test/fixtures/local/noconflict',
         remoteFixtures: 'test/fixtures/remote/noconflict',
         subDir: 'foo/bar'
-      }).then(result => {
-        let stderr = result.stderr;
-
+      }).then(({
+        stderr
+      }) => {
         expect(isGitClean({ cwd: localDir })).to.be.ok;
         expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
         expect(process.cwd()).to.equal(localDir);
@@ -410,9 +410,9 @@ D  removed-unchanged.txt
         reset: true,
         ignoredFiles: ['ignored-changed.txt'],
         subDir: 'foo/bar'
-      }).then(result => {
-        let status = result.status;
-
+      }).then(({
+        status
+      }) => {
         fixtureCompare({
           mergeFixtures: 'test/fixtures/merge/reset'
         });
@@ -437,7 +437,7 @@ D  removed-unchanged.txt
     });
 
     it('reverts files after remove when error', function() {
-      let run = utils.run;
+      let { run } = utils;
       sandbox.stub(utils, 'run').callsFake(function(command) {
         if (command.indexOf('git rm -r') > -1) {
           throw 'test remove failed';
@@ -450,9 +450,9 @@ D  removed-unchanged.txt
         localFixtures: 'test/fixtures/local/reset',
         remoteFixtures: 'test/fixtures/remote/reset',
         reset: true
-      }).then(result => {
-        let stderr = result.stderr;
-
+      }).then(({
+        stderr
+      }) => {
         expect(isGitClean({ cwd: localDir })).to.be.ok;
         expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
         expect(process.cwd()).to.equal(localDir);
@@ -462,7 +462,7 @@ D  removed-unchanged.txt
     });
 
     it('reverts files after copy when error', function() {
-      let copy = utils.copy;
+      let { copy } = utils;
       sandbox.stub(utils, 'copy').callsFake(function() {
         return copy.apply(this, arguments).then(() => {
           if (arguments[1] !== localDir) {
@@ -480,9 +480,9 @@ D  removed-unchanged.txt
         localFixtures: 'test/fixtures/local/reset',
         remoteFixtures: 'test/fixtures/remote/reset',
         reset: true
-      }).then(result => {
-        let stderr = result.stderr;
-
+      }).then(({
+        stderr
+      }) => {
         expect(isGitClean({ cwd: localDir })).to.be.ok;
         expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
         expect(process.cwd()).to.equal(localDir);
@@ -492,7 +492,7 @@ D  removed-unchanged.txt
     });
 
     it('reverts files after reset when error', function() {
-      let run = utils.run;
+      let { run } = utils;
       sandbox.stub(utils, 'run').callsFake(function(command) {
         if (command === 'git reset') {
           throw 'test reset failed';
@@ -505,9 +505,9 @@ D  removed-unchanged.txt
         localFixtures: 'test/fixtures/local/reset',
         remoteFixtures: 'test/fixtures/remote/reset',
         reset: true
-      }).then(result => {
-        let stderr = result.stderr;
-
+      }).then(({
+        stderr
+      }) => {
         expect(isGitClean({ cwd: localDir })).to.be.ok;
         expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
         expect(process.cwd()).to.equal(localDir);

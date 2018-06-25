@@ -36,14 +36,14 @@ function chdir(dir) {
   process.chdir(dir);
 }
 
-module.exports = function gitDiffApply(options) {
-  let remoteUrl = options.remoteUrl;
-  let startTag = options.startTag;
-  let endTag = options.endTag;
-  let _resolveConflicts = options.resolveConflicts;
-  let ignoredFiles = options.ignoredFiles || [];
-  let reset = options.reset;
-
+module.exports = function gitDiffApply({
+  remoteUrl,
+  startTag,
+  endTag,
+  resolveConflicts: _resolveConflicts,
+  ignoredFiles = [],
+  reset
+}) {
   let tmpDir;
   let tmpGitDir;
   let tmpWorkingDir;

@@ -1,6 +1,6 @@
 'use strict';
 
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const copyRegex = require('../../src/copy-regex');
 
 describe('Unit - copy-regex', function() {
