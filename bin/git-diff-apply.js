@@ -3,7 +3,7 @@
 
 const gitDiffApply = require('../src');
 
-const argv = require('yargs')
+const { argv } = require('yargs')
   .options({
     'remote-url': {
       type: 'string'
@@ -23,8 +23,7 @@ const argv = require('yargs')
     'reset': {
       type: 'boolean'
     }
-  })
-  .argv;
+  });
 
 const remoteUrl = argv['remote-url'];
 const startTag = argv['start-tag'];
