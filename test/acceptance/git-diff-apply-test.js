@@ -9,7 +9,7 @@ const {
 const buildTmp = require('../helpers/build-tmp');
 
 describe('Acceptance - git-diff-apply', function() {
-  this.timeout((process.platform === 'win32' ? 6 : 3) * 10000);
+  this.timeout(30000);
 
   let localDir;
   let remoteDir;
