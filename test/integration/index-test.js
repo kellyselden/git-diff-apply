@@ -12,7 +12,7 @@ const {
 } = require('git-fixtures');
 const gitDiffApply = require('../../src');
 const utils = require('../../src/utils');
-const isGitClean = require('../../src/is-git-clean');
+const isGitClean = gitDiffApply.isGitClean;
 const getCheckedOutBranchName = require('../../src/get-checked-out-branch-name');
 const buildTmp = require('../helpers/build-tmp');
 

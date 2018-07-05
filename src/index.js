@@ -264,3 +264,5 @@ module.exports = function gitDiffApply({
     return returnObject;
   });
 };
+
+module.exports.isGitClean = isGitClean;
