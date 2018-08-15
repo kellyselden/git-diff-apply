@@ -46,7 +46,7 @@ describe('Acceptance - git-diff-apply', function() {
       cwd: localDir,
       commitMessage: 'local',
       expect
-    });
+    }).promise;
   }
 
   function fixtureCompare({
