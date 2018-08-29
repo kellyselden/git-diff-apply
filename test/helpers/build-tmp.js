@@ -2,19 +2,19 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const gitFixtures = require('git-fixtures');
+const {
+  gitInit,
+  commit,
+  postCommit
+} = require('git-fixtures');
 const gitRemoveAll = require('../../src/git-remove-all');
 
-const gitInit = gitFixtures.gitInit;
-const commit = gitFixtures.commit;
-const postCommit = gitFixtures.postCommit;
-
-module.exports = function(options) {
-  let fixturesPath = options.fixturesPath;
-  let tmpPath = options.tmpPath;
-  let dirty = options.dirty;
-  let subDir = options.subDir || '';
-
+module.exports = function({
+  fixturesPath,
+  tmpPath,
+  dirty,
+  subDir = ''
+}) {
   gitInit({
     cwd: tmpPath
   });
