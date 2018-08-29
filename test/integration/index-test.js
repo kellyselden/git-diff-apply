@@ -29,7 +29,7 @@ describe('Integration - index', function() {
   });
 
   beforeEach(function() {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
 
     localDir = tmp.dirSync().name;
     remoteDir = tmp.dirSync().name;
