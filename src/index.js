@@ -16,6 +16,7 @@ const commit = require('./commit');
 const checkOutTag = require('./check-out-tag');
 const convertToObj = require('./convert-to-obj');
 const resolveConflicts = require('./resolve-conflicts');
+const gitRemoveAll = require('./git-remove-all');
 
 const tempBranchName = uuidv1();
 
@@ -94,7 +95,7 @@ module.exports = function gitDiffApply({
     }
 
     return copyToSubDir(startTag).then(() => {
-      utils.run('git rm -r *', { cwd: newTmpDir });
+      gitRemoveAll({ cwd: newTmpDir });
 
       return copyToSubDir(endTag);
     }).then(() => {

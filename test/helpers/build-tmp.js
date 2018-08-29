@@ -3,7 +3,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const gitFixtures = require('git-fixtures');
-const run = require('../../src/run');
+const gitRemoveAll = require('../../src/git-remove-all');
 
 const gitInit = gitFixtures.gitInit;
 const commit = gitFixtures.commit;
@@ -25,7 +25,7 @@ module.exports = function(options) {
 
   for (let i = 0; i < tags.length; i++) {
     if (i !== 0) {
-      run('git rm -r *', {
+      gitRemoveAll({
         cwd: tmpPath
       });
     }
