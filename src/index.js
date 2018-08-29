@@ -16,16 +16,12 @@ const commit = require('./commit');
 const checkOutTag = require('./check-out-tag');
 const convertToObj = require('./convert-to-obj');
 const resolveConflicts = require('./resolve-conflicts');
+const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
 
 const tempBranchName = uuidv1();
 
 const isUnix = os.platform() !== 'win32';
-
-function commitAndTag(tag, options) {
-  commit(options);
-  utils.run(`git tag ${tag}`, options);
-}
 
 function ensureDir(dir) {
   debug('ensureDirSync', dir);
