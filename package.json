@@ -10,7 +10,7 @@
     "test": "cross-env DEBUG=git-diff-apply,git-fixtures mocha test/**/*-test.js",
     "posttest": "npm run lint",
     "prelint": "eslint --version",
-    "lint": "eslint bin src test",
+    "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix"
   },
   "repository": {
