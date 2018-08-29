@@ -18,6 +18,7 @@ const convertToObj = require('./convert-to-obj');
 const resolveConflicts = require('./resolve-conflicts');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
+const createCustomRemote = require('./create-custom-remote');
 
 const tempBranchName = uuidv1();
 
@@ -39,7 +40,10 @@ module.exports = function gitDiffApply({
   endTag,
   resolveConflicts: _resolveConflicts,
   ignoredFiles = [],
-  reset
+  reset,
+  createCustomDiff,
+  startCommand,
+  endCommand
 }) {
   let tmpDir;
   let tmpGitDir;
@@ -136,6 +140,17 @@ module.exports = function gitDiffApply({
       throw 'You must start with a clean working directory';
     }
 
+    if (createCustomDiff) {
+      return createCustomRemote({
+        startCommand,
+        endCommand,
+        startTag,
+        endTag
+      }).then(tmpPath => {
+        remoteUrl = tmpPath;
+      });
+    }
+  }).then(() => {
     tmpDir = tmp.dirSync().name;
     tmpGitDir = path.join(tmpDir, '.git');
     tmpWorkingDir = tmpDir;

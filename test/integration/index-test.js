@@ -50,7 +50,10 @@ describe('Integration - index', function() {
     ignoredFiles = [],
     startTag = 'v1',
     endTag = 'v3',
-    reset
+    reset,
+    createCustomDiff,
+    startCommand,
+    endCommand
   }) {
     buildTmp({
       fixturesPath: localFixtures,
@@ -81,7 +84,10 @@ describe('Integration - index', function() {
       startTag,
       endTag,
       ignoredFiles,
-      reset
+      reset,
+      createCustomDiff,
+      startCommand,
+      endCommand
     });
 
     return processExit({
@@ -514,6 +520,32 @@ D  removed-unchanged.txt
 
         expect(stderr).to.contain('test reset failed');
       });
+    });
+  });
+
+  it('can create a custom diff', function() {
+    let ncp = path.resolve(path.dirname(require.resolve('ncp')), '../bin/ncp');
+    let remoteFixtures = 'test/fixtures/remote/noconflict';
+    let startTag = 'v1';
+    let endTag = 'v3';
+
+    return merge({
+      localFixtures: 'test/fixtures/local/noconflict',
+      remoteFixtures,
+      createCustomDiff: true,
+      startCommand: `node ${ncp} ${path.resolve(remoteFixtures, startTag)} .`,
+      endCommand: `node ${ncp} ${path.resolve(remoteFixtures, endTag)} .`,
+      startTag,
+      endTag
+    }).then(({
+      status
+    }) => {
+      fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/noconflict'
+      });
+
+      expect(status).to.equal(`M  changed.txt
+`);
     });
   });
 });
