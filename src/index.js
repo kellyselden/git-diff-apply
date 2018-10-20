@@ -5,6 +5,8 @@ const path = require('path');
 const tmp = require('tmp');
 const fs = require('fs-extra');
 const uuidv1 = require('uuid/v1');
+const denodeify = require('denodeify');
+const ncp = denodeify(require('ncp'));
 const debug = require('debug')('git-diff-apply');
 const utils = require('./utils');
 const getRootDir = require('./get-root-dir');
@@ -56,10 +58,12 @@ module.exports = function gitDiffApply({
   let isTempBranchCheckedOut;
   let isCodeUntracked;
   let isCodeModified;
+  let shouldReturnGitIgnoredFiles;
   let isTempBranchCommitted;
 
   let root;
   let cwd;
+  let gitIgnoredFiles;
   let shouldResetCwd;
 
   function buildReturnObject() {
@@ -207,8 +211,13 @@ module.exports = function gitDiffApply({
     chdir(cwd);
     shouldResetCwd = false;
 
-    isCodeUntracked = true;
-    return copy().then(() => {
+    gitIgnoredFiles = tmp.dirSync().name;
+    return utils.copy(cwd, gitIgnoredFiles).then(() => {
+      shouldReturnGitIgnoredFiles = true;
+
+      isCodeUntracked = true;
+      return copy();
+    }).then(() => {
       commit();
       isCodeUntracked = false;
       isTempBranchCommitted = true;
@@ -261,19 +270,25 @@ module.exports = function gitDiffApply({
 
     return err;
   }).then(err => {
-    if (isTempBranchCommitted) {
-      utils.run(`git branch -D ${tempBranchName}`);
-    }
+    return Promise.resolve().then(() => {
+      if (isTempBranchCommitted) {
+        utils.run(`git branch -D ${tempBranchName}`);
+      }
 
-    if (err) {
-      throw err;
-    }
+      if (shouldReturnGitIgnoredFiles) {
+        return ncp(gitIgnoredFiles, cwd);
+      }
+    }).then(() => {
+      if (err) {
+        throw err;
+      }
 
-    if (hasConflicts && _resolveConflicts) {
-      resolveConflicts();
-    }
+      if (hasConflicts && _resolveConflicts) {
+        resolveConflicts();
+      }
 
-    return returnObject;
+      return returnObject;
+    });
   });
 };
 
