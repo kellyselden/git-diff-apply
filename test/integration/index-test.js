@@ -16,6 +16,9 @@ const { isGitClean } = gitDiffApply;
 const getCheckedOutBranchName = require('../../src/get-checked-out-branch-name');
 const buildTmp = require('../helpers/build-tmp');
 const co = require('co');
+const denodeify = require('denodeify');
+const tmpDir = denodeify(tmp.dir);
+const ncp = denodeify(require('ncp'));
 
 describe('Integration - index', function() {
   this.timeout(30000);
@@ -100,18 +103,29 @@ describe('Integration - index', function() {
     });
   }
 
-  function fixtureCompare({
-    mergeFixtures
+  let fixtureCompare = co.wrap(function* fixtureCompare({
+    mergeFixtures,
+    beforeCompare
   }) {
+    let expected = yield tmpDir();
+
+    yield ncp(path.join(cwd, mergeFixtures), expected);
+
     let actual = localDir;
-    let expected = path.join(cwd, mergeFixtures);
+
+    if (beforeCompare) {
+      yield beforeCompare({
+        actual,
+        expected
+      });
+    }
 
     _fixtureCompare({
       expect,
       actual,
       expected
     });
-  }
+  });
 
   it('handles no conflicts', co.wrap(function* () {
     let {
@@ -121,7 +135,7 @@ describe('Integration - index', function() {
       remoteFixtures: 'test/fixtures/remote/noconflict'
     });
 
-    fixtureCompare({
+    yield fixtureCompare({
       mergeFixtures: 'test/fixtures/merge/noconflict'
     });
 
@@ -178,7 +192,7 @@ D  removed-unchanged.txt
       ignoredFiles: ['ignored-changed.txt']
     });
 
-    fixtureCompare({
+    yield fixtureCompare({
       mergeFixtures: 'test/fixtures/merge/ignored'
     });
 
@@ -197,7 +211,7 @@ D  removed-unchanged.txt
       ignoredFiles: ['changed.txt']
     });
 
-    fixtureCompare({
+    yield fixtureCompare({
       mergeFixtures: 'test/fixtures/merge/nochange'
     });
 
@@ -248,7 +262,7 @@ D  removed-unchanged.txt
     expect(isGitClean({ cwd: localDir })).to.be.ok;
     expect(process.cwd()).to.equal(localDir);
 
-    fixtureCompare({
+    yield fixtureCompare({
       mergeFixtures: 'test/fixtures/merge/no-change-between-tags'
     });
 
@@ -265,7 +279,7 @@ D  removed-unchanged.txt
         subDir: 'foo/bar'
       });
 
-      fixtureCompare({
+      yield fixtureCompare({
         mergeFixtures: 'test/fixtures/merge/noconflict'
       });
 
@@ -284,7 +298,7 @@ D  removed-unchanged.txt
         ignoredFiles: ['ignored-changed.txt']
       });
 
-      fixtureCompare({
+      yield fixtureCompare({
         mergeFixtures: 'test/fixtures/merge/ignored'
       });
 
@@ -421,7 +435,7 @@ D  removed-unchanged.txt
         subDir: 'foo/bar'
       });
 
-      fixtureCompare({
+      yield fixtureCompare({
         mergeFixtures: 'test/fixtures/merge/reset'
       });
 
@@ -438,7 +452,7 @@ D  removed-unchanged.txt
         startTag: 'v3'
       });
 
-      fixtureCompare({
+      yield fixtureCompare({
         mergeFixtures: 'test/fixtures/merge/reset'
       });
     }));
@@ -542,11 +556,33 @@ D  removed-unchanged.txt
       endTag
     });
 
-    fixtureCompare({
+    yield fixtureCompare({
       mergeFixtures: 'test/fixtures/merge/noconflict'
     });
 
     expect(status).to.equal(`M  changed.txt
 `);
+  }));
+
+  it('preserves locally gitignored', co.wrap(function* () {
+    yield [
+      fs.ensureFile(path.join(localDir, 'local-and-remote')),
+      fs.ensureFile(path.join(localDir, 'local-only'))
+    ];
+
+    yield merge({
+      localFixtures: 'test/fixtures/local/gitignored',
+      remoteFixtures: 'test/fixtures/remote/gitignored'
+    });
+
+    yield fixtureCompare({
+      mergeFixtures: 'test/fixtures/merge/gitignored',
+      beforeCompare({ expected }) {
+        return Promise.all([
+          fs.ensureFile(path.join(expected, 'local-and-remote')),
+          fs.ensureFile(path.join(expected, 'local-only'))
+        ]);
+      }
+    });
   }));
 });
