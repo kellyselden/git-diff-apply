@@ -7,6 +7,7 @@ const {
   fixtureCompare: _fixtureCompare
 } = require('git-fixtures');
 const buildTmp = require('../helpers/build-tmp');
+const co = require('co');
 
 describe('Acceptance - git-diff-apply', function() {
   this.timeout(30000);
@@ -62,40 +63,40 @@ describe('Acceptance - git-diff-apply', function() {
     });
   }
 
-  it('handles conflicts', function() {
-    return merge({
+  it('handles conflicts', co.wrap(function* () {
+    let {
+      status
+    } = yield merge({
       localFixtures: 'test/fixtures/local/conflict',
       remoteFixtures: 'test/fixtures/remote/conflict'
-    }).then(({
-      status
-    }) => {
-      fixtureCompare({
-        mergeFixtures: 'test/fixtures/merge/conflict'
-      });
+    });
 
-      expect(status).to.equal(`A  added-changed.txt
+    fixtureCompare({
+      mergeFixtures: 'test/fixtures/merge/conflict'
+    });
+
+    expect(status).to.equal(`A  added-changed.txt
 A  added-unchanged.txt
 M  present-added-changed.txt
 M  present-changed.txt
 D  removed-changed.txt
 D  removed-unchanged.txt
 `);
-    });
-  });
+  }));
 
-  it('ignores .git folder', function() {
-    return merge({
+  it('ignores .git folder', co.wrap(function* () {
+    let {
+      status
+    } = yield merge({
       localFixtures: 'test/fixtures/local/git',
       remoteFixtures: 'test/fixtures/remote/git'
-    }).then(({
-      status
-    }) => {
-      fixtureCompare({
-        mergeFixtures: 'test/fixtures/merge/git'
-      });
-
-      expect(status).to.equal(`M  .gitignore
-`);
     });
-  });
+
+    fixtureCompare({
+      mergeFixtures: 'test/fixtures/merge/git'
+    });
+
+    expect(status).to.equal(`M  .gitignore
+`);
+  }));
 });
