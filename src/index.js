@@ -212,7 +212,7 @@ module.exports = function gitDiffApply({
     shouldResetCwd = false;
 
     gitIgnoredFiles = tmp.dirSync().name;
-    return utils.copy(cwd, gitIgnoredFiles).then(() => {
+    return ncp(cwd, gitIgnoredFiles).then(() => {
       shouldReturnGitIgnoredFiles = true;
 
       isCodeUntracked = true;
