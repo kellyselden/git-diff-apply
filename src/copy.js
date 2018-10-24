@@ -1,7 +1,6 @@
 'use strict';
 
-const denodeify = require('denodeify');
-const ncp = denodeify(require('ncp'));
+const fs = require('fs-extra');
 const copyRegex = require('./copy-regex');
 const debug = require('debug')('git-diff-apply');
 
@@ -11,7 +10,9 @@ module.exports = function copy(from, to) {
   }
 
   debug(`copy ${from} ${to}`);
-  return ncp(from, to, {
-    filter: copyRegex
+  return fs.copy(from, to, {
+    filter(src) {
+      return copyRegex.test(src);
+    }
   });
 };

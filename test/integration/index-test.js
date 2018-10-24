@@ -18,7 +18,6 @@ const buildTmp = require('../helpers/build-tmp');
 const co = require('co');
 const denodeify = require('denodeify');
 const tmpDir = denodeify(tmp.dir);
-const ncp = denodeify(require('ncp'));
 
 describe('Integration - index', function() {
   this.timeout(30000);
@@ -109,7 +108,7 @@ describe('Integration - index', function() {
   }) {
     let expected = yield tmpDir();
 
-    yield ncp(path.join(cwd, mergeFixtures), expected);
+    yield fs.copy(path.join(cwd, mergeFixtures), expected);
 
     let actual = localDir;
 
