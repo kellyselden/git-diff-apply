@@ -5,8 +5,6 @@ const path = require('path');
 const tmp = require('tmp');
 const fs = require('fs-extra');
 const uuidv1 = require('uuid/v1');
-const denodeify = require('denodeify');
-const ncp = denodeify(require('ncp'));
 const debug = require('debug')('git-diff-apply');
 const utils = require('./utils');
 const getRootDir = require('./get-root-dir');
@@ -21,6 +19,7 @@ const resolveConflicts = require('./resolve-conflicts');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
 const createCustomRemote = require('./create-custom-remote');
+const moveAll = require('./move-all');
 
 const tempBranchName = uuidv1();
 
@@ -212,7 +211,7 @@ module.exports = function gitDiffApply({
     shouldResetCwd = false;
 
     gitIgnoredFiles = tmp.dirSync().name;
-    return utils.copy(cwd, gitIgnoredFiles).then(() => {
+    return moveAll(cwd, gitIgnoredFiles).then(() => {
       shouldReturnGitIgnoredFiles = true;
 
       isCodeUntracked = true;
@@ -276,7 +275,7 @@ module.exports = function gitDiffApply({
       }
 
       if (shouldReturnGitIgnoredFiles) {
-        return ncp(gitIgnoredFiles, cwd);
+        return moveAll(gitIgnoredFiles, cwd);
       }
     }).then(() => {
       if (err) {
