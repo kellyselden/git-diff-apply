@@ -120,7 +120,7 @@ module.exports = function gitDiffApply({
 
   function applyDiff() {
     let patchFile = path.join(tmp.dirSync().name, 'file.patch');
-    utils.run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} > ${patchFile}`);
+    utils.run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} --binary > ${patchFile}`);
     if (fs.readFileSync(patchFile, 'utf8') !== '') {
       utils.run(`git apply ${patchFile}`);
     }
