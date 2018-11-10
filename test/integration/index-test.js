@@ -584,4 +584,20 @@ D  removed-unchanged.txt
       }
     });
   }));
+
+  it('handles binary files', co.wrap(function* () {
+    let {
+      status
+    } = yield merge({
+      localFixtures: 'test/fixtures/local/binary',
+      remoteFixtures: 'test/fixtures/remote/binary'
+    });
+
+    yield fixtureCompare({
+      mergeFixtures: 'test/fixtures/merge/binary'
+    });
+
+    expect(status).to.equal(`M  changed.png
+`);
+  }));
 });
