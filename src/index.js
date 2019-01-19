@@ -4,6 +4,7 @@ const os = require('os');
 const path = require('path');
 const tmp = require('tmp');
 const fs = require('fs-extra');
+const co = require('co');
 const uuidv1 = require('uuid/v1');
 const debug = require('debug')('git-diff-apply');
 const utils = require('./utils');
@@ -35,7 +36,7 @@ function chdir(dir) {
   process.chdir(dir);
 }
 
-module.exports = function gitDiffApply({
+module.exports = co.wrap(function* gitDiffApply({
   remoteUrl,
   startTag,
   endTag,
@@ -60,10 +61,11 @@ module.exports = function gitDiffApply({
   let shouldReturnGitIgnoredFiles;
   let isTempBranchCommitted;
 
-  let root;
   let cwd;
   let gitIgnoredFiles;
   let shouldResetCwd;
+
+  let err;
 
   function buildReturnObject() {
     checkOutTag(tmpDir, startTag);
@@ -80,33 +82,33 @@ module.exports = function gitDiffApply({
     };
   }
 
-  function namespaceRepoWithSubDir(subDir) {
+  let namespaceRepoWithSubDir = co.wrap(function* namespaceRepoWithSubDir(subDir) {
     let newTmpDir = tmp.dirSync().name;
 
     gitInit({ cwd: newTmpDir });
 
     let newTmpSubDir = path.join(newTmpDir, subDir);
 
-    function copyToSubDir(tag) {
+    let copyToSubDir = co.wrap(function* copyToSubDir(tag) {
       ensureDir(newTmpSubDir);
 
       checkOutTag(tmpDir, tag);
 
-      return utils.copy(tmpDir, newTmpSubDir).then(() => {
-        commitAndTag(tag, { cwd: newTmpDir });
-      });
-    }
+      yield utils.copy(tmpDir, newTmpSubDir);
 
-    return copyToSubDir(startTag).then(() => {
-      gitRemoveAll({ cwd: newTmpDir });
-
-      return copyToSubDir(endTag);
-    }).then(() => {
-      tmpDir = newTmpDir;
-      tmpGitDir = path.join(tmpDir, '.git');
-      tmpWorkingDir = newTmpSubDir;
+      commitAndTag(tag, { cwd: newTmpDir });
     });
-  }
+
+    yield copyToSubDir(startTag);
+
+    gitRemoveAll({ cwd: newTmpDir });
+
+    yield copyToSubDir(endTag);
+
+    tmpDir = newTmpDir;
+    tmpGitDir = path.join(tmpDir, '.git');
+    tmpWorkingDir = newTmpSubDir;
+  });
 
   function copy() {
     return utils.copy(tmpWorkingDir, cwd);
@@ -126,7 +128,7 @@ module.exports = function gitDiffApply({
     }
   }
 
-  return Promise.resolve().then(() => {
+  try {
     if (startTag === endTag && !reset) {
       throw 'Tags match, nothing to apply';
     }
@@ -144,16 +146,16 @@ module.exports = function gitDiffApply({
     }
 
     if (createCustomDiff) {
-      return createCustomRemote({
+      let tmpPath = yield createCustomRemote({
         startCommand,
         endCommand,
         startTag,
         endTag
-      }).then(tmpPath => {
-        remoteUrl = tmpPath;
       });
+
+      remoteUrl = tmpPath;
     }
-  }).then(() => {
+
     tmpDir = tmp.dirSync().name;
     tmpGitDir = path.join(tmpDir, '.git');
     tmpWorkingDir = tmpDir;
@@ -162,12 +164,12 @@ module.exports = function gitDiffApply({
 
     returnObject = buildReturnObject();
 
-    root = getRootDir();
+    let root = getRootDir();
     let subDir = getSubDir(root);
     if (subDir) {
-      return namespaceRepoWithSubDir(subDir);
+      yield namespaceRepoWithSubDir(subDir);
     }
-  }).then(() => {
+
     cwd = process.cwd();
 
     if (reset) {
@@ -185,13 +187,15 @@ module.exports = function gitDiffApply({
         chdir(cwd);
       }
 
-      return copy().then(() => {
-        utils.run('git reset');
+      yield copy();
 
-        resetIgnoredFiles();
-        isCodeModified = true;
-        isCodeUntracked = true;
-      });
+      utils.run('git reset');
+
+      resetIgnoredFiles();
+      isCodeModified = true;
+      isCodeUntracked = true;
+
+      return;
     }
 
     checkOutTag(tmpDir, startTag);
@@ -211,47 +215,47 @@ module.exports = function gitDiffApply({
     shouldResetCwd = false;
 
     gitIgnoredFiles = tmp.dirSync().name;
-    return moveAll(cwd, gitIgnoredFiles).then(() => {
-      shouldReturnGitIgnoredFiles = true;
+    yield moveAll(cwd, gitIgnoredFiles);
 
-      isCodeUntracked = true;
-      return copy();
-    }).then(() => {
+    shouldReturnGitIgnoredFiles = true;
+
+    isCodeUntracked = true;
+    yield copy();
+
+    commit();
+    isCodeUntracked = false;
+    isTempBranchCommitted = true;
+
+    isCodeUntracked = true;
+    isCodeModified = true;
+    applyDiff();
+
+    resetIgnoredFiles();
+
+    let wereAnyChanged = !isGitClean();
+
+    if (wereAnyChanged) {
       commit();
-      isCodeUntracked = false;
-      isTempBranchCommitted = true;
+    }
+    isCodeUntracked = false;
+    isCodeModified = false;
 
-      isCodeUntracked = true;
-      isCodeModified = true;
-      applyDiff();
+    let sha;
+    if (wereAnyChanged) {
+      sha = utils.run('git rev-parse HEAD');
+    }
 
-      resetIgnoredFiles();
+    utils.run(`git checkout ${oldBranchName}`);
+    isTempBranchCheckedOut = false;
 
-      let wereAnyChanged = !isGitClean();
-
-      if (wereAnyChanged) {
-        commit();
+    if (wereAnyChanged) {
+      try {
+        utils.run(`git cherry-pick --no-commit ${sha.trim()}`);
+      } catch (err) {
+        hasConflicts = true;
       }
-      isCodeUntracked = false;
-      isCodeModified = false;
-
-      let sha;
-      if (wereAnyChanged) {
-        sha = utils.run('git rev-parse HEAD');
-      }
-
-      utils.run(`git checkout ${oldBranchName}`);
-      isTempBranchCheckedOut = false;
-
-      if (wereAnyChanged) {
-        try {
-          utils.run(`git cherry-pick --no-commit ${sha.trim()}`);
-        } catch (err) {
-          hasConflicts = true;
-        }
-      }
-    });
-  }).catch(err => {
+    }
+  } catch (_err) {
     if (shouldResetCwd) {
       chdir(cwd);
     }
@@ -267,28 +271,26 @@ module.exports = function gitDiffApply({
       utils.run(`git checkout ${oldBranchName}`);
     }
 
-    return err;
-  }).then(err => {
-    return Promise.resolve().then(() => {
-      if (isTempBranchCommitted) {
-        utils.run(`git branch -D ${tempBranchName}`);
-      }
+    err = _err;
+  }
 
-      if (shouldReturnGitIgnoredFiles) {
-        return moveAll(gitIgnoredFiles, cwd);
-      }
-    }).then(() => {
-      if (err) {
-        throw err;
-      }
+  if (isTempBranchCommitted) {
+    utils.run(`git branch -D ${tempBranchName}`);
+  }
 
-      if (hasConflicts && _resolveConflicts) {
-        resolveConflicts();
-      }
+  if (shouldReturnGitIgnoredFiles) {
+    yield moveAll(gitIgnoredFiles, cwd);
+  }
 
-      return returnObject;
-    });
-  });
-};
+  if (err) {
+    throw err;
+  }
+
+  if (hasConflicts && _resolveConflicts) {
+    resolveConflicts();
+  }
+
+  return returnObject;
+});
 
 module.exports.isGitClean = isGitClean;
