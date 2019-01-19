@@ -27,8 +27,8 @@ const tempBranchName = uuidv1();
 const isUnix = os.platform() !== 'win32';
 
 function ensureDir(dir) {
-  debug('ensureDirSync', dir);
-  fs.ensureDirSync(dir);
+  debug('ensureDir', dir);
+  return fs.ensureDir(dir);
 }
 
 function chdir(dir) {
@@ -91,7 +91,7 @@ module.exports = co.wrap(function* gitDiffApply({
     let newTmpSubDir = path.join(newTmpDir, subDir);
 
     let copyToSubDir = co.wrap(function* copyToSubDir(tag) {
-      ensureDir(newTmpSubDir);
+      yield ensureDir(newTmpSubDir);
 
       checkOutTag(tmpDir, tag);
 
@@ -141,7 +141,7 @@ module.exports = co.wrap(function* gitDiffApply({
       utils.run(`git rm -r ${cwd}`);
 
       if (isUnix) {
-        ensureDir(cwd);
+        yield ensureDir(cwd);
         chdir(cwd);
       }
 
@@ -167,7 +167,7 @@ module.exports = co.wrap(function* gitDiffApply({
 
     utils.run('git reset --hard');
 
-    ensureDir(cwd);
+    yield ensureDir(cwd);
 
     chdir(cwd);
     shouldResetCwd = false;
