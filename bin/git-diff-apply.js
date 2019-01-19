@@ -34,24 +34,4 @@ const { argv } = require('yargs')
     }
   });
 
-const remoteUrl = argv['remote-url'];
-const startTag = argv['start-tag'];
-const endTag = argv['end-tag'];
-const resolveConflicts = argv['resolve-conflicts'];
-const ignoredFiles = argv['ignored-files'];
-const reset = argv['reset'];
-const createCustomDiff = argv['create-custom-diff'];
-const startCommand = argv['start-command'];
-const endCommand = argv['end-command'];
-
-gitDiffApply({
-  remoteUrl,
-  startTag,
-  endTag,
-  resolveConflicts,
-  ignoredFiles,
-  reset,
-  createCustomDiff,
-  startCommand,
-  endCommand
-}).catch(console.error);
+gitDiffApply(argv).catch(console.error);
