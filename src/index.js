@@ -61,6 +61,7 @@ module.exports = co.wrap(function* gitDiffApply({
   let shouldReturnGitIgnoredFiles;
   let isTempBranchCommitted;
 
+  let root;
   let cwd;
   let gitIgnoredFiles;
   let shouldResetCwd;
@@ -128,50 +129,7 @@ module.exports = co.wrap(function* gitDiffApply({
     }
   }
 
-  try {
-    if (startTag === endTag && !reset) {
-      throw 'Tags match, nothing to apply';
-    }
-
-    let isClean;
-
-    try {
-      isClean = isGitClean();
-    } catch (err) {
-      throw 'Not a git repository';
-    }
-
-    if (!isClean) {
-      throw 'You must start with a clean working directory';
-    }
-
-    if (createCustomDiff) {
-      let tmpPath = yield createCustomRemote({
-        startCommand,
-        endCommand,
-        startTag,
-        endTag
-      });
-
-      remoteUrl = tmpPath;
-    }
-
-    tmpDir = tmp.dirSync().name;
-    tmpGitDir = path.join(tmpDir, '.git');
-    tmpWorkingDir = tmpDir;
-
-    utils.run(`git clone --mirror ${remoteUrl} ${tmpGitDir}`);
-
-    returnObject = buildReturnObject();
-
-    let root = getRootDir();
-    let subDir = getSubDir(root);
-    if (subDir) {
-      yield namespaceRepoWithSubDir(subDir);
-    }
-
-    cwd = process.cwd();
-
+  let go = co.wrap(function* go() {
     if (reset) {
       checkOutTag(tmpDir, endTag);
 
@@ -255,6 +213,53 @@ module.exports = co.wrap(function* gitDiffApply({
         hasConflicts = true;
       }
     }
+  });
+
+  try {
+    if (startTag === endTag && !reset) {
+      throw 'Tags match, nothing to apply';
+    }
+
+    let isClean;
+
+    try {
+      isClean = isGitClean();
+    } catch (err) {
+      throw 'Not a git repository';
+    }
+
+    if (!isClean) {
+      throw 'You must start with a clean working directory';
+    }
+
+    if (createCustomDiff) {
+      let tmpPath = yield createCustomRemote({
+        startCommand,
+        endCommand,
+        startTag,
+        endTag
+      });
+
+      remoteUrl = tmpPath;
+    }
+
+    tmpDir = tmp.dirSync().name;
+    tmpGitDir = path.join(tmpDir, '.git');
+    tmpWorkingDir = tmpDir;
+
+    utils.run(`git clone --mirror ${remoteUrl} ${tmpGitDir}`);
+
+    returnObject = buildReturnObject();
+
+    root = getRootDir();
+    let subDir = getSubDir(root);
+    if (subDir) {
+      yield namespaceRepoWithSubDir(subDir);
+    }
+
+    cwd = process.cwd();
+
+    yield go();
   } catch (_err) {
     if (shouldResetCwd) {
       chdir(cwd);
