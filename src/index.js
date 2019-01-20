@@ -161,19 +161,13 @@ module.exports = co.wrap(function* gitDiffApply({
 
     checkOutTag(tmpDir, startTag);
 
-    chdir(root);
-    shouldResetCwd = true;
-
     oldBranchName = getCheckedOutBranchName();
     utils.run(`git checkout --orphan ${tempBranchName}`);
     isTempBranchCheckedOut = true;
 
-    utils.run('git reset --hard');
+    yield safeGitRemoveAll();
 
     yield ensureDir(cwd);
-
-    chdir(cwd);
-    shouldResetCwd = false;
 
     gitIgnoredFiles = tmp.dirSync().name;
     yield moveAll(cwd, gitIgnoredFiles);
