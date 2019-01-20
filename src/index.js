@@ -151,8 +151,6 @@ module.exports = co.wrap(function* gitDiffApply({
       utils.run('git reset');
 
       resetIgnoredFiles();
-      isCodeModified = true;
-      isCodeUntracked = true;
 
       return;
     }
