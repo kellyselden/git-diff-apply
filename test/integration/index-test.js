@@ -8,7 +8,8 @@ const sinon = require('sinon');
 const fixturify = require('fixturify');
 const {
   processExit,
-  fixtureCompare: _fixtureCompare
+  fixtureCompare: _fixtureCompare,
+  commit
 } = require('git-fixtures');
 const gitDiffApply = require('../../src');
 const utils = require('../../src/utils');
@@ -45,7 +46,7 @@ describe('Integration - index', function() {
     sandbox.restore();
   });
 
-  function merge({
+  let merge = co.wrap(function* merge({
     localFixtures,
     remoteFixtures,
     dirty,
@@ -57,7 +58,8 @@ describe('Integration - index', function() {
     reset,
     createCustomDiff,
     startCommand,
-    endCommand
+    endCommand,
+    beforeMerge = () => Promise.resolve()
   }) {
     buildTmp({
       fixturesPath: localFixtures,
@@ -78,6 +80,8 @@ describe('Integration - index', function() {
     rootDir = localDir;
     localDir = path.join(localDir, subDir);
 
+    yield beforeMerge();
+
     process.chdir(localDir);
 
     // this prefixes /private in OSX...
@@ -95,14 +99,14 @@ describe('Integration - index', function() {
       endCommand
     });
 
-    return processExit({
+    return yield processExit({
       promise,
       cwd: localDir,
       commitMessage: 'local',
       noGit,
       expect
     });
-  }
+  });
 
   let fixtureCompare = co.wrap(function* fixtureCompare({
     mergeFixtures,
@@ -314,6 +318,77 @@ D  removed-unchanged.txt
       expect(result).to.deep.equal(
         fixturify.readSync(path.join(cwd, 'test/fixtures/ignored'))
       );
+    }));
+
+    it('preserves locally gitignored', co.wrap(function* () {
+      yield merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures: 'test/fixtures/remote/noconflict',
+        subDir,
+        beforeMerge() {
+          return Promise.all([
+            fs.ensureFile(path.join(rootDir, 'local-and-remote')),
+            fs.ensureFile(path.join(rootDir, 'local-only')),
+            fs.copy(
+              path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
+              path.join(rootDir, '.gitignore')
+            )
+          ]).then(() => {
+            commit({ m: 'local', cwd: rootDir });
+          });
+        }
+      });
+
+      yield fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/noconflict',
+        subDir,
+        beforeCompare({ expected }) {
+          return Promise.all([
+            fs.ensureFile(path.join(expected, 'local-and-remote')),
+            fs.ensureFile(path.join(expected, 'local-only')),
+            fs.copy(
+              path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
+              path.join(expected, '.gitignore')
+            )
+          ]);
+        }
+      });
+    }));
+
+    it('resets files to new version + preserves locally gitignored', co.wrap(function* () {
+      yield merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures: 'test/fixtures/remote/noconflict',
+        reset: true,
+        subDir,
+        beforeMerge() {
+          return Promise.all([
+            fs.ensureFile(path.join(rootDir, 'local-and-remote')),
+            fs.ensureFile(path.join(rootDir, 'local-only')),
+            fs.copy(
+              path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
+              path.join(rootDir, '.gitignore')
+            )
+          ]).then(() => {
+            commit({ m: 'local', cwd: rootDir });
+          });
+        }
+      });
+
+      yield fixtureCompare({
+        mergeFixtures: 'test/fixtures/remote/noconflict/v3',
+        subDir,
+        beforeCompare({ expected }) {
+          return Promise.all([
+            fs.ensureFile(path.join(expected, 'local-and-remote')),
+            fs.ensureFile(path.join(expected, 'local-only')),
+            fs.copy(
+              path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
+              path.join(expected, '.gitignore')
+            )
+          ]);
+        }
+      });
     }));
   });
 
