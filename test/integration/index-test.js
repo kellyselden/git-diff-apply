@@ -564,10 +564,10 @@ D  removed-unchanged.txt
   }));
 
   it('preserves locally gitignored', co.wrap(function* () {
-    yield [
+    yield Promise.all([
       fs.ensureFile(path.join(localDir, 'local-and-remote')),
       fs.ensureFile(path.join(localDir, 'local-only'))
-    ];
+    ]);
 
     yield merge({
       localFixtures: 'test/fixtures/local/gitignored',
