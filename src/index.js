@@ -174,7 +174,6 @@ module.exports = co.wrap(function* gitDiffApply({
 
     gitIgnoredFiles = tmp.dirSync().name;
     yield moveAll(cwd, gitIgnoredFiles);
-
     shouldReturnGitIgnoredFiles = true;
 
     isCodeUntracked = true;
