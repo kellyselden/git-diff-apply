@@ -462,13 +462,8 @@ D  removed-unchanged.txt
     }));
 
     it('reverts files after remove when error', co.wrap(function* () {
-      let { run } = utils;
-      sandbox.stub(utils, 'run').callsFake(function(command) {
-        if (command.indexOf('git rm -r') > -1) {
-          throw 'test remove failed';
-        }
-
-        return run.apply(this, arguments);
+      sandbox.stub(utils, 'gitRemoveAll').callsFake(() => {
+        throw 'test remove failed';
       });
 
       let {

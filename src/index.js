@@ -129,22 +129,26 @@ module.exports = co.wrap(function* gitDiffApply({
     }
   }
 
+  let safeGitRemoveAll = co.wrap(function* safeGitRemoveAll() {
+    if (isUnix) {
+      shouldResetCwd = true;
+    }
+    utils.gitRemoveAll();
+
+    if (isUnix) {
+      yield ensureDir(cwd);
+      chdir(cwd);
+      shouldResetCwd = false;
+    }
+  });
+
   let go = co.wrap(function* go() {
     if (reset) {
       checkOutTag(tmpDir, endTag);
 
       isCodeUntracked = true;
       isCodeModified = true;
-      if (isUnix) {
-        shouldResetCwd = true;
-      }
-      utils.run(`git rm -r ${cwd}`);
-
-      if (isUnix) {
-        yield ensureDir(cwd);
-        chdir(cwd);
-        shouldResetCwd = false;
-      }
+      yield safeGitRemoveAll();
 
       yield copy();
 
