@@ -24,6 +24,7 @@ describe('Integration - index', function() {
 
   let cwd;
   let sandbox;
+  let rootDir;
   let localDir;
   let remoteDir;
 
@@ -74,6 +75,7 @@ describe('Integration - index', function() {
       fs.removeSync(path.join(localDir, '.git'));
     }
 
+    rootDir = localDir;
     localDir = path.join(localDir, subDir);
 
     process.chdir(localDir);
@@ -104,25 +106,26 @@ describe('Integration - index', function() {
 
   let fixtureCompare = co.wrap(function* fixtureCompare({
     mergeFixtures,
-    beforeCompare
+    subDir = '',
+    beforeCompare = () => Promise.resolve()
   }) {
-    let expected = yield tmpDir();
+    let localMergeDir = yield tmpDir();
 
-    yield fs.copy(path.join(cwd, mergeFixtures), expected);
+    let rootMergeDir = localMergeDir;
+    localMergeDir = path.join(rootMergeDir, subDir);
+    yield fs.ensureDir(localMergeDir);
 
-    let actual = localDir;
+    yield fs.copy(path.join(cwd, mergeFixtures), localMergeDir);
 
-    if (beforeCompare) {
-      yield beforeCompare({
-        actual,
-        expected
-      });
-    }
+    yield beforeCompare({
+      actual: rootDir,
+      expected: rootMergeDir
+    });
 
     _fixtureCompare({
       expect,
-      actual,
-      expected
+      actual: rootDir,
+      expected: rootMergeDir
     });
   });
 
@@ -269,17 +272,20 @@ D  removed-unchanged.txt
   }));
 
   describe('sub dir', function() {
+    let subDir = 'foo/bar';
+
     it('scopes to sub dir if run from there', co.wrap(function* () {
       let {
         status
       } = yield merge({
         localFixtures: 'test/fixtures/local/noconflict',
         remoteFixtures: 'test/fixtures/remote/noconflict',
-        subDir: 'foo/bar'
+        subDir
       });
 
       yield fixtureCompare({
-        mergeFixtures: 'test/fixtures/merge/noconflict'
+        mergeFixtures: 'test/fixtures/merge/noconflict',
+        subDir
       });
 
       expect(status).to.equal(`M  foo/bar/changed.txt
@@ -293,12 +299,13 @@ D  removed-unchanged.txt
       } = yield merge({
         localFixtures: 'test/fixtures/local/ignored',
         remoteFixtures: 'test/fixtures/remote/ignored',
-        subDir: 'foo/bar',
+        subDir,
         ignoredFiles: ['ignored-changed.txt']
       });
 
       yield fixtureCompare({
-        mergeFixtures: 'test/fixtures/merge/ignored'
+        mergeFixtures: 'test/fixtures/merge/ignored',
+        subDir
       });
 
       expect(status).to.equal(`M  foo/bar/changed.txt
@@ -410,8 +417,7 @@ D  removed-unchanged.txt
         stderr
       } = yield merge({
         localFixtures: 'test/fixtures/local/noconflict',
-        remoteFixtures: 'test/fixtures/remote/noconflict',
-        subDir: 'foo/bar'
+        remoteFixtures: 'test/fixtures/remote/noconflict'
       });
 
       expect(isGitClean({ cwd: localDir })).to.be.ok;
@@ -430,15 +436,14 @@ D  removed-unchanged.txt
         localFixtures: 'test/fixtures/local/reset',
         remoteFixtures: 'test/fixtures/remote/reset',
         reset: true,
-        ignoredFiles: ['ignored-changed.txt'],
-        subDir: 'foo/bar'
+        ignoredFiles: ['ignored-changed.txt']
       });
 
       yield fixtureCompare({
         mergeFixtures: 'test/fixtures/merge/reset'
       });
 
-      expect(status).to.equal(` M foo/bar/changed.txt
+      expect(status).to.equal(` M changed.txt
 `);
     }));
 
