@@ -259,30 +259,44 @@ module.exports = co.wrap(function* gitDiffApply({
 
     yield go();
   } catch (_err) {
-    if (shouldResetCwd) {
-      chdir(cwd);
-    }
-
-    if (isCodeUntracked) {
-      utils.run('git clean -f');
-    }
-    if (isCodeModified) {
-      utils.run('git reset --hard');
-    }
-
-    if (isTempBranchCheckedOut) {
-      utils.run(`git checkout ${oldBranchName}`);
-    }
-
     err = _err;
+
+    try {
+      if (shouldResetCwd) {
+        chdir(cwd);
+      }
+
+      if (isCodeUntracked) {
+        utils.run('git clean -f');
+      }
+      if (isCodeModified) {
+        utils.run('git reset --hard');
+      }
+
+      if (isTempBranchCheckedOut) {
+        utils.run(`git checkout ${oldBranchName}`);
+      }
+    } catch (err2) {
+      throw {
+        err,
+        err2
+      };
+    }
   }
 
-  if (isTempBranchCommitted) {
-    utils.run(`git branch -D ${tempBranchName}`);
-  }
+  try {
+    if (isTempBranchCommitted) {
+      utils.run(`git branch -D ${tempBranchName}`);
+    }
 
-  if (shouldReturnGitIgnoredFiles) {
-    yield moveAll(gitIgnoredFiles, cwd);
+    if (shouldReturnGitIgnoredFiles) {
+      yield moveAll(gitIgnoredFiles, cwd);
+    }
+  } catch (err2) {
+    err = {
+      err,
+      err2
+    };
   }
 
   if (err) {
