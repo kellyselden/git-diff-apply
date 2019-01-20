@@ -143,6 +143,7 @@ module.exports = co.wrap(function* gitDiffApply({
       if (isUnix) {
         yield ensureDir(cwd);
         chdir(cwd);
+        shouldResetCwd = false;
       }
 
       yield copy();
