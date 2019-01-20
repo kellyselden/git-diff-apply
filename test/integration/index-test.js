@@ -540,6 +540,29 @@ D  removed-unchanged.txt
 
       expect(stderr).to.contain('test reset failed');
     }));
+
+    it('preserves locally gitignored', co.wrap(function* () {
+      yield Promise.all([
+        fs.ensureFile(path.join(localDir, 'local-and-remote')),
+        fs.ensureFile(path.join(localDir, 'local-only'))
+      ]);
+
+      yield merge({
+        localFixtures: 'test/fixtures/local/gitignored',
+        remoteFixtures: 'test/fixtures/remote/gitignored',
+        reset: true
+      });
+
+      yield fixtureCompare({
+        mergeFixtures: 'test/fixtures/remote/gitignored/v3',
+        beforeCompare({ expected }) {
+          return Promise.all([
+            fs.ensureFile(path.join(expected, 'local-and-remote')),
+            fs.ensureFile(path.join(expected, 'local-only'))
+          ]);
+        }
+      });
+    }));
   });
 
   it('can create a custom diff', co.wrap(function* () {
