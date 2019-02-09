@@ -34,4 +34,6 @@ const { argv } = require('yargs')
     }
   });
 
+argv.wasRunAsExecutable = true;
+
 gitDiffApply(argv).catch(console.error);
