@@ -45,7 +45,8 @@ module.exports = co.wrap(function* gitDiffApply({
   reset,
   createCustomDiff,
   startCommand,
-  endCommand
+  endCommand,
+  wasRunAsExecutable
 }) {
   let tmpDir;
   let tmpGitDir;
@@ -302,7 +303,9 @@ module.exports = co.wrap(function* gitDiffApply({
   }
 
   if (hasConflicts && _resolveConflicts) {
-    resolveConflicts();
+    returnObject.resolveConflictsProcess = resolveConflicts({
+      shouldPipe: !wasRunAsExecutable
+    });
   }
 
   return returnObject;
