@@ -20,7 +20,8 @@
       "env": {
         "DEBUG": "git-diff-apply,git-fixtures"
       },
-      "internalConsoleOptions": "openOnSessionStart"
+      "internalConsoleOptions": "openOnSessionStart",
+      "outputCapture": "std"
     }
   ]
 }
