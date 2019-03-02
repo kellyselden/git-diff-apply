@@ -523,6 +523,35 @@ D  removed-unchanged.txt
 `);
     }));
 
+    it('resets using a create diff', co.wrap(function* () {
+      let ncp = path.resolve(path.dirname(require.resolve('ncp')), '../bin/ncp');
+      let remoteFixtures = 'test/fixtures/remote/reset';
+      let startTag = 'v1';
+      let endTag = 'v3';
+
+      let {
+        status
+      } = yield merge({
+        localFixtures: 'test/fixtures/local/reset',
+        remoteFixtures,
+        reset: true,
+        ignoredFiles: ['ignored-changed.txt'],
+        remoteUrl: null,
+        createCustomDiff: true,
+        startCommand: `node ${ncp} ${path.resolve(remoteFixtures, startTag)} .`,
+        endCommand: `node ${ncp} ${path.resolve(remoteFixtures, endTag)} .`,
+        startTag,
+        endTag
+      });
+
+      yield fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/reset'
+      });
+
+      expect(status).to.equal(` M changed.txt
+`);
+    }));
+
     it('ignores matching tags', co.wrap(function* () {
       yield merge({
         localFixtures: 'test/fixtures/local/reset',
