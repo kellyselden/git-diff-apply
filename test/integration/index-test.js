@@ -49,6 +49,7 @@ describe('Integration - index', function() {
   let merge = co.wrap(function* merge({
     localFixtures,
     remoteFixtures,
+    remoteUrl = remoteDir,
     dirty,
     noGit,
     subDir = '',
@@ -89,7 +90,7 @@ describe('Integration - index', function() {
     localDir = process.cwd();
 
     let promise = gitDiffApply({
-      remoteUrl: remoteDir,
+      remoteUrl,
       startTag,
       endTag,
       ignoredFiles,
@@ -646,6 +647,7 @@ D  removed-unchanged.txt
     } = yield merge({
       localFixtures: 'test/fixtures/local/noconflict',
       remoteFixtures,
+      remoteUrl: null,
       createCustomDiff: true,
       startCommand: `node ${ncp} ${path.resolve(remoteFixtures, startTag)} .`,
       endCommand: `node ${ncp} ${path.resolve(remoteFixtures, endTag)} .`,
