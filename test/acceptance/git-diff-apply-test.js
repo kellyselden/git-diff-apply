@@ -1,12 +1,11 @@
 'use strict';
 
 const { expect } = require('chai');
-const tmp = require('tmp');
 const {
+  buildTmp,
   processBin,
   fixtureCompare: _fixtureCompare
 } = require('git-fixtures');
-const buildTmp = require('../helpers/build-tmp');
 const co = require('co');
 
 describe('Acceptance - git-diff-apply', function() {
@@ -15,25 +14,18 @@ describe('Acceptance - git-diff-apply', function() {
   let localDir;
   let remoteDir;
 
-  beforeEach(function() {
-    localDir = tmp.dirSync().name;
-    remoteDir = tmp.dirSync().name;
-  });
-
-  function merge({
+  let merge = co.wrap(function* merge({
     localFixtures,
     remoteFixtures
   }) {
-    buildTmp({
-      fixturesPath: localFixtures,
-      tmpPath: localDir
+    localDir = yield buildTmp({
+      fixturesPath: localFixtures
     });
-    buildTmp({
-      fixturesPath: remoteFixtures,
-      tmpPath: remoteDir
+    remoteDir = yield buildTmp({
+      fixturesPath: remoteFixtures
     });
 
-    return processBin({
+    return yield processBin({
       binFile: 'git-diff-apply',
       args: [
         '--remote-url',
@@ -48,7 +40,7 @@ describe('Acceptance - git-diff-apply', function() {
       commitMessage: 'local',
       expect
     }).promise;
-  }
+  });
 
   function fixtureCompare({
     mergeFixtures

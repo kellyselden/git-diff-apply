@@ -7,15 +7,15 @@ const fs = require('fs-extra');
 const sinon = require('sinon');
 const fixturify = require('fixturify');
 const {
+  commit,
+  buildTmp,
   processExit,
-  fixtureCompare: _fixtureCompare,
-  commit
+  fixtureCompare: _fixtureCompare
 } = require('git-fixtures');
 const gitDiffApply = require('../../src');
 const utils = require('../../src/utils');
 const { isGitClean } = gitDiffApply;
 const getCheckedOutBranchName = require('../../src/get-checked-out-branch-name');
-const buildTmp = require('../helpers/build-tmp');
 const co = require('co');
 const denodeify = require('denodeify');
 const tmpDir = denodeify(tmp.dir);
@@ -35,9 +35,6 @@ describe('Integration - index', function() {
 
   beforeEach(function() {
     sandbox = sinon.createSandbox();
-
-    localDir = tmp.dirSync().name;
-    remoteDir = tmp.dirSync().name;
   });
 
   afterEach(function() {
@@ -49,7 +46,7 @@ describe('Integration - index', function() {
   let merge = co.wrap(function* merge({
     localFixtures,
     remoteFixtures,
-    remoteUrl = remoteDir,
+    remoteUrl,
     dirty,
     noGit,
     subDir = '',
@@ -62,24 +59,17 @@ describe('Integration - index', function() {
     endCommand,
     beforeMerge = () => Promise.resolve()
   }) {
-    buildTmp({
+    localDir = yield buildTmp({
       fixturesPath: localFixtures,
-      tmpPath: localDir,
       dirty,
       noGit,
       subDir
     });
-    buildTmp({
-      fixturesPath: remoteFixtures,
-      tmpPath: remoteDir
+    remoteDir = yield buildTmp({
+      fixturesPath: remoteFixtures
     });
 
-    if (noGit) {
-      fs.removeSync(path.join(localDir, '.git'));
-    }
-
-    rootDir = localDir;
-    localDir = path.join(localDir, subDir);
+    rootDir = path.resolve(localDir, ...subDir.split('/').filter(Boolean).map(() => '..'));
 
     yield beforeMerge();
 
@@ -90,7 +80,7 @@ describe('Integration - index', function() {
     localDir = process.cwd();
 
     let promise = gitDiffApply({
-      remoteUrl,
+      remoteUrl: remoteUrl || remoteDir,
       startTag,
       endTag,
       ignoredFiles,
@@ -642,15 +632,16 @@ D  removed-unchanged.txt
     }));
 
     it('preserves locally gitignored', co.wrap(function* () {
-      yield Promise.all([
-        fs.ensureFile(path.join(localDir, 'local-and-remote')),
-        fs.ensureFile(path.join(localDir, 'local-only'))
-      ]);
-
       yield merge({
         localFixtures: 'test/fixtures/local/gitignored',
         remoteFixtures: 'test/fixtures/remote/gitignored',
-        reset: true
+        reset: true,
+        beforeMerge() {
+          return Promise.all([
+            fs.ensureFile(path.join(localDir, 'local-and-remote')),
+            fs.ensureFile(path.join(localDir, 'local-only'))
+          ]);
+        }
       });
 
       yield fixtureCompare({
@@ -693,14 +684,15 @@ D  removed-unchanged.txt
   }));
 
   it('preserves locally gitignored', co.wrap(function* () {
-    yield Promise.all([
-      fs.ensureFile(path.join(localDir, 'local-and-remote')),
-      fs.ensureFile(path.join(localDir, 'local-only'))
-    ]);
-
     yield merge({
       localFixtures: 'test/fixtures/local/gitignored',
-      remoteFixtures: 'test/fixtures/remote/gitignored'
+      remoteFixtures: 'test/fixtures/remote/gitignored',
+      beforeMerge() {
+        return Promise.all([
+          fs.ensureFile(path.join(localDir, 'local-and-remote')),
+          fs.ensureFile(path.join(localDir, 'local-only'))
+        ]);
+      }
     });
 
     yield fixtureCompare({
