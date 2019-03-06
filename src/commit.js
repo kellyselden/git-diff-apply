@@ -1,7 +1,7 @@
 'use strict';
 
 const run = require('./run');
-const isGitClean = require('./is-git-clean');
+const { isGitClean } = require('./git-status');
 
 module.exports = function commit(options) {
   run('git add -A', options);
