@@ -12,7 +12,7 @@ const getRootDir = require('./get-root-dir');
 const getSubDir = require('./get-sub-dir');
 const gitInit = require('./git-init');
 const getCheckedOutBranchName = require('./get-checked-out-branch-name');
-const isGitClean = require('./is-git-clean');
+const gitStatus = require('./git-status');
 const commit = require('./commit');
 const checkOutTag = require('./check-out-tag');
 const convertToObj = require('./convert-to-obj');
@@ -21,6 +21,8 @@ const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
 const createCustomRemote = require('./create-custom-remote');
 const moveAll = require('./move-all');
+
+const { isGitClean } = gitStatus;
 
 const tempBranchName = uuidv1();
 
@@ -311,5 +313,6 @@ module.exports = co.wrap(function* gitDiffApply({
   return returnObject;
 });
 
+module.exports.gitStatus = gitStatus;
 module.exports.isGitClean = isGitClean;
 module.exports.gitRemoveAll = gitRemoveAll;
