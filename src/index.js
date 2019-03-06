@@ -312,3 +312,4 @@ module.exports = co.wrap(function* gitDiffApply({
 });
 
 module.exports.isGitClean = isGitClean;
+module.exports.gitRemoveAll = gitRemoveAll;
