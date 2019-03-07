@@ -313,6 +313,7 @@ module.exports = co.wrap(function* gitDiffApply({
   return returnObject;
 });
 
+module.exports.run = utils.run;
 module.exports.gitStatus = gitStatus;
 module.exports.isGitClean = isGitClean;
 module.exports.gitRemoveAll = gitRemoveAll;
