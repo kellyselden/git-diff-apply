@@ -320,6 +320,8 @@ D  removed-unchanged.txt
           return Promise.all([
             fs.ensureFile(path.join(rootDir, 'local-and-remote')),
             fs.ensureFile(path.join(rootDir, 'local-only')),
+            fs.ensureFile(path.join(rootDir, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(rootDir, 'folder/local-only')),
             fs.copy(
               path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
               path.join(rootDir, '.gitignore')
@@ -337,6 +339,8 @@ D  removed-unchanged.txt
           return Promise.all([
             fs.ensureFile(path.join(expected, 'local-and-remote')),
             fs.ensureFile(path.join(expected, 'local-only')),
+            fs.ensureFile(path.join(expected, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(expected, 'folder/local-only')),
             fs.copy(
               path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
               path.join(expected, '.gitignore')
@@ -356,6 +360,8 @@ D  removed-unchanged.txt
           return Promise.all([
             fs.ensureFile(path.join(rootDir, 'local-and-remote')),
             fs.ensureFile(path.join(rootDir, 'local-only')),
+            fs.ensureFile(path.join(rootDir, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(rootDir, 'folder/local-only')),
             fs.copy(
               path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
               path.join(rootDir, '.gitignore')
@@ -373,6 +379,8 @@ D  removed-unchanged.txt
           return Promise.all([
             fs.ensureFile(path.join(expected, 'local-and-remote')),
             fs.ensureFile(path.join(expected, 'local-only')),
+            fs.ensureFile(path.join(expected, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(expected, 'folder/local-only')),
             fs.copy(
               path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
               path.join(expected, '.gitignore')
@@ -639,7 +647,9 @@ D  removed-unchanged.txt
         beforeMerge() {
           return Promise.all([
             fs.ensureFile(path.join(localDir, 'local-and-remote')),
-            fs.ensureFile(path.join(localDir, 'local-only'))
+            fs.ensureFile(path.join(localDir, 'local-only')),
+            fs.ensureFile(path.join(localDir, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(localDir, 'folder/local-only'))
           ]);
         }
       });
@@ -649,7 +659,9 @@ D  removed-unchanged.txt
         beforeCompare({ expected }) {
           return Promise.all([
             fs.ensureFile(path.join(expected, 'local-and-remote')),
-            fs.ensureFile(path.join(expected, 'local-only'))
+            fs.ensureFile(path.join(expected, 'local-only')),
+            fs.ensureFile(path.join(expected, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(expected, 'folder/local-only'))
           ]);
         }
       });
@@ -690,7 +702,9 @@ D  removed-unchanged.txt
       beforeMerge() {
         return Promise.all([
           fs.ensureFile(path.join(localDir, 'local-and-remote')),
-          fs.ensureFile(path.join(localDir, 'local-only'))
+          fs.ensureFile(path.join(localDir, 'local-only')),
+          fs.ensureFile(path.join(localDir, 'folder/local-and-remote')),
+          fs.ensureFile(path.join(localDir, 'folder/local-only'))
         ]);
       }
     });
@@ -700,7 +714,9 @@ D  removed-unchanged.txt
       beforeCompare({ expected }) {
         return Promise.all([
           fs.ensureFile(path.join(expected, 'local-and-remote')),
-          fs.ensureFile(path.join(expected, 'local-only'))
+          fs.ensureFile(path.join(expected, 'local-only')),
+          fs.ensureFile(path.join(expected, 'folder/local-and-remote')),
+          fs.ensureFile(path.join(expected, 'folder/local-only'))
         ]);
       }
     });
