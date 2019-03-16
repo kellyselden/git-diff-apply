@@ -17,6 +17,16 @@ describe('Unit - copy-regex', function() {
     expect('foo\\.git').to.not.match(copyRegex);
   });
 
+  it('exludes node_modules', function() {
+    expect('node_modules').to.not.match(copyRegex);
+    expect('node_moduless').to.match(copyRegex);
+    expect('nnode_modules').to.match(copyRegex);
+    expect('node_modules/foo').to.not.match(copyRegex);
+    expect('node_modules\\foo').to.not.match(copyRegex);
+    expect('foo/node_modules').to.not.match(copyRegex);
+    expect('foo\\node_modules').to.not.match(copyRegex);
+  });
+
   it('includes everything else', function() {
     expect('foo/bar').to.match(copyRegex);
     expect('foo\\bar').to.match(copyRegex);
