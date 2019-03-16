@@ -8,10 +8,10 @@ describe('Unit - copy-regex', function() {
     expect('git').to.match(copyRegex);
     expect('.git').to.not.match(copyRegex);
     expect('.git/').to.not.match(copyRegex);
-    expect('.git/x').to.not.match(copyRegex);
+    expect('.git/foo').to.not.match(copyRegex);
     expect('.gitignore').to.match(copyRegex);
     expect('foo.git').to.not.match(copyRegex);
-    expect('bar/.git').to.not.match(copyRegex);
+    expect('foo/.git').to.not.match(copyRegex);
   });
 
   it('includes everything else', function() {
