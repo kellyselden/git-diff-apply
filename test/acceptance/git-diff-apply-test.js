@@ -1,5 +1,6 @@
 'use strict';
 
+const { describe, it } = require('../helpers/mocha');
 const { expect } = require('chai');
 const {
   buildTmp,
@@ -8,7 +9,7 @@ const {
 } = require('git-fixtures');
 const co = require('co');
 
-describe('Acceptance - git-diff-apply', function() {
+describe(function() {
   this.timeout(30000);
 
   let localDir;
