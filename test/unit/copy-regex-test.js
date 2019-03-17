@@ -12,7 +12,7 @@ describe('Unit - copy-regex', function() {
     expect('.git/foo').to.not.match(copyRegex);
     expect('.git\\foo').to.not.match(copyRegex);
     expect('.gitignore').to.match(copyRegex);
-    expect('foo.git').to.not.match(copyRegex);
+    expect('foo.git').to.match(copyRegex);
     expect('foo/.git').to.not.match(copyRegex);
     expect('foo\\.git').to.not.match(copyRegex);
   });
