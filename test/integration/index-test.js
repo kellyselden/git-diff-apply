@@ -1,7 +1,8 @@
 'use strict';
 
-const path = require('path');
+const { describe, it } = require('../helpers/mocha');
 const { expect } = require('chai');
+const path = require('path');
 const tmp = require('tmp');
 const fs = require('fs-extra');
 const sinon = require('sinon');
@@ -20,7 +21,7 @@ const co = require('co');
 const denodeify = require('denodeify');
 const tmpDir = denodeify(tmp.dir);
 
-describe('Integration - index', function() {
+describe(function() {
   this.timeout(30000);
 
   let cwd;

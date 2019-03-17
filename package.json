@@ -57,6 +57,7 @@
     "eslint-plugin-prefer-let": "^1.0.1",
     "git-fixtures": "^0.14.0",
     "mocha": "^6.0.2",
+    "mocha-helpers": "^1.2.1",
     "ncp": "^2.0.0",
     "renovate-config-standard": "^2.0.0",
     "sinon": "^7.0.0"

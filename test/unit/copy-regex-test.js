@@ -1,9 +1,10 @@
 'use strict';
 
+const { describe, it } = require('../helpers/mocha');
 const { expect } = require('chai');
 const copyRegex = require('../../src/copy-regex');
 
-describe('Unit - copy-regex', function() {
+describe(copyRegex, function() {
   it('exludes git files', function() {
     expect('git').to.match(copyRegex);
     expect('.git').to.not.match(copyRegex);
