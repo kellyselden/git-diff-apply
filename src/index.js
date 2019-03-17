@@ -20,7 +20,7 @@ const resolveConflicts = require('./resolve-conflicts');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
 const createCustomRemote = require('./create-custom-remote');
-const mergeDir = require('./merge-dir');
+const moveAll = require('./move-all');
 
 const { isGitClean } = gitStatus;
 
@@ -173,7 +173,7 @@ module.exports = co.wrap(function* gitDiffApply({
     yield ensureDir(cwd);
 
     gitIgnoredFiles = tmp.dirSync().name;
-    yield mergeDir(cwd, gitIgnoredFiles);
+    yield moveAll(cwd, gitIgnoredFiles);
     shouldReturnGitIgnoredFiles = true;
 
     isCodeUntracked = true;
@@ -291,7 +291,7 @@ module.exports = co.wrap(function* gitDiffApply({
     }
 
     if (shouldReturnGitIgnoredFiles) {
-      yield mergeDir(gitIgnoredFiles, cwd);
+      yield moveAll(gitIgnoredFiles, cwd);
     }
   } catch (err2) {
     err = {
