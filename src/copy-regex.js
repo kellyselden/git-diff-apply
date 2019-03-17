@@ -1,1 +1,1 @@
-module.exports = /^(?:(?!\.git(\/|$)).)+$/;
+module.exports = /^(?:(?!\.git($|\/)).)+$/;
