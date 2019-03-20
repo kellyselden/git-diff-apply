@@ -114,8 +114,8 @@ describe(function() {
     yield fs.copy(path.join(cwd, mergeFixtures), localMergeDir);
 
     yield beforeCompare({
-      actual: rootDir,
-      expected: rootMergeDir
+      localMergeDir,
+      rootMergeDir
     });
 
     _fixtureCompare({
@@ -319,10 +319,10 @@ D  removed-unchanged.txt
         subDir,
         beforeMerge() {
           return Promise.all([
-            fs.ensureFile(path.join(rootDir, 'local-and-remote')),
-            fs.ensureFile(path.join(rootDir, 'local-only')),
-            fs.ensureFile(path.join(rootDir, 'folder/local-and-remote')),
-            fs.ensureFile(path.join(rootDir, 'folder/local-only')),
+            fs.ensureFile(path.join(localDir, 'local-and-remote')),
+            fs.ensureFile(path.join(localDir, 'local-only')),
+            fs.ensureFile(path.join(localDir, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(localDir, 'folder/local-only')),
             fs.copy(
               path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
               path.join(rootDir, '.gitignore')
@@ -336,15 +336,18 @@ D  removed-unchanged.txt
       yield fixtureCompare({
         mergeFixtures: 'test/fixtures/merge/noconflict',
         subDir,
-        beforeCompare({ expected }) {
+        beforeCompare({
+          localMergeDir,
+          rootMergeDir
+        }) {
           return Promise.all([
-            fs.ensureFile(path.join(expected, 'local-and-remote')),
-            fs.ensureFile(path.join(expected, 'local-only')),
-            fs.ensureFile(path.join(expected, 'folder/local-and-remote')),
-            fs.ensureFile(path.join(expected, 'folder/local-only')),
+            fs.ensureFile(path.join(localMergeDir, 'local-and-remote')),
+            fs.ensureFile(path.join(localMergeDir, 'local-only')),
+            fs.ensureFile(path.join(localMergeDir, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(localMergeDir, 'folder/local-only')),
             fs.copy(
               path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
-              path.join(expected, '.gitignore')
+              path.join(rootMergeDir, '.gitignore')
             )
           ]);
         }
@@ -359,10 +362,10 @@ D  removed-unchanged.txt
         subDir,
         beforeMerge() {
           return Promise.all([
-            fs.ensureFile(path.join(rootDir, 'local-and-remote')),
-            fs.ensureFile(path.join(rootDir, 'local-only')),
-            fs.ensureFile(path.join(rootDir, 'folder/local-and-remote')),
-            fs.ensureFile(path.join(rootDir, 'folder/local-only')),
+            fs.ensureFile(path.join(localDir, 'local-and-remote')),
+            fs.ensureFile(path.join(localDir, 'local-only')),
+            fs.ensureFile(path.join(localDir, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(localDir, 'folder/local-only')),
             fs.copy(
               path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
               path.join(rootDir, '.gitignore')
@@ -376,16 +379,14 @@ D  removed-unchanged.txt
       yield fixtureCompare({
         mergeFixtures: 'test/fixtures/remote/noconflict/v3',
         subDir,
-        beforeCompare({ expected }) {
+        beforeCompare({
+          localMergeDir
+        }) {
           return Promise.all([
-            fs.ensureFile(path.join(expected, 'local-and-remote')),
-            fs.ensureFile(path.join(expected, 'local-only')),
-            fs.ensureFile(path.join(expected, 'folder/local-and-remote')),
-            fs.ensureFile(path.join(expected, 'folder/local-only')),
-            fs.copy(
-              path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
-              path.join(expected, '.gitignore')
-            )
+            fs.ensureFile(path.join(localMergeDir, 'local-and-remote')),
+            fs.ensureFile(path.join(localMergeDir, 'local-only')),
+            fs.ensureFile(path.join(localMergeDir, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(localMergeDir, 'folder/local-only'))
           ]);
         }
       });
@@ -657,12 +658,14 @@ D  removed-unchanged.txt
 
       yield fixtureCompare({
         mergeFixtures: 'test/fixtures/remote/gitignored/v3',
-        beforeCompare({ expected }) {
+        beforeCompare({
+          localMergeDir
+        }) {
           return Promise.all([
-            fs.ensureFile(path.join(expected, 'local-and-remote')),
-            fs.ensureFile(path.join(expected, 'local-only')),
-            fs.ensureFile(path.join(expected, 'folder/local-and-remote')),
-            fs.ensureFile(path.join(expected, 'folder/local-only'))
+            fs.ensureFile(path.join(localMergeDir, 'local-and-remote')),
+            fs.ensureFile(path.join(localMergeDir, 'local-only')),
+            fs.ensureFile(path.join(localMergeDir, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(localMergeDir, 'folder/local-only'))
           ]);
         }
       });
@@ -712,12 +715,14 @@ D  removed-unchanged.txt
 
     yield fixtureCompare({
       mergeFixtures: 'test/fixtures/merge/gitignored',
-      beforeCompare({ expected }) {
+      beforeCompare({
+        localMergeDir
+      }) {
         return Promise.all([
-          fs.ensureFile(path.join(expected, 'local-and-remote')),
-          fs.ensureFile(path.join(expected, 'local-only')),
-          fs.ensureFile(path.join(expected, 'folder/local-and-remote')),
-          fs.ensureFile(path.join(expected, 'folder/local-only'))
+          fs.ensureFile(path.join(localMergeDir, 'local-and-remote')),
+          fs.ensureFile(path.join(localMergeDir, 'local-only')),
+          fs.ensureFile(path.join(localMergeDir, 'folder/local-and-remote')),
+          fs.ensureFile(path.join(localMergeDir, 'folder/local-only'))
         ]);
       }
     });
