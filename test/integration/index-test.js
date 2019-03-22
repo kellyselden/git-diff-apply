@@ -523,7 +523,7 @@ D  removed-unchanged.txt
     }));
 
     it('resets using a create diff', co.wrap(function* () {
-      let ncp = path.resolve(path.dirname(require.resolve('ncp')), '../bin/ncp');
+      let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
       let remoteFixtures = 'test/fixtures/remote/reset';
       let startTag = 'v1';
       let endTag = 'v3';
@@ -537,8 +537,8 @@ D  removed-unchanged.txt
         ignoredFiles: ['ignored-changed.txt'],
         remoteUrl: null,
         createCustomDiff: true,
-        startCommand: `node ${ncp} ${path.resolve(remoteFixtures, startTag)} .`,
-        endCommand: `node ${ncp} ${path.resolve(remoteFixtures, endTag)} .`,
+        startCommand: `node ${cpr} ${path.resolve(remoteFixtures, startTag)} .`,
+        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, endTag)} .`,
         startTag,
         endTag
       });
@@ -670,7 +670,7 @@ D  removed-unchanged.txt
   });
 
   it('can create a custom diff', co.wrap(function* () {
-    let ncp = path.resolve(path.dirname(require.resolve('ncp')), '../bin/ncp');
+    let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
     let remoteFixtures = 'test/fixtures/remote/noconflict';
     let startTag = 'v1';
     let endTag = 'v3';
@@ -682,8 +682,8 @@ D  removed-unchanged.txt
       remoteFixtures,
       remoteUrl: null,
       createCustomDiff: true,
-      startCommand: `node ${ncp} ${path.resolve(remoteFixtures, startTag)} .`,
-      endCommand: `node ${ncp} ${path.resolve(remoteFixtures, endTag)} .`,
+      startCommand: `node ${cpr} ${path.resolve(remoteFixtures, startTag)} .`,
+      endCommand: `node ${cpr} ${path.resolve(remoteFixtures, endTag)} .`,
       startTag,
       endTag
     });
