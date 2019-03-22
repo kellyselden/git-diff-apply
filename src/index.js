@@ -1,6 +1,5 @@
 'use strict';
 
-const os = require('os');
 const path = require('path');
 const tmp = require('tmp');
 const fs = require('fs-extra');
@@ -26,16 +25,9 @@ const { isGitClean } = gitStatus;
 
 const tempBranchName = uuidv1();
 
-const isUnix = os.platform() !== 'win32';
-
 function ensureDir(dir) {
   debug('ensureDir', dir);
   return fs.ensureDir(dir);
-}
-
-function chdir(dir) {
-  debug('chdir', dir);
-  process.chdir(dir);
 }
 
 module.exports = co.wrap(function* gitDiffApply({
@@ -67,7 +59,6 @@ module.exports = co.wrap(function* gitDiffApply({
   let root;
   let cwd;
   let gitIgnoredFiles;
-  let shouldResetCwd;
 
   let err;
 
@@ -105,7 +96,7 @@ module.exports = co.wrap(function* gitDiffApply({
 
     yield copyToSubDir(startTag);
 
-    gitRemoveAll({ cwd: newTmpDir });
+    yield gitRemoveAll({ cwd: newTmpDir });
 
     yield copyToSubDir(endTag);
 
@@ -132,26 +123,13 @@ module.exports = co.wrap(function* gitDiffApply({
     }
   }
 
-  let safeGitRemoveAll = co.wrap(function* safeGitRemoveAll() {
-    if (isUnix) {
-      shouldResetCwd = true;
-    }
-    utils.gitRemoveAll();
-
-    if (isUnix) {
-      yield ensureDir(cwd);
-      chdir(cwd);
-      shouldResetCwd = false;
-    }
-  });
-
   let go = co.wrap(function* go() {
     if (reset) {
       checkOutTag(tmpDir, endTag);
 
       isCodeUntracked = true;
       isCodeModified = true;
-      yield safeGitRemoveAll();
+      yield utils.gitRemoveAll({ cwd: root });
 
       yield copy();
 
@@ -168,9 +146,7 @@ module.exports = co.wrap(function* gitDiffApply({
     utils.run(`git checkout --orphan ${tempBranchName}`);
     isTempBranchCheckedOut = true;
 
-    yield safeGitRemoveAll();
-
-    yield ensureDir(cwd);
+    yield utils.gitRemoveAll({ cwd: root });
 
     gitIgnoredFiles = tmp.dirSync().name;
     yield mergeDir(cwd, gitIgnoredFiles);
@@ -263,10 +239,6 @@ module.exports = co.wrap(function* gitDiffApply({
     err = _err;
 
     try {
-      if (shouldResetCwd) {
-        chdir(cwd);
-      }
-
       if (isCodeUntracked) {
         utils.run('git clean -f');
       }
