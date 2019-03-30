@@ -743,4 +743,20 @@ D  removed-unchanged.txt
     expect(status).to.equal(`M  changed.png
 `);
   }));
+
+  it('handles spaces in path', co.wrap(function* () {
+    let {
+      status
+    } = yield merge({
+      localFixtures: 'test/fixtures/local/space',
+      remoteFixtures: 'test/fixtures/remote/space'
+    });
+
+    yield fixtureCompare({
+      mergeFixtures: 'test/fixtures/merge/space'
+    });
+
+    expect(status).to.equal(`M  "space in filename.txt"
+`);
+  }));
 });
