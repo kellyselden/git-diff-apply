@@ -15,7 +15,7 @@ module.exports = co.wrap(function* gitRemoveAll(options) {
   for (let file of files) {
     // this removes folders that become empty,
     // which we are trying to avoid
-    // run(`git rm -f ${file}`, options);
+    // run(`git rm -f "${file}"`, options);
 
     yield fs.remove(path.join(options.cwd, file));
 
