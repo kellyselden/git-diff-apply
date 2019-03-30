@@ -19,6 +19,6 @@ module.exports = co.wrap(function* gitRemoveAll(options) {
 
     yield fs.remove(path.join(options.cwd, file));
 
-    run(`git add ${file}`, options);
+    run(`git add "${file}"`, options);
   }
 });
