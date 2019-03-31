@@ -36,7 +36,7 @@ module.exports = co.wrap(function* mergeDir(from, to) {
 
       reject(err);
     }).on('end', () => {
-      Promise.all(promises).then(resolve);
+      resolve(Promise.all(promises));
     });
   });
 });
