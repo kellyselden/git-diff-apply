@@ -15,6 +15,7 @@ module.exports = co.wrap(function* mergeDir(from, to) {
   yield new Promise((resolve, reject) => {
     let promises = [];
     klaw(from, {
+      preserveSymlinks: true,
       filter(src) {
         return copyRegex.test(src);
       }
@@ -28,7 +29,8 @@ module.exports = co.wrap(function* mergeDir(from, to) {
       if (item.stats.isDirectory()) {
         promise = fs.ensureDir(toFile);
       } else {
-        promise = fs.move(fromFile, toFile);
+        // `fs.move` doesn't handle broken symlinks
+        promise = fs.rename(fromFile, toFile);
       }
       promises.push(promise);
     }).on('error', (err, item) => {
