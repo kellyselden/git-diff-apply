@@ -759,4 +759,39 @@ D  removed-unchanged.txt
     expect(status).to.equal(`M  "space in filename.txt"
 `);
   }));
+
+  it('handles ignored broken symlinks', co.wrap(function* () {
+    let createBrokenSymlink = co.wrap(function* (srcpath, dstpath) {
+      yield fs.ensureFile(srcpath);
+      yield fs.symlink(srcpath, dstpath);
+      yield fs.remove(srcpath);
+    });
+
+    let assertBrokenSymlink = co.wrap(function* (srcpath, dstpath) {
+      expect(yield fs.readlink(dstpath)).to.equal(srcpath);
+    });
+
+    yield merge({
+      localFixtures: 'test/fixtures/local/gitignored',
+      remoteFixtures: 'test/fixtures/remote/gitignored',
+      beforeMerge: co.wrap(function* () {
+        yield createBrokenSymlink(
+          path.join(localDir, 'broken'),
+          path.join(localDir, 'local-only')
+        );
+      })
+    });
+
+    yield assertBrokenSymlink(
+      path.join(localDir, 'broken'),
+      path.join(localDir, 'local-only')
+    );
+
+    // `fixturify` doesn't support broken symlinks
+    yield fs.unlink(path.join(localDir, 'local-only'));
+
+    yield fixtureCompare({
+      mergeFixtures: 'test/fixtures/merge/gitignored'
+    });
+  }));
 });
