@@ -761,14 +761,18 @@ D  removed-unchanged.txt
   }));
 
   it('handles ignored broken symlinks', co.wrap(function* () {
+    // another OSX /private workaround
+    let realpath = {};
+
     let createBrokenSymlink = co.wrap(function* (srcpath, dstpath) {
       yield fs.ensureFile(srcpath);
       yield fs.symlink(srcpath, dstpath);
+      realpath[srcpath] = yield fs.realpath(srcpath);
       yield fs.remove(srcpath);
     });
 
     let assertBrokenSymlink = co.wrap(function* (srcpath, dstpath) {
-      expect(yield fs.readlink(dstpath)).to.equal(srcpath);
+      expect(realpath[yield fs.readlink(dstpath)]).to.equal(srcpath);
     });
 
     yield merge({
