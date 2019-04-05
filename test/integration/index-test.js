@@ -34,8 +34,6 @@ describe(function() {
 
   afterEach(function() {
     sinon.restore();
-
-    process.chdir(cwd);
   });
 
   async function merge({
@@ -67,14 +65,6 @@ describe(function() {
     rootDir = path.resolve(localDir, ...subDir.split('/').filter(Boolean).map(() => '..'));
 
     await beforeMerge();
-
-    process.chdir(localDir);
-
-    // this prefixes /private in OSX...
-    // let's us do === against it later
-    localDir = process.cwd();
-
-    process.chdir(cwd);
 
     let promise = gitDiffApply({
       cwd: localDir,
@@ -999,18 +989,14 @@ D  removed-unchanged.txt
   });
 
   it('handles ignored broken symlinks', async function() {
-    // another OSX /private workaround
-    let realpath = {};
-
     async function createBrokenSymlink(srcpath, dstpath) {
-      await fs.ensureFile(path.resolve(localDir, srcpath));
+      await fs.ensureFile(srcpath);
       await fs.symlink(srcpath, dstpath);
-      realpath[srcpath] = await fs.realpath(path.resolve(localDir, srcpath));
-      await fs.remove(path.resolve(localDir, srcpath));
+      await fs.remove(srcpath);
     }
 
     async function assertBrokenSymlink(srcpath, dstpath) {
-      expect(realpath[await fs.readlink(dstpath)]).to.equal(srcpath);
+      expect(await fs.readlink(dstpath)).to.equal(srcpath);
     }
 
     await merge({
@@ -1018,7 +1004,7 @@ D  removed-unchanged.txt
       remoteFixtures: 'test/fixtures/remote/gitignored',
       async beforeMerge() {
         await createBrokenSymlink(
-          path.normalize('./broken'),
+          path.join(localDir, 'broken'),
           path.join(localDir, 'local-only')
         );
       }
