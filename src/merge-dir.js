@@ -5,6 +5,7 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const copyRegex = require('./copy-regex');
 const debug = require('debug')('git-diff-apply');
+const moveFile = require('move-file');
 
 module.exports = co.wrap(function* mergeDir(from, to) {
   if (debug.enabled) {
@@ -30,7 +31,8 @@ module.exports = co.wrap(function* mergeDir(from, to) {
         promise = fs.ensureDir(toFile);
       } else {
         // `fs.move` doesn't handle broken symlinks
-        promise = fs.rename(fromFile, toFile);
+        // `fs.rename` doesn't work cross filesystems
+        promise = moveFile(fromFile, toFile);
       }
       promises.push(promise);
     }).on('error', (err, item) => {
