@@ -1,9 +1,9 @@
 'use strict';
 
 const co = require('co');
-const path = require('path');
 const fs = require('fs-extra');
 const klaw = require('klaw');
+const moveFile = require('move-file');
 const copyRegex = require('./copy-regex');
 const debug = require('debug')('git-diff-apply');
 
@@ -31,19 +31,9 @@ module.exports = co.wrap(function* mergeDir(from, to) {
         promise = fs.ensureDir(toFile);
       } else {
         // `fs.rename` can throw EXDEV if across partitions
-        promise = fs.move(fromFile, toFile).catch(co.wrap(function*(err) {
-          // `fs.move` doesn't handle broken symlinks
-          // https://github.com/jprichardson/node-fs-extra/issues/638
-          if (!err.message.startsWith('ENOENT: no such file or directory, stat')) {
-            throw err;
-          }
-          // reimplement `fs.rename`...
-          let brokenSymlink = yield fs.readlink(fromFile);
-          let absolute = path.resolve(path.dirname(fromFile), brokenSymlink);
-          yield fs.ensureFile(absolute);
-          yield fs.move(fromFile, toFile);
-          yield fs.unlink(absolute);
-        }));
+        // `fs.move` doesn't handle broken symlinks
+        // https://github.com/jprichardson/node-fs-extra/issues/638
+        promise = moveFile(fromFile, toFile);
       }
       promises.push(promise);
     }).on('error', (err, item) => {
