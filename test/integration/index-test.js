@@ -765,10 +765,10 @@ D  removed-unchanged.txt
     let realpath = {};
 
     let createBrokenSymlink = co.wrap(function* (srcpath, dstpath) {
-      yield fs.ensureFile(srcpath);
+      yield fs.ensureFile(path.resolve(localDir, srcpath));
       yield fs.symlink(srcpath, dstpath);
-      realpath[srcpath] = yield fs.realpath(srcpath);
-      yield fs.remove(srcpath);
+      realpath[srcpath] = yield fs.realpath(path.resolve(localDir, srcpath));
+      yield fs.remove(path.resolve(localDir, srcpath));
     });
 
     let assertBrokenSymlink = co.wrap(function* (srcpath, dstpath) {
@@ -780,7 +780,7 @@ D  removed-unchanged.txt
       remoteFixtures: 'test/fixtures/remote/gitignored',
       beforeMerge: co.wrap(function* () {
         yield createBrokenSymlink(
-          path.join(localDir, 'broken'),
+          path.normalize('./broken'),
           path.join(localDir, 'local-only')
         );
       })
