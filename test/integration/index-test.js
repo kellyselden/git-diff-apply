@@ -728,6 +728,60 @@ D  removed-unchanged.txt
     });
   }));
 
+  describe('globally gitignored', function() {
+    let realGlobalGitignorePath;
+
+    before(co.wrap(function*() {
+      try {
+        realGlobalGitignorePath = utils.run('git config --global core.excludesfile').trim();
+      } catch (err) {
+        // do nothing
+      }
+      let tmpGlobalGitignorePath = path.join(yield tmpDir(), '.gitignore');
+      yield fs.writeFile(tmpGlobalGitignorePath, '.vscode');
+      utils.run(`git config --global core.excludesfile "${tmpGlobalGitignorePath}"`);
+    }));
+
+    after(function() {
+      if (realGlobalGitignorePath) {
+        utils.run(`git config --global core.excludesfile "${realGlobalGitignorePath}"`);
+      }
+    });
+
+    it('works', co.wrap(function* () {
+      yield merge({
+        localFixtures: 'test/fixtures/local/globally-gitignored',
+        remoteFixtures: 'test/fixtures/remote/globally-gitignored'
+      });
+
+      yield fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/globally-gitignored'
+      });
+    }));
+
+    it('can create a custom diff', co.wrap(function* () {
+      let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
+      let remoteFixtures = 'test/fixtures/remote/globally-gitignored';
+      let startTag = 'v1';
+      let endTag = 'v3';
+
+      yield merge({
+        localFixtures: 'test/fixtures/local/globally-gitignored',
+        remoteFixtures,
+        remoteUrl: null,
+        createCustomDiff: true,
+        startCommand: `node ${cpr} ${path.resolve(remoteFixtures, startTag)} .`,
+        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, endTag)} .`,
+        startTag,
+        endTag
+      });
+
+      yield fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/globally-gitignored'
+      });
+    }));
+  });
+
   it('handles binary files', co.wrap(function* () {
     let {
       status
