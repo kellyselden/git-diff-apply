@@ -21,4 +21,7 @@ module.exports = co.wrap(function* gitRemoveAll(options) {
 
     run(`git add "${file}"`, options);
   }
+
+  // remove any globally gitignored files left over (.vscode)
+  run('git clean -fdx', options);
 });
