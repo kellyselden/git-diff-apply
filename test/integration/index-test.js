@@ -852,4 +852,21 @@ D  removed-unchanged.txt
       mergeFixtures: 'test/fixtures/merge/gitignored'
     });
   }));
+
+  it('handles ignored files that don\'t exist', co.wrap(function* () {
+    let {
+      status
+    } = yield merge({
+      localFixtures: 'test/fixtures/local/noconflict',
+      remoteFixtures: 'test/fixtures/remote/noconflict',
+      ignoredFiles: ['missing.txt']
+    });
+
+    yield fixtureCompare({
+      mergeFixtures: 'test/fixtures/merge/noconflict'
+    });
+
+    expect(status).to.equal(`M  changed.txt
+`);
+  }));
 });
