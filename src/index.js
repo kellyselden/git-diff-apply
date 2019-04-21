@@ -109,11 +109,13 @@ module.exports = co.wrap(function* gitDiffApply({
     return utils.copy(tmpWorkingDir, cwd);
   }
 
-  function resetIgnoredFiles() {
+  let resetIgnoredFiles = co.wrap(function* resetIgnoredFiles() {
     for (let ignoredFile of ignoredFiles) {
-      utils.run(`git checkout -- ${ignoredFile}`);
+      if (yield fs.pathExists(ignoredFile)) {
+        utils.run(`git checkout -- ${ignoredFile}`);
+      }
     }
-  }
+  });
 
   function applyDiff() {
     let patchFile = path.join(tmp.dirSync().name, 'file.patch');
@@ -135,7 +137,7 @@ module.exports = co.wrap(function* gitDiffApply({
 
       utils.run('git reset');
 
-      resetIgnoredFiles();
+      yield resetIgnoredFiles();
 
       return;
     }
@@ -163,7 +165,7 @@ module.exports = co.wrap(function* gitDiffApply({
     isCodeModified = true;
     applyDiff();
 
-    resetIgnoredFiles();
+    yield resetIgnoredFiles();
 
     let wereAnyChanged = !isGitClean();
 
