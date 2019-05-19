@@ -1,6 +1,5 @@
 'use strict';
 
-const co = require('co');
 const run = require('./run');
 const gitInit = require('./git-init');
 const commitAndTag = require('./commit-and-tag');
@@ -8,13 +7,13 @@ const gitRemoveAll = require('./git-remove-all');
 const { promisify } = require('util');
 const tmpDir = promisify(require('tmp').dir);
 
-module.exports = co.wrap(function* createCustomRemote({
+module.exports = async function createCustomRemote({
   startCommand,
   endCommand,
   startTag,
   endTag
 }) {
-  let cwd = yield tmpDir();
+  let cwd = await tmpDir();
 
   gitInit({
     cwd
@@ -28,7 +27,7 @@ module.exports = co.wrap(function* createCustomRemote({
     cwd
   });
 
-  yield gitRemoveAll({
+  await gitRemoveAll({
     cwd
   });
 
@@ -41,4 +40,4 @@ module.exports = co.wrap(function* createCustomRemote({
   });
 
   return cwd;
-});
+};

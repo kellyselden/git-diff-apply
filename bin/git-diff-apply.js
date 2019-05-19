@@ -36,4 +36,10 @@ const { argv } = require('yargs')
 
 argv.wasRunAsExecutable = true;
 
-gitDiffApply(argv).catch(console.error);
+(async() => {
+  try {
+    await gitDiffApply(argv);
+  } catch (err) {
+    console.log(err);
+  }
+})();

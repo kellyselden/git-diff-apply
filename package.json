@@ -37,7 +37,6 @@
     "node": ">=8"
   },
   "dependencies": {
-    "co": "^4.6.0",
     "debug": "^4.0.0",
     "fixturify": "^1.0.0",
     "fs-extra": "^8.0.0",

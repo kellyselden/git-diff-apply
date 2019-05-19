@@ -4,7 +4,6 @@ const path = require('path');
 const { promisify } = require('util');
 const tmpDir = promisify(require('tmp').dir);
 const fs = require('fs-extra');
-const co = require('co');
 const uuidv1 = require('uuid/v1');
 const debug = require('debug')('git-diff-apply');
 const utils = require('./utils');
@@ -26,12 +25,12 @@ const { isGitClean } = gitStatus;
 
 const tempBranchName = uuidv1();
 
-function ensureDir(dir) {
+async function ensureDir(dir) {
   debug('ensureDir', dir);
-  return fs.ensureDir(dir);
+  await fs.ensureDir(dir);
 }
 
-module.exports = co.wrap(function* gitDiffApply({
+module.exports = async function gitDiffApply({
   remoteUrl,
   startTag,
   endTag,
@@ -78,67 +77,67 @@ module.exports = co.wrap(function* gitDiffApply({
     };
   }
 
-  let namespaceRepoWithSubDir = co.wrap(function* namespaceRepoWithSubDir(subDir) {
-    let newTmpDir = yield tmpDir();
+  async function namespaceRepoWithSubDir(subDir) {
+    let newTmpDir = await tmpDir();
 
     gitInit({ cwd: newTmpDir });
 
     let newTmpSubDir = path.join(newTmpDir, subDir);
 
-    let copyToSubDir = co.wrap(function* copyToSubDir(tag) {
-      yield ensureDir(newTmpSubDir);
+    async function copyToSubDir(tag) {
+      await ensureDir(newTmpSubDir);
 
       checkOutTag(_tmpDir, tag);
 
-      yield utils.copy(_tmpDir, newTmpSubDir);
+      await utils.copy(_tmpDir, newTmpSubDir);
 
       commitAndTag(tag, { cwd: newTmpDir });
-    });
+    }
 
-    yield copyToSubDir(startTag);
+    await copyToSubDir(startTag);
 
-    yield gitRemoveAll({ cwd: newTmpDir });
+    await gitRemoveAll({ cwd: newTmpDir });
 
-    yield copyToSubDir(endTag);
+    await copyToSubDir(endTag);
 
     _tmpDir = newTmpDir;
     tmpGitDir = path.join(_tmpDir, '.git');
     tmpWorkingDir = newTmpSubDir;
-  });
-
-  function copy() {
-    return utils.copy(tmpWorkingDir, cwd);
   }
 
-  let resetIgnoredFiles = co.wrap(function* resetIgnoredFiles() {
+  async function copy() {
+    await utils.copy(tmpWorkingDir, cwd);
+  }
+
+  async function resetIgnoredFiles() {
     for (let ignoredFile of ignoredFiles) {
-      if (yield fs.pathExists(ignoredFile)) {
+      if (await fs.pathExists(ignoredFile)) {
         utils.run(`git checkout -- ${ignoredFile}`);
       }
     }
-  });
+  }
 
-  let applyDiff = co.wrap(function* applyDiff() {
-    let patchFile = path.join(yield tmpDir(), 'file.patch');
+  async function applyDiff() {
+    let patchFile = path.join(await tmpDir(), 'file.patch');
     utils.run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} --binary > ${patchFile}`);
-    if ((yield fs.readFile(patchFile, 'utf8')) !== '') {
+    if (await fs.readFile(patchFile, 'utf8') !== '') {
       utils.run(`git apply ${patchFile}`);
     }
-  });
+  }
 
-  let go = co.wrap(function* go() {
+  async function go() {
     if (reset) {
       checkOutTag(_tmpDir, endTag);
 
       isCodeUntracked = true;
       isCodeModified = true;
-      yield utils.gitRemoveAll({ cwd: root });
+      await utils.gitRemoveAll({ cwd: root });
 
-      yield copy();
+      await copy();
 
       utils.run('git reset');
 
-      yield resetIgnoredFiles();
+      await resetIgnoredFiles();
 
       return;
     }
@@ -149,14 +148,14 @@ module.exports = co.wrap(function* gitDiffApply({
     utils.run(`git checkout --orphan ${tempBranchName}`);
     isTempBranchCheckedOut = true;
 
-    yield utils.gitRemoveAll({ cwd: root });
+    await utils.gitRemoveAll({ cwd: root });
 
-    gitIgnoredFiles = yield tmpDir();
-    yield mergeDir(cwd, gitIgnoredFiles);
+    gitIgnoredFiles = await tmpDir();
+    await mergeDir(cwd, gitIgnoredFiles);
     shouldReturnGitIgnoredFiles = true;
 
     isCodeUntracked = true;
-    yield copy();
+    await copy();
 
     commit();
     isCodeUntracked = false;
@@ -164,9 +163,9 @@ module.exports = co.wrap(function* gitDiffApply({
 
     isCodeUntracked = true;
     isCodeModified = true;
-    yield applyDiff();
+    await applyDiff();
 
-    yield resetIgnoredFiles();
+    await resetIgnoredFiles();
 
     let wereAnyChanged = !isGitClean();
 
@@ -191,7 +190,7 @@ module.exports = co.wrap(function* gitDiffApply({
         hasConflicts = true;
       }
     }
-  });
+  }
 
   try {
     if (startTag === endTag && !reset) {
@@ -211,7 +210,7 @@ module.exports = co.wrap(function* gitDiffApply({
     }
 
     if (createCustomDiff) {
-      let tmpPath = yield createCustomRemote({
+      let tmpPath = await createCustomRemote({
         startCommand,
         endCommand,
         startTag,
@@ -221,7 +220,7 @@ module.exports = co.wrap(function* gitDiffApply({
       remoteUrl = tmpPath;
     }
 
-    _tmpDir = yield tmpDir();
+    _tmpDir = await tmpDir();
     tmpGitDir = path.join(_tmpDir, '.git');
     tmpWorkingDir = _tmpDir;
 
@@ -232,12 +231,12 @@ module.exports = co.wrap(function* gitDiffApply({
     root = getRootDir();
     let subDir = getSubDir(root);
     if (subDir) {
-      yield namespaceRepoWithSubDir(subDir);
+      await namespaceRepoWithSubDir(subDir);
     }
 
     cwd = process.cwd();
 
-    yield go();
+    await go();
   } catch (_err) {
     err = _err;
 
@@ -266,7 +265,7 @@ module.exports = co.wrap(function* gitDiffApply({
     }
 
     if (shouldReturnGitIgnoredFiles) {
-      yield mergeDir(gitIgnoredFiles, cwd);
+      await mergeDir(gitIgnoredFiles, cwd);
     }
   } catch (err2) {
     err = {
@@ -286,7 +285,7 @@ module.exports = co.wrap(function* gitDiffApply({
   }
 
   return returnObject;
-});
+};
 
 module.exports.run = utils.run;
 module.exports.gitInit = gitInit;
