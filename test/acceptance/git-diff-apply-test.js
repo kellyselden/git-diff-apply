@@ -7,7 +7,6 @@ const {
   processBin,
   fixtureCompare: _fixtureCompare
 } = require('git-fixtures');
-const co = require('co');
 
 describe(function() {
   this.timeout(30000);
@@ -15,18 +14,18 @@ describe(function() {
   let localDir;
   let remoteDir;
 
-  let merge = co.wrap(function* merge({
+  async function merge({
     localFixtures,
     remoteFixtures
   }) {
-    localDir = yield buildTmp({
+    localDir = await buildTmp({
       fixturesPath: localFixtures
     });
-    remoteDir = yield buildTmp({
+    remoteDir = await buildTmp({
       fixturesPath: remoteFixtures
     });
 
-    return yield processBin({
+    return await processBin({
       binFile: 'git-diff-apply',
       args: [
         '--remote-url',
@@ -41,7 +40,7 @@ describe(function() {
       commitMessage: 'local',
       expect
     }).promise;
-  });
+  }
 
   function fixtureCompare({
     mergeFixtures
@@ -56,10 +55,10 @@ describe(function() {
     });
   }
 
-  it('handles conflicts', co.wrap(function* () {
+  it('handles conflicts', async function() {
     let {
       status
-    } = yield merge({
+    } = await merge({
       localFixtures: 'test/fixtures/local/conflict',
       remoteFixtures: 'test/fixtures/remote/conflict'
     });
@@ -75,12 +74,12 @@ M  present-changed.txt
 D  removed-changed.txt
 D  removed-unchanged.txt
 `);
-  }));
+  });
 
-  it('ignores .git folder', co.wrap(function* () {
+  it('ignores .git folder', async function() {
     let {
       status
-    } = yield merge({
+    } = await merge({
       localFixtures: 'test/fixtures/local/git',
       remoteFixtures: 'test/fixtures/remote/git'
     });
@@ -91,5 +90,5 @@ D  removed-unchanged.txt
 
     expect(status).to.equal(`M  .gitignore
 `);
-  }));
+  });
 });
