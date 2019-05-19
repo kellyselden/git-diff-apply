@@ -1,6 +1,6 @@
 environment:
   matrix:
-    - nodejs_version: "6"
+    - nodejs_version: "8"
 
 branches:
   only:
@@ -10,10 +10,6 @@ branches:
 # Install scripts. (runs after repo cloning)
 install:
   - ps: Install-Product node $env:nodejs_version
-  - node --version
-  - npm config set spin false
-  - npm install -g npm
-  - npm --version
   - npm install
 
 # Post-install test scripts.
