@@ -3,7 +3,6 @@
 const { describe, it } = require('../helpers/mocha');
 const { expect } = require('chai');
 const path = require('path');
-const tmp = require('tmp');
 const fs = require('fs-extra');
 const sinon = require('sinon');
 const fixturify = require('fixturify');
@@ -18,7 +17,7 @@ const utils = require('../../src/utils');
 const { isGitClean } = gitDiffApply;
 const getCheckedOutBranchName = require('../../src/get-checked-out-branch-name');
 const { promisify } = require('util');
-const tmpDir = promisify(tmp.dir);
+const tmpDir = promisify(require('tmp').dir);
 
 describe(function() {
   this.timeout(30000);
@@ -212,7 +211,7 @@ D  removed-unchanged.txt
       mergeFixtures: 'test/fixtures/merge/nochange'
     });
 
-    expect(isGitClean({ cwd: localDir })).to.be.ok;
+    expect(await isGitClean({ cwd: localDir })).to.be.ok;
     expect(process.cwd()).to.equal(localDir);
   });
 
@@ -226,7 +225,7 @@ D  removed-unchanged.txt
       endTag: 'v3'
     });
 
-    expect(isGitClean({ cwd: localDir })).to.be.ok;
+    expect(await isGitClean({ cwd: localDir })).to.be.ok;
     expect(process.cwd()).to.equal(localDir);
 
     expect(stderr).to.contain('Tags match, nothing to apply');
@@ -256,7 +255,7 @@ D  removed-unchanged.txt
       remoteFixtures: 'test/fixtures/remote/no-change-between-tags'
     });
 
-    expect(isGitClean({ cwd: localDir })).to.be.ok;
+    expect(await isGitClean({ cwd: localDir })).to.be.ok;
     expect(process.cwd()).to.equal(localDir);
 
     await fixtureCompare({
@@ -400,8 +399,8 @@ D  removed-unchanged.txt
           return await copy.apply(this, arguments);
         }
 
-        expect(isGitClean({ cwd: localDir })).to.be.ok;
-        expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
+        expect(await isGitClean({ cwd: localDir })).to.be.ok;
+        expect(await getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
 
         throw 'test copy failed';
       });
@@ -413,8 +412,8 @@ D  removed-unchanged.txt
         remoteFixtures: 'test/fixtures/remote/noconflict'
       });
 
-      expect(isGitClean({ cwd: localDir })).to.be.ok;
-      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+      expect(await isGitClean({ cwd: localDir })).to.be.ok;
+      expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
       expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test copy failed');
@@ -429,8 +428,8 @@ D  removed-unchanged.txt
           return;
         }
 
-        expect(isGitClean({ cwd: localDir })).to.not.be.ok;
-        expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
+        expect(await isGitClean({ cwd: localDir })).to.not.be.ok;
+        expect(await getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
 
         throw 'test copy failed';
       });
@@ -442,8 +441,8 @@ D  removed-unchanged.txt
         remoteFixtures: 'test/fixtures/remote/noconflict'
       });
 
-      expect(isGitClean({ cwd: localDir })).to.be.ok;
-      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+      expect(await isGitClean({ cwd: localDir })).to.be.ok;
+      expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
       expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test copy failed');
@@ -451,12 +450,12 @@ D  removed-unchanged.txt
 
     it('reverts temporary files after apply when error', async function() {
       let { run } = utils;
-      sandbox.stub(utils, 'run').callsFake(function(command) {
-        let result = run.apply(this, arguments);
+      sandbox.stub(utils, 'run').callsFake(async function(command) {
+        let result = await run.apply(this, arguments);
 
         if (command.indexOf('git apply') > -1) {
-          expect(isGitClean({ cwd: localDir })).to.not.be.ok;
-          expect(getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
+          expect(await isGitClean({ cwd: localDir })).to.not.be.ok;
+          expect(await getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
 
           throw 'test apply failed';
         }
@@ -471,8 +470,8 @@ D  removed-unchanged.txt
         remoteFixtures: 'test/fixtures/remote/noconflict'
       });
 
-      expect(isGitClean({ cwd: localDir })).to.be.ok;
-      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+      expect(await isGitClean({ cwd: localDir })).to.be.ok;
+      expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
       expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test apply failed');
@@ -480,12 +479,12 @@ D  removed-unchanged.txt
 
     it('preserves cwd when erroring during the orphan step', async function() {
       let { run } = utils;
-      sandbox.stub(utils, 'run').callsFake(function(command) {
+      sandbox.stub(utils, 'run').callsFake(async function(command) {
         if (command.indexOf('git checkout --orphan') > -1) {
           throw 'test orphan failed';
         }
 
-        return run.apply(this, arguments);
+        return await run.apply(this, arguments);
       });
 
       let {
@@ -495,8 +494,8 @@ D  removed-unchanged.txt
         remoteFixtures: 'test/fixtures/remote/noconflict'
       });
 
-      expect(isGitClean({ cwd: localDir })).to.be.ok;
-      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+      expect(await isGitClean({ cwd: localDir })).to.be.ok;
+      expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
       expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test orphan failed');
@@ -578,8 +577,8 @@ D  removed-unchanged.txt
         reset: true
       });
 
-      expect(isGitClean({ cwd: localDir })).to.be.ok;
-      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+      expect(await isGitClean({ cwd: localDir })).to.be.ok;
+      expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
       expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test remove failed');
@@ -594,8 +593,8 @@ D  removed-unchanged.txt
           return;
         }
 
-        expect(isGitClean({ cwd: localDir })).to.not.be.ok;
-        expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+        expect(await isGitClean({ cwd: localDir })).to.not.be.ok;
+        expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
 
         throw 'test copy failed';
       });
@@ -608,8 +607,8 @@ D  removed-unchanged.txt
         reset: true
       });
 
-      expect(isGitClean({ cwd: localDir })).to.be.ok;
-      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+      expect(await isGitClean({ cwd: localDir })).to.be.ok;
+      expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
       expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test copy failed');
@@ -617,12 +616,12 @@ D  removed-unchanged.txt
 
     it('reverts files after reset when error', async function() {
       let { run } = utils;
-      sandbox.stub(utils, 'run').callsFake(function(command) {
+      sandbox.stub(utils, 'run').callsFake(async function(command) {
         if (command === 'git reset') {
           throw 'test reset failed';
         }
 
-        return run.apply(this, arguments);
+        return await run.apply(this, arguments);
       });
 
       let {
@@ -633,8 +632,8 @@ D  removed-unchanged.txt
         reset: true
       });
 
-      expect(isGitClean({ cwd: localDir })).to.be.ok;
-      expect(getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+      expect(await isGitClean({ cwd: localDir })).to.be.ok;
+      expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
       expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test reset failed');
@@ -732,18 +731,16 @@ D  removed-unchanged.txt
 
     before(async function() {
       try {
-        realGlobalGitignorePath = utils.run('git config --global core.excludesfile').trim();
-      } catch (err) {
-        // do nothing
-      }
+        realGlobalGitignorePath = (await utils.run('git config --global core.excludesfile')).trim();
+      } catch (err) {}
       let tmpGlobalGitignorePath = path.join(await tmpDir(), '.gitignore');
       await fs.writeFile(tmpGlobalGitignorePath, '.vscode');
-      utils.run(`git config --global core.excludesfile "${tmpGlobalGitignorePath}"`);
+      await utils.run(`git config --global core.excludesfile "${tmpGlobalGitignorePath}"`);
     });
 
-    after(function() {
+    after(async function() {
       if (realGlobalGitignorePath) {
-        utils.run(`git config --global core.excludesfile "${realGlobalGitignorePath}"`);
+        await utils.run(`git config --global core.excludesfile "${realGlobalGitignorePath}"`);
       }
     });
 

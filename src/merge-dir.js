@@ -49,8 +49,10 @@ module.exports = async function mergeDir(from, to) {
       debug(`error ${item.path}`);
 
       reject(err);
-    }).on('end', () => {
-      resolve(Promise.all(promises));
+    }).on('end', async() => {
+      await Promise.all(promises);
+
+      resolve();
     });
   });
 };

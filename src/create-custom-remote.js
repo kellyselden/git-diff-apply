@@ -15,15 +15,15 @@ module.exports = async function createCustomRemote({
 }) {
   let cwd = await tmpDir();
 
-  gitInit({
+  await gitInit({
     cwd
   });
 
-  run(startCommand, {
+  await run(startCommand, {
     cwd
   });
 
-  commitAndTag(startTag, {
+  await commitAndTag(startTag, {
     cwd
   });
 
@@ -31,11 +31,11 @@ module.exports = async function createCustomRemote({
     cwd
   });
 
-  run(endCommand, {
+  await run(endCommand, {
     cwd
   });
 
-  commitAndTag(endTag, {
+  await commitAndTag(endTag, {
     cwd
   });
 

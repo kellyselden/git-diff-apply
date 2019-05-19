@@ -25,7 +25,7 @@ describe(function() {
       fixturesPath: remoteFixtures
     });
 
-    return await processBin({
+    return processBin({
       binFile: 'git-diff-apply',
       args: [
         '--remote-url',

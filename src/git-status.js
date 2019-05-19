@@ -2,12 +2,12 @@
 
 const run = require('./run');
 
-function gitStatus(options) {
-  return run('git status --porcelain', options);
+async function gitStatus(options) {
+  return await run('git status --porcelain', options);
 }
 
-function isGitClean(options) {
-  return !gitStatus(options);
+async function isGitClean(options) {
+  return !await gitStatus(options);
 }
 
 module.exports = gitStatus;

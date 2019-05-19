@@ -62,12 +62,12 @@ module.exports = async function gitDiffApply({
 
   let err;
 
-  function buildReturnObject() {
-    checkOutTag(_tmpDir, startTag);
+  async function buildReturnObject() {
+    await checkOutTag(_tmpDir, startTag);
 
     let from = convertToObj(_tmpDir, ignoredFiles);
 
-    checkOutTag(_tmpDir, endTag);
+    await checkOutTag(_tmpDir, endTag);
 
     let to = convertToObj(_tmpDir, ignoredFiles);
 
@@ -80,18 +80,18 @@ module.exports = async function gitDiffApply({
   async function namespaceRepoWithSubDir(subDir) {
     let newTmpDir = await tmpDir();
 
-    gitInit({ cwd: newTmpDir });
+    await gitInit({ cwd: newTmpDir });
 
     let newTmpSubDir = path.join(newTmpDir, subDir);
 
     async function copyToSubDir(tag) {
       await ensureDir(newTmpSubDir);
 
-      checkOutTag(_tmpDir, tag);
+      await checkOutTag(_tmpDir, tag);
 
       await utils.copy(_tmpDir, newTmpSubDir);
 
-      commitAndTag(tag, { cwd: newTmpDir });
+      await commitAndTag(tag, { cwd: newTmpDir });
     }
 
     await copyToSubDir(startTag);
@@ -112,22 +112,22 @@ module.exports = async function gitDiffApply({
   async function resetIgnoredFiles() {
     for (let ignoredFile of ignoredFiles) {
       if (await fs.pathExists(ignoredFile)) {
-        utils.run(`git checkout -- ${ignoredFile}`);
+        await utils.run(`git checkout -- ${ignoredFile}`);
       }
     }
   }
 
   async function applyDiff() {
     let patchFile = path.join(await tmpDir(), 'file.patch');
-    utils.run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} --binary > ${patchFile}`);
+    await utils.run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} --binary > ${patchFile}`);
     if (await fs.readFile(patchFile, 'utf8') !== '') {
-      utils.run(`git apply ${patchFile}`);
+      await utils.run(`git apply ${patchFile}`);
     }
   }
 
   async function go() {
     if (reset) {
-      checkOutTag(_tmpDir, endTag);
+      await checkOutTag(_tmpDir, endTag);
 
       isCodeUntracked = true;
       isCodeModified = true;
@@ -135,17 +135,17 @@ module.exports = async function gitDiffApply({
 
       await copy();
 
-      utils.run('git reset');
+      await utils.run('git reset');
 
       await resetIgnoredFiles();
 
       return;
     }
 
-    checkOutTag(_tmpDir, startTag);
+    await checkOutTag(_tmpDir, startTag);
 
-    oldBranchName = getCheckedOutBranchName();
-    utils.run(`git checkout --orphan ${tempBranchName}`);
+    oldBranchName = await getCheckedOutBranchName();
+    await utils.run(`git checkout --orphan ${tempBranchName}`);
     isTempBranchCheckedOut = true;
 
     await utils.gitRemoveAll({ cwd: root });
@@ -157,7 +157,7 @@ module.exports = async function gitDiffApply({
     isCodeUntracked = true;
     await copy();
 
-    commit();
+    await commit();
     isCodeUntracked = false;
     isTempBranchCommitted = true;
 
@@ -167,25 +167,25 @@ module.exports = async function gitDiffApply({
 
     await resetIgnoredFiles();
 
-    let wereAnyChanged = !isGitClean();
+    let wereAnyChanged = !await isGitClean();
 
     if (wereAnyChanged) {
-      commit();
+      await commit();
     }
     isCodeUntracked = false;
     isCodeModified = false;
 
     let sha;
     if (wereAnyChanged) {
-      sha = utils.run('git rev-parse HEAD');
+      sha = await utils.run('git rev-parse HEAD');
     }
 
-    utils.run(`git checkout ${oldBranchName}`);
+    await utils.run(`git checkout ${oldBranchName}`);
     isTempBranchCheckedOut = false;
 
     if (wereAnyChanged) {
       try {
-        utils.run(`git cherry-pick --no-commit ${sha.trim()}`);
+        await utils.run(`git cherry-pick --no-commit ${sha.trim()}`);
       } catch (err) {
         hasConflicts = true;
       }
@@ -200,7 +200,7 @@ module.exports = async function gitDiffApply({
     let isClean;
 
     try {
-      isClean = isGitClean();
+      isClean = await isGitClean();
     } catch (err) {
       throw 'Not a git repository';
     }
@@ -224,11 +224,11 @@ module.exports = async function gitDiffApply({
     tmpGitDir = path.join(_tmpDir, '.git');
     tmpWorkingDir = _tmpDir;
 
-    utils.run(`git clone --mirror ${remoteUrl} ${tmpGitDir}`);
+    await utils.run(`git clone --mirror ${remoteUrl} ${tmpGitDir}`);
 
-    returnObject = buildReturnObject();
+    returnObject = await buildReturnObject();
 
-    root = getRootDir();
+    root = await getRootDir();
     let subDir = getSubDir(root);
     if (subDir) {
       await namespaceRepoWithSubDir(subDir);
@@ -242,14 +242,14 @@ module.exports = async function gitDiffApply({
 
     try {
       if (isCodeUntracked) {
-        utils.run('git clean -f');
+        await utils.run('git clean -f');
       }
       if (isCodeModified) {
-        utils.run('git reset --hard');
+        await utils.run('git reset --hard');
       }
 
       if (isTempBranchCheckedOut) {
-        utils.run(`git checkout ${oldBranchName}`);
+        await utils.run(`git checkout ${oldBranchName}`);
       }
     } catch (err2) {
       throw {
@@ -261,7 +261,7 @@ module.exports = async function gitDiffApply({
 
   try {
     if (isTempBranchCommitted) {
-      utils.run(`git branch -D ${tempBranchName}`);
+      await utils.run(`git branch -D ${tempBranchName}`);
     }
 
     if (shouldReturnGitIgnoredFiles) {
