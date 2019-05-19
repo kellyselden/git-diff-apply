@@ -5,7 +5,6 @@ environment:
 branches:
   only:
     - master
-    - /^greenkeeper\/.*$/
 
 # Install scripts. (runs after repo cloning)
 install:
