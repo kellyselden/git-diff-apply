@@ -328,7 +328,7 @@ D  removed-unchanged.txt
             )
           ]);
 
-          commit({ m: 'local', cwd: rootDir });
+          await commit({ m: 'local', cwd: rootDir });
         }
       });
 
@@ -371,7 +371,7 @@ D  removed-unchanged.txt
             )
           ]);
 
-          commit({ m: 'local', cwd: rootDir });
+          await commit({ m: 'local', cwd: rootDir });
         }
       });
 
