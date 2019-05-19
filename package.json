@@ -39,7 +39,6 @@
   "dependencies": {
     "co": "^4.6.0",
     "debug": "^4.0.0",
-    "denodeify": "^1.2.1",
     "fixturify": "^1.0.0",
     "fs-extra": "^8.0.0",
     "klaw": "^3.0.0",

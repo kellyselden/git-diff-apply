@@ -18,8 +18,8 @@ const utils = require('../../src/utils');
 const { isGitClean } = gitDiffApply;
 const getCheckedOutBranchName = require('../../src/get-checked-out-branch-name');
 const co = require('co');
-const denodeify = require('denodeify');
-const tmpDir = denodeify(tmp.dir);
+const { promisify } = require('util');
+const tmpDir = promisify(tmp.dir);
 
 describe(function() {
   this.timeout(30000);
