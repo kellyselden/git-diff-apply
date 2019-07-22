@@ -2,7 +2,7 @@
   "name": "git-diff-apply",
   "version": "0.18.0",
   "description": "Use an unrelated remote repository to apply a git diff",
-  "main": "src/index.js",
+  "main": "src",
   "bin": {
     "git-diff-apply": "bin/git-diff-apply.js"
   },
