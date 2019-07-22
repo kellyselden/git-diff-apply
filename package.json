@@ -1,6 +1,6 @@
 {
   "name": "git-diff-apply",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "Use an unrelated remote repository to apply a git diff",
   "main": "src",
   "files": [
