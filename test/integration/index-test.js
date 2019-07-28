@@ -798,12 +798,12 @@ D  removed-unchanged.txt
     let {
       status
     } = await merge({
-      localFixtures: 'test/fixtures/local/space',
-      remoteFixtures: 'test/fixtures/remote/space'
+      localFixtures: 'test/fixtures/local/space in dirname',
+      remoteFixtures: 'test/fixtures/remote/space in dirname'
     });
 
     await fixtureCompare({
-      mergeFixtures: 'test/fixtures/merge/space'
+      mergeFixtures: 'test/fixtures/merge/space in dirname'
     });
 
     expect(status).to.equal(`M  "space in filename.txt"
