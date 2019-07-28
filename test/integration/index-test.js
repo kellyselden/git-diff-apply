@@ -123,7 +123,7 @@ describe(function() {
     });
   };
 
-  it('handles no conflicts', async function() {
+  it.only('handles no conflicts', async function() {
     let {
       status
     } = await merge({

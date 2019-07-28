@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "debug": "^4.0.0",
+    "execa": "^2.0.3",
     "fixturify": "^1.0.0",
     "fs-extra": "^8.0.0",
     "klaw": "^3.0.0",

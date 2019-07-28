@@ -5,5 +5,5 @@ const run = require('./run');
 
 module.exports = async function commitAndTag(tag, options) {
   await commit(options);
-  await run(`git tag ${tag}`, options);
+  await run('git', ['tag', tag], options);
 };
