@@ -8,7 +8,7 @@ async function lsFiles(options) {
   // attempt to fix https://github.com/ember-cli/ember-cli-update/issues/583
   options = { maxBuffer: 500 * 1024, ...options };
 
-  let files = (await run('git ls-files', options)).split(/\r?\n/g);
+  let files = (await run('git ls-files', options)).trim().split(/\r?\n/g);
 
   return files;
 }
