@@ -185,7 +185,7 @@ module.exports = async function gitDiffApply({
 
     if (wereAnyChanged) {
       try {
-        await utils.run(`git cherry-pick --no-commit ${sha.trim()}`);
+        await utils.run(`git cherry-pick --no-commit ${sha}`);
       } catch (err) {
         hasConflicts = true;
       }
