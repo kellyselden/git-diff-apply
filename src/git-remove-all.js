@@ -9,7 +9,7 @@ module.exports = async function gitRemoveAll(options) {
   // when in a monorepo
   // await run('git rm -rf .', options);
 
-  let files = (await run('git ls-files', options)).trim().split(/\r?\n/g);
+  let files = (await run('git ls-files', options)).split(/\r?\n/g);
 
   for (let file of files) {
     // this removes folders that become empty,
