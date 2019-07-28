@@ -731,7 +731,7 @@ D  removed-unchanged.txt
 
     before(async function() {
       try {
-        realGlobalGitignorePath = await utils.run('git config --global core.excludesfile');
+        realGlobalGitignorePath = (await utils.run('git config --global core.excludesfile')).trim();
       } catch (err) {}
       let tmpGlobalGitignorePath = path.join(await tmpDir(), '.gitignore');
       await fs.writeFile(tmpGlobalGitignorePath, '.vscode');

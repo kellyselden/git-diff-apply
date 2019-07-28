@@ -8,5 +8,5 @@ module.exports = async function run(command, options) {
   debug(command);
   let { stdout } = await exec(command, options);
   debug(stdout);
-  return stdout.trim();
+  return stdout;
 };
