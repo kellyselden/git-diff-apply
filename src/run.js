@@ -7,6 +7,7 @@ const debug = require('debug')('git-diff-apply');
 module.exports = async function run(command, options) {
   debug(command);
   let { stdout } = await exec(command, options);
-  debug(stdout);
-  return stdout.trim();
+  let result = stdout.trim();
+  debug(result);
+  return result;
 };
