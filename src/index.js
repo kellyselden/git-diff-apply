@@ -111,8 +111,13 @@ module.exports = async function gitDiffApply({
 
   async function resetIgnoredFiles() {
     for (let ignoredFile of ignoredFiles) {
-      if (await fs.pathExists(ignoredFile)) {
+      // An exist check is not good enough.
+      // `git checkout` will fail unless it is also tracked.
+      let isTracked = await utils.run(`git ls-files ${ignoredFile}`);
+      if (isTracked) {
         await utils.run(`git checkout -- ${ignoredFile}`);
+      } else {
+        await fs.remove(ignoredFile);
       }
     }
   }
