@@ -865,4 +865,21 @@ D  removed-unchanged.txt
     expect(status).to.equal(`M  changed.txt
 `);
   });
+
+  it('handles ignored files that were added upstream', async function() {
+    let {
+      status
+    } = await merge({
+      localFixtures: 'test/fixtures/local/ignored-added',
+      remoteFixtures: 'test/fixtures/remote/ignored-added',
+      ignoredFiles: ['ignored-added.txt']
+    });
+
+    await fixtureCompare({
+      mergeFixtures: 'test/fixtures/merge/ignored-added'
+    });
+
+    expect(status).to.equal(`M  changed.txt
+`);
+  });
 });
