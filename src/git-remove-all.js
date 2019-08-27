@@ -3,7 +3,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const run = require('./run');
-const {runWithSpawn} = require('./run');
+const { runWithSpawn } = require('./run');
 
 module.exports = async function gitRemoveAll(options) {
   // this removes cwd as well, which trips up your terminal
@@ -12,7 +12,9 @@ module.exports = async function gitRemoveAll(options) {
 
   // Using spawn rather than run here because ls-files produces a lot
   // of output if it gets run in a large repo
-  let files = (await runWithSpawn('git', ['ls-files'], options)).split(/\r?\n/g);
+  let files = (await runWithSpawn('git', ['ls-files'], options))
+    .split(/\r?\n/g)
+    .filter(Boolean);
 
   for (let file of files) {
     // this removes folders that become empty,

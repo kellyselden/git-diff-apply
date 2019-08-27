@@ -14,13 +14,13 @@ module.exports = async function run(command, options) {
 
 module.exports.runWithSpawn = async function runWithSpawn(cmd, args, options) {
   return await new Promise(function(resolve, reject) {
-    const command = [cmd, ...args].join(' ');
+    let command = [cmd, ...args].join(' ');
     let stdout = '';
     let errorMessage = '';
 
     debug(command);
 
-    const child = spawn(cmd, args, options);
+    let child = spawn(cmd, args, options);
     child.stdout.on('data', function(data) {
       stdout += data;
     });
