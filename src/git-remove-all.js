@@ -3,12 +3,15 @@
 const fs = require('fs-extra');
 const path = require('path');
 const run = require('./run');
+const { runWithSpawn } = require('./run');
 
 async function lsFiles(options) {
-  // attempt to fix https://github.com/ember-cli/ember-cli-update/issues/583
-  options = { maxBuffer: 500 * 1024, ...options };
-
-  let files = (await run('git ls-files', options)).trim().split(/\r?\n/g);
+  // Using spawn rather than run here because ls-files produces a lot
+  // of output if it gets run in a large repo.
+  // See https://github.com/kellyselden/git-diff-apply/pull/277
+  let files = (await runWithSpawn('git', ['ls-files'], options))
+    .split(/\r?\n/g)
+    .filter(Boolean);
 
   return files;
 }
