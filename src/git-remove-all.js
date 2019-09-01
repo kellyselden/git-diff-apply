@@ -18,10 +18,11 @@ async function lsFiles(options) {
 function chunkFilePaths(files, maxChunkSize = 4096) {
   let currentChunkLength = 0;
   let currentChunkIndex = 0;
-  let chunkedOutput = [[]];
+  let chunkedOutput = [];
 
   files.forEach(file => {
     if (currentChunkLength + file.length <= maxChunkSize) {
+      chunkedOutput[currentChunkIndex] = chunkedOutput[currentChunkIndex] || [];
       chunkedOutput[currentChunkIndex].push(file);
       currentChunkLength += file.length;
     } else {
@@ -53,3 +54,5 @@ module.exports = async function gitRemoveAll(options) {
     await runWithSpawn('git', ['add', ...files], options);
   }
 };
+
+module.exports.chunkFilePaths = chunkFilePaths;
