@@ -60,6 +60,7 @@
     "eslint-plugin-mocha": "^6.0.0",
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-prefer-let": "^1.0.1",
+    "fixturify-project": "^1.9.0",
     "git-fixtures": "^2.0.0",
     "mocha": "^6.0.2",
     "mocha-helpers": "^4.0.0",

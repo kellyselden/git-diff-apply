@@ -18,6 +18,7 @@ const { isGitClean } = gitDiffApply;
 const getCheckedOutBranchName = require('../../src/get-checked-out-branch-name');
 const { promisify } = require('util');
 const tmpDir = promisify(require('tmp').dir);
+const Project = require('fixturify-project');
 
 describe(function() {
   this.timeout(30000);
@@ -880,6 +881,51 @@ D  removed-unchanged.txt
     });
 
     expect(status).to.equal(`M  changed.txt
+`);
+  });
+
+  it('takes a reasonable amount of time on a large monorepo', async function() {
+    let subDir = 'foo/bar';
+
+    let beforeTime;
+
+    let {
+      status
+    } = await merge({
+      localFixtures: 'test/fixtures/local/noconflict',
+      remoteFixtures: 'test/fixtures/remote/noconflict',
+      subDir,
+      async beforeMerge() {
+        let project = new Project('monorepo', '0.0.0');
+
+        for (let i = 0; i < 100; i++) {
+          project.addDependency(`package${i}`, '0.0.0');
+
+          project.files[`index${i}.js`] = 'module.exports = "Hello, World!"';
+        }
+
+        project.writeSync(rootDir);
+
+        await commit({ m: 'local', cwd: rootDir });
+
+        beforeTime = new Date();
+      }
+    });
+
+    let afterTime = new Date();
+
+    let delta = afterTime - beforeTime;
+
+    let threshold = 3 * 1000;
+
+    // Regarding https://github.com/kellyselden/git-diff-apply/pull/278
+    // Testing on Mac
+    // Before: ~7100ms
+    // After: ~1300ms
+    // 3s seems to be a good threshold
+    expect(delta).to.be.lessThan(threshold);
+
+    expect(status).to.equal(`M  foo/bar/changed.txt
 `);
   });
 });
