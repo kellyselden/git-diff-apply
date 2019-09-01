@@ -15,7 +15,7 @@ async function lsFiles(options) {
   return files;
 }
 
-function chunkFilePaths(files, maxChunkSize = 2048) {
+function chunkFilePaths(files, maxChunkSize = 4096) {
   let currentChunkLength = 0;
   let currentChunkIndex = 0;
   let chunkedOutput = [[]];
