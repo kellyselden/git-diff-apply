@@ -2,7 +2,6 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const run = require('./run');
 const { runWithSpawn } = require('./run');
 
 async function lsFiles(options) {
@@ -16,20 +15,44 @@ async function lsFiles(options) {
   return files;
 }
 
+function chunkFilePaths(files, maxChunkSize = 4096) {
+  let currentChunkLength = 0;
+  let currentChunkIndex = 0;
+  let chunkedOutput = [];
+
+  files.forEach(file => {
+    if (currentChunkLength + file.length <= maxChunkSize) {
+      chunkedOutput[currentChunkIndex] = chunkedOutput[currentChunkIndex] || [];
+      chunkedOutput[currentChunkIndex].push(file);
+      currentChunkLength += file.length;
+    } else {
+      chunkedOutput.push([file]);
+      currentChunkLength = file.length;
+      currentChunkIndex += 1;
+    }
+  });
+
+  return chunkedOutput;
+}
+
 module.exports = async function gitRemoveAll(options) {
   // this removes cwd as well, which trips up your terminal
   // when in a monorepo
   // await run('git rm -rf .', options);
 
   let files = await lsFiles(options);
+  let fileGroups = chunkFilePaths(files);
 
-  for (let file of files) {
+  for (let files of fileGroups) {
     // this removes folders that become empty,
     // which we are trying to avoid
     // await run(`git rm -f "${file}"`, options);
+    for (let file of files) {
+      await fs.remove(path.join(options.cwd, file));
+    }
 
-    await fs.remove(path.join(options.cwd, file));
-
-    await run(`git add "${file}"`, options);
+    await runWithSpawn('git', ['add', ...files], options);
   }
 };
+
+module.exports.chunkFilePaths = chunkFilePaths;
