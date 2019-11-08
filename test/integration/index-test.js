@@ -102,7 +102,7 @@ describe(function() {
     });
   }
 
-  let fixtureCompare = async function fixtureCompare({
+  async function fixtureCompare({
     mergeFixtures,
     subDir = '',
     beforeCompare = async() => {}
@@ -125,7 +125,7 @@ describe(function() {
       actual: rootDir,
       expected: rootMergeDir
     });
-  };
+  }
 
   it('handles no conflicts', async function() {
     let {
