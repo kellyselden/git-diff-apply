@@ -49,7 +49,6 @@ describe(function() {
   async function merge({
     localFixtures,
     remoteFixtures,
-    remoteUrl,
     dirty,
     noGit,
     subDir = '',
@@ -83,7 +82,7 @@ describe(function() {
     localDir = process.cwd();
 
     let promise = gitDiffApply({
-      remoteUrl: remoteUrl || remoteDir,
+      remoteUrl: remoteDir,
       startTag,
       endTag,
       ignoredFiles,
@@ -535,7 +534,6 @@ D  removed-unchanged.txt
         remoteFixtures,
         reset: true,
         ignoredFiles: ['ignored-changed.txt'],
-        remoteUrl: null,
         createCustomDiff: true,
         startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
         endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
@@ -678,7 +676,6 @@ D  removed-unchanged.txt
     } = await merge({
       localFixtures: 'test/fixtures/local/noconflict',
       remoteFixtures,
-      remoteUrl: null,
       createCustomDiff: true,
       startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
       endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
@@ -757,7 +754,6 @@ D  removed-unchanged.txt
       await merge({
         localFixtures: 'test/fixtures/local/globally-gitignored',
         remoteFixtures,
-        remoteUrl: null,
         createCustomDiff: true,
         startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
         endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
