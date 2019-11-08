@@ -19,17 +19,20 @@ module.exports = async function createCustomRemote({
     cwd
   });
 
-  await run(startCommand, {
-    cwd
-  });
+  // can happen during --reset
+  if (startTag !== endTag) {
+    await run(startCommand, {
+      cwd
+    });
 
-  await commitAndTag(startTag, {
-    cwd
-  });
+    await commitAndTag(startTag, {
+      cwd
+    });
 
-  await gitRemoveAll({
-    cwd
-  });
+    await gitRemoveAll({
+      cwd
+    });
+  }
 
   await run(endCommand, {
     cwd
