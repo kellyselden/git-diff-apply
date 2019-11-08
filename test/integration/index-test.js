@@ -547,6 +547,30 @@ D  removed-unchanged.txt
 `);
     });
 
+    it('resets using a create diff on same tag', async function() {
+      let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
+      let remoteFixtures = 'test/fixtures/remote/reset';
+
+      let {
+        status
+      } = await merge({
+        localFixtures: 'test/fixtures/local/reset',
+        remoteFixtures,
+        reset: true,
+        ignoredFiles: ['ignored-changed.txt'],
+        createCustomDiff: true,
+        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`,
+        startTag: defaultEndTag
+      });
+
+      await fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/reset'
+      });
+
+      expect(status).to.equal(` M changed.txt
+`);
+    });
+
     it('ignores matching tags', async function() {
       await merge({
         localFixtures: 'test/fixtures/local/reset',
