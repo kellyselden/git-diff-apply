@@ -20,6 +20,9 @@ const { promisify } = require('util');
 const tmpDir = promisify(require('tmp').dir);
 const Project = require('fixturify-project');
 
+const defaultStartTag = 'v1';
+const defaultEndTag = 'v3';
+
 describe(function() {
   this.timeout(30000);
 
@@ -51,8 +54,8 @@ describe(function() {
     noGit,
     subDir = '',
     ignoredFiles = [],
-    startTag = 'v1',
-    endTag = 'v3',
+    startTag = defaultStartTag,
+    endTag = defaultEndTag,
     reset,
     createCustomDiff,
     startCommand,
@@ -222,8 +225,7 @@ D  removed-unchanged.txt
     } = await merge({
       localFixtures: 'test/fixtures/local/noconflict',
       remoteFixtures: 'test/fixtures/remote/noconflict',
-      startTag: 'v3',
-      endTag: 'v3'
+      startTag: defaultEndTag
     });
 
     expect(await isGitClean({ cwd: localDir })).to.be.ok;
@@ -376,7 +378,7 @@ D  removed-unchanged.txt
       });
 
       await fixtureCompare({
-        mergeFixtures: 'test/fixtures/remote/noconflict/v3',
+        mergeFixtures: `test/fixtures/remote/noconflict/${defaultEndTag}`,
         subDir,
         async beforeCompare({
           localMergeDir
@@ -525,8 +527,6 @@ D  removed-unchanged.txt
     it('resets using a create diff', async function() {
       let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
       let remoteFixtures = 'test/fixtures/remote/reset';
-      let startTag = 'v1';
-      let endTag = 'v3';
 
       let {
         status
@@ -537,10 +537,8 @@ D  removed-unchanged.txt
         ignoredFiles: ['ignored-changed.txt'],
         remoteUrl: null,
         createCustomDiff: true,
-        startCommand: `node ${cpr} ${path.resolve(remoteFixtures, startTag)} .`,
-        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, endTag)} .`,
-        startTag,
-        endTag
+        startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
+        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
       });
 
       await fixtureCompare({
@@ -557,7 +555,7 @@ D  removed-unchanged.txt
         remoteFixtures: 'test/fixtures/remote/reset',
         reset: true,
         ignoredFiles: ['ignored-changed.txt'],
-        startTag: 'v3'
+        startTag: defaultEndTag
       });
 
       await fixtureCompare({
@@ -656,7 +654,7 @@ D  removed-unchanged.txt
       });
 
       await fixtureCompare({
-        mergeFixtures: 'test/fixtures/remote/gitignored/v3',
+        mergeFixtures: `test/fixtures/remote/gitignored/${defaultEndTag}`,
         async beforeCompare({
           localMergeDir
         }) {
@@ -674,8 +672,6 @@ D  removed-unchanged.txt
   it('can create a custom diff', async function() {
     let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
     let remoteFixtures = 'test/fixtures/remote/noconflict';
-    let startTag = 'v1';
-    let endTag = 'v3';
 
     let {
       status
@@ -684,10 +680,8 @@ D  removed-unchanged.txt
       remoteFixtures,
       remoteUrl: null,
       createCustomDiff: true,
-      startCommand: `node ${cpr} ${path.resolve(remoteFixtures, startTag)} .`,
-      endCommand: `node ${cpr} ${path.resolve(remoteFixtures, endTag)} .`,
-      startTag,
-      endTag
+      startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
+      endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
     });
 
     await fixtureCompare({
@@ -759,18 +753,14 @@ D  removed-unchanged.txt
     it('can create a custom diff', async function() {
       let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
       let remoteFixtures = 'test/fixtures/remote/globally-gitignored';
-      let startTag = 'v1';
-      let endTag = 'v3';
 
       await merge({
         localFixtures: 'test/fixtures/local/globally-gitignored',
         remoteFixtures,
         remoteUrl: null,
         createCustomDiff: true,
-        startCommand: `node ${cpr} ${path.resolve(remoteFixtures, startTag)} .`,
-        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, endTag)} .`,
-        startTag,
-        endTag
+        startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
+        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
       });
 
       await fixtureCompare({
