@@ -32,7 +32,8 @@ module.exports = {
         mocha: true
       },
       rules: {
-        'mocha/no-setup-in-describe': 0
+        'mocha/no-setup-in-describe': 0,
+        'mocha/no-exclusive-tests': 2
       }
     }
   ]
