@@ -8,6 +8,9 @@ const {
   fixtureCompare: _fixtureCompare
 } = require('git-fixtures');
 
+const defaultStartTag = 'v1';
+const defaultEndTag = 'v3';
+
 describe(function() {
   this.timeout(30000);
 
@@ -31,9 +34,9 @@ describe(function() {
         '--remote-url',
         remoteDir,
         '--start-tag',
-        'v1',
+        defaultStartTag,
         '--end-tag',
-        'v3',
+        defaultEndTag,
         '--resolve-conflicts'
       ],
       cwd: localDir,
