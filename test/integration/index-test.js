@@ -523,7 +523,7 @@ D  removed-unchanged.txt
 `);
     });
 
-    it('resets using a create diff', async function() {
+    it('resets using a custom diff', async function() {
       let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
       let remoteFixtures = 'test/fixtures/remote/reset';
 
@@ -547,7 +547,7 @@ D  removed-unchanged.txt
 `);
     });
 
-    it('resets using a create diff on same tag', async function() {
+    it('resets using a custom diff on same tag', async function() {
       let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
       let remoteFixtures = 'test/fixtures/remote/reset';
 
