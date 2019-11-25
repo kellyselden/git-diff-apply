@@ -507,7 +507,8 @@ D  removed-unchanged.txt
   describe('reset', function() {
     it('resets files to new version', async function() {
       let {
-        status
+        status,
+        result
       } = await merge({
         localFixtures: 'test/fixtures/local/reset',
         remoteFixtures: 'test/fixtures/remote/reset',
@@ -521,6 +522,8 @@ D  removed-unchanged.txt
 
       expect(status).to.equal(` M changed.txt
 `);
+
+      expect(result.from).to.deep.equal({});
     });
 
     it('resets using a custom diff', async function() {
@@ -528,14 +531,14 @@ D  removed-unchanged.txt
       let remoteFixtures = 'test/fixtures/remote/reset';
 
       let {
-        status
+        status,
+        result
       } = await merge({
         localFixtures: 'test/fixtures/local/reset',
         remoteFixtures,
         reset: true,
         ignoredFiles: ['ignored-changed.txt'],
         createCustomDiff: true,
-        startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
         endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
       });
 
@@ -545,6 +548,8 @@ D  removed-unchanged.txt
 
       expect(status).to.equal(` M changed.txt
 `);
+
+      expect(result.from).to.deep.equal({});
     });
 
     it('resets using a custom diff on same tag', async function() {
@@ -552,7 +557,8 @@ D  removed-unchanged.txt
       let remoteFixtures = 'test/fixtures/remote/reset';
 
       let {
-        status
+        status,
+        result
       } = await merge({
         localFixtures: 'test/fixtures/local/reset',
         remoteFixtures,
@@ -569,6 +575,35 @@ D  removed-unchanged.txt
 
       expect(status).to.equal(` M changed.txt
 `);
+
+      expect(result.from).to.deep.equal({});
+    });
+
+    it('resets using a custom diff without start tag', async function() {
+      let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
+      let remoteFixtures = 'test/fixtures/remote/reset';
+
+      let {
+        status,
+        result
+      } = await merge({
+        localFixtures: 'test/fixtures/local/reset',
+        remoteFixtures,
+        reset: true,
+        ignoredFiles: ['ignored-changed.txt'],
+        createCustomDiff: true,
+        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`,
+        startTag: null
+      });
+
+      await fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/reset'
+      });
+
+      expect(status).to.equal(` M changed.txt
+`);
+
+      expect(result.from).to.deep.equal({});
     });
 
     it('ignores matching tags', async function() {

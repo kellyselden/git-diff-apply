@@ -63,9 +63,15 @@ module.exports = async function gitDiffApply({
   let err;
 
   async function buildReturnObject() {
-    await checkOutTag(_tmpDir, startTag);
+    let from;
 
-    let from = convertToObj(_tmpDir, ignoredFiles);
+    if (reset) {
+      from = {};
+    } else {
+      await checkOutTag(_tmpDir, startTag);
+
+      from = convertToObj(_tmpDir, ignoredFiles);
+    }
 
     await checkOutTag(_tmpDir, endTag);
 
@@ -219,7 +225,8 @@ module.exports = async function gitDiffApply({
         startCommand,
         endCommand,
         startTag,
-        endTag
+        endTag,
+        reset
       });
 
       remoteUrl = tmpPath;

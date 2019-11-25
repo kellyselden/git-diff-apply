@@ -11,7 +11,8 @@ module.exports = async function createCustomRemote({
   startCommand,
   endCommand,
   startTag,
-  endTag
+  endTag,
+  reset
 }) {
   let cwd = await tmpDir();
 
@@ -19,8 +20,7 @@ module.exports = async function createCustomRemote({
     cwd
   });
 
-  // can happen during --reset
-  if (startTag !== endTag) {
+  if (!reset) {
     await run(startCommand, {
       cwd
     });
