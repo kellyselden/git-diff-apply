@@ -1,25 +1,24 @@
 'use strict';
 
-const { promisify } = require('util');
-const { exec, spawn } = require('child_process');
+const { spawn } = require('child_process');
 const debug = require('debug')('git-diff-apply');
-const execPromise = promisify(exec);
 
-module.exports = async function run(command, options) {
+const run = async function run(command, options) {
   debug(command);
-  let { stdout } = await execPromise(command, options);
+  let cmdArr = command.split(' ');
+  let [cmd, ...args] = cmdArr;
+  let stdout = await runWithSpawn(cmd, args, options);
   debug(stdout);
   return stdout;
 };
 
-module.exports.runWithSpawn = async function runWithSpawn(cmd, args, options) {
+const runWithSpawn = async function runWithSpawn(cmd, args, options) {
   return await new Promise(function(resolve, reject) {
     let command = [cmd, ...args].join(' ');
     let stdout = '';
     let errorMessage = '';
 
     debug(command);
-
     let child = spawn(cmd, args, options);
     child.stdout.on('data', function(data) {
       stdout += data;
@@ -36,3 +35,6 @@ module.exports.runWithSpawn = async function runWithSpawn(cmd, args, options) {
     });
   });
 };
+
+module.exports = run;
+module.exports.runWithSpawn = runWithSpawn;
