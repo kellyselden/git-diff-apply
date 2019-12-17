@@ -3,11 +3,21 @@
 const { spawn } = require('child_process');
 const debug = require('debug')('git-diff-apply');
 
-const run = async function run(command, options) {
+const run = async function run(command, options = {}) {
+  // Matches the shell-enabled behaviour of child_process.exec, which this
+  // function previously used to run the specified command. This avoids
+  // problems when handling quotes and whitespace.
+  options.shell = true;
   debug(command);
-  let cmdArr = command.split(' ');
-  let [cmd, ...args] = cmdArr;
-  let stdout = await runWithSpawn(cmd, args, options);
+  let [
+    cmd,
+    ...args
+  ] = command.split(' ');
+  let stdout = await runWithSpawn(
+    cmd,
+    args,
+    options
+  );
   debug(stdout);
   return stdout;
 };
