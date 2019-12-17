@@ -9,15 +9,8 @@ const run = async function run(command, options = {}) {
   // problems when handling quotes and whitespace.
   options.shell = true;
   debug(command);
-  let [
-    cmd,
-    ...args
-  ] = command.split(' ');
-  let stdout = await runWithSpawn(
-    cmd,
-    args,
-    options
-  );
+  let [cmd, ...args] = command.split(' ');
+  let stdout = await runWithSpawn(cmd, args, options);
   debug(stdout);
   return stdout;
 };
