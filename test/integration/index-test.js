@@ -52,6 +52,7 @@ describe(function() {
     startTag = defaultStartTag,
     endTag = defaultEndTag,
     reset,
+    init,
     createCustomDiff,
     startCommand,
     endCommand,
@@ -83,6 +84,7 @@ describe(function() {
       endTag,
       ignoredFiles,
       reset,
+      init,
       createCustomDiff,
       startCommand,
       endCommand
@@ -387,6 +389,49 @@ D  removed-unchanged.txt
         }
       });
     });
+
+    it('inits files to new version + preserves locally gitignored', async function() {
+      await merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures: 'test/fixtures/remote/noconflict',
+        init: true,
+        subDir,
+        async beforeMerge() {
+          await Promise.all([
+            fs.ensureFile(path.join(localDir, 'local-and-remote')),
+            fs.ensureFile(path.join(localDir, 'local-only')),
+            fs.ensureFile(path.join(localDir, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(localDir, 'folder/local-only')),
+            fs.copy(
+              path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
+              path.join(rootDir, '.gitignore')
+            )
+          ]);
+
+          await commit({ m: 'local', cwd: rootDir });
+        }
+      });
+
+      await fixtureCompare({
+        mergeFixtures: `test/fixtures/remote/noconflict/${defaultEndTag}`,
+        subDir,
+        async beforeCompare({
+          localMergeDir,
+          rootMergeDir
+        }) {
+          await Promise.all([
+            fs.ensureFile(path.join(localMergeDir, 'local-and-remote')),
+            fs.ensureFile(path.join(localMergeDir, 'local-only')),
+            fs.ensureFile(path.join(localMergeDir, 'folder/local-and-remote')),
+            fs.ensureFile(path.join(localMergeDir, 'folder/local-only')),
+            fs.copy(
+              path.join(cwd, 'test/fixtures/local/gitignored/local/.gitignore'),
+              path.join(rootMergeDir, '.gitignore')
+            )
+          ]);
+        }
+      });
+    });
   });
 
   describe('error recovery', function() {
@@ -500,231 +545,240 @@ D  removed-unchanged.txt
     });
   });
 
-  describe('reset', function() {
-    it('resets files to new version', async function() {
-      let {
-        status,
-        result
-      } = await merge({
-        localFixtures: 'test/fixtures/local/reset',
-        remoteFixtures: 'test/fixtures/remote/reset',
-        reset: true,
-        ignoredFiles: ['ignored-changed.txt']
-      });
-
-      await fixtureCompare({
-        mergeFixtures: 'test/fixtures/merge/reset'
-      });
-
-      expect(status).to.equal(` M changed.txt
+  for (let [type, expectedStatus] of [
+    ['reset', ` M changed.txt
  D unchanged.txt
-`);
+`],
+    ['init', ` M changed.txt
+`]
+  ]) {
+    describe(type, function() {
+      it(`${type}s files to new version`, async function() {
+        let {
+          status,
+          result
+        } = await merge({
+          localFixtures: `test/fixtures/local/${type}`,
+          remoteFixtures: `test/fixtures/remote/${type}`,
+          [type]: true,
+          ignoredFiles: ['ignored-changed.txt']
+        });
 
-      expect(result.from).to.deep.equal({});
-    });
+        await fixtureCompare({
+          mergeFixtures: `test/fixtures/merge/${type}`
+        });
 
-    it('resets using a custom diff', async function() {
-      let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
-      let remoteFixtures = 'test/fixtures/remote/reset';
+        expect(status).to.equal(expectedStatus);
 
-      let {
-        status,
-        result
-      } = await merge({
-        localFixtures: 'test/fixtures/local/reset',
-        remoteFixtures,
-        reset: true,
-        ignoredFiles: ['ignored-changed.txt'],
-        createCustomDiff: true,
-        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
+        expect(result.from).to.deep.equal({});
       });
 
-      await fixtureCompare({
-        mergeFixtures: 'test/fixtures/merge/reset'
+      it(`${type}s using a custom diff`, async function() {
+        let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
+        let remoteFixtures = `test/fixtures/remote/${type}`;
+
+        let {
+          status,
+          result
+        } = await merge({
+          localFixtures: `test/fixtures/local/${type}`,
+          remoteFixtures,
+          [type]: true,
+          ignoredFiles: ['ignored-changed.txt'],
+          createCustomDiff: true,
+          endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
+        });
+
+        await fixtureCompare({
+          mergeFixtures: `test/fixtures/merge/${type}`
+        });
+
+        expect(status).to.equal(expectedStatus);
+
+        expect(result.from).to.deep.equal({});
       });
 
-      expect(status).to.equal(` M changed.txt
- D unchanged.txt
-`);
+      it('resets using a custom diff on same tag', async function() {
+        let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
+        let remoteFixtures = `test/fixtures/remote/${type}`;
 
-      expect(result.from).to.deep.equal({});
-    });
+        let {
+          status,
+          result
+        } = await merge({
+          localFixtures: `test/fixtures/local/${type}`,
+          remoteFixtures,
+          [type]: true,
+          ignoredFiles: ['ignored-changed.txt'],
+          createCustomDiff: true,
+          endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`,
+          startTag: defaultEndTag
+        });
 
-    it('resets using a custom diff on same tag', async function() {
-      let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
-      let remoteFixtures = 'test/fixtures/remote/reset';
+        await fixtureCompare({
+          mergeFixtures: `test/fixtures/merge/${type}`
+        });
 
-      let {
-        status,
-        result
-      } = await merge({
-        localFixtures: 'test/fixtures/local/reset',
-        remoteFixtures,
-        reset: true,
-        ignoredFiles: ['ignored-changed.txt'],
-        createCustomDiff: true,
-        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`,
-        startTag: defaultEndTag
+        expect(status).to.equal(expectedStatus);
+
+        expect(result.from).to.deep.equal({});
       });
 
-      await fixtureCompare({
-        mergeFixtures: 'test/fixtures/merge/reset'
+      it('resets using a custom diff without start tag', async function() {
+        let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
+        let remoteFixtures = `test/fixtures/remote/${type}`;
+
+        let {
+          status,
+          result
+        } = await merge({
+          localFixtures: `test/fixtures/local/${type}`,
+          remoteFixtures,
+          [type]: true,
+          ignoredFiles: ['ignored-changed.txt'],
+          createCustomDiff: true,
+          endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`,
+          startTag: null
+        });
+
+        await fixtureCompare({
+          mergeFixtures: `test/fixtures/merge/${type}`
+        });
+
+        expect(status).to.equal(expectedStatus);
+
+        expect(result.from).to.deep.equal({});
       });
 
-      expect(status).to.equal(` M changed.txt
- D unchanged.txt
-`);
+      it('ignores matching tags', async function() {
+        await merge({
+          localFixtures: `test/fixtures/local/${type}`,
+          remoteFixtures: `test/fixtures/remote/${type}`,
+          [type]: true,
+          ignoredFiles: ['ignored-changed.txt'],
+          startTag: defaultEndTag
+        });
 
-      expect(result.from).to.deep.equal({});
-    });
-
-    it('resets using a custom diff without start tag', async function() {
-      let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
-      let remoteFixtures = 'test/fixtures/remote/reset';
-
-      let {
-        status,
-        result
-      } = await merge({
-        localFixtures: 'test/fixtures/local/reset',
-        remoteFixtures,
-        reset: true,
-        ignoredFiles: ['ignored-changed.txt'],
-        createCustomDiff: true,
-        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`,
-        startTag: null
+        await fixtureCompare({
+          mergeFixtures: `test/fixtures/merge/${type}`
+        });
       });
 
-      await fixtureCompare({
-        mergeFixtures: 'test/fixtures/merge/reset'
-      });
+      if (type === 'reset') {
+        it('reverts files after remove when error', async function() {
+          sinon.stub(utils, 'gitRemoveAll').callsFake(async() => {
+            throw 'test remove failed';
+          });
 
-      expect(status).to.equal(` M changed.txt
- D unchanged.txt
-`);
+          let {
+            stderr
+          } = await merge({
+            localFixtures: `test/fixtures/local/${type}`,
+            remoteFixtures: `test/fixtures/remote/${type}`,
+            [type]: true
+          });
 
-      expect(result.from).to.deep.equal({});
-    });
+          expect(await isGitClean({ cwd: localDir })).to.be.ok;
+          expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+          expect(process.cwd()).to.equal(localDir);
 
-    it('ignores matching tags', async function() {
-      await merge({
-        localFixtures: 'test/fixtures/local/reset',
-        remoteFixtures: 'test/fixtures/remote/reset',
-        reset: true,
-        ignoredFiles: ['ignored-changed.txt'],
-        startTag: defaultEndTag
-      });
+          expect(stderr).to.contain('test remove failed');
+        });
+      }
 
-      await fixtureCompare({
-        mergeFixtures: 'test/fixtures/merge/reset'
-      });
-    });
+      it('reverts files after copy when error', async function() {
+        let { copy } = utils;
+        sinon.stub(utils, 'copy').callsFake(async function() {
+          await copy.apply(this, arguments);
 
-    it('reverts files after remove when error', async function() {
-      sinon.stub(utils, 'gitRemoveAll').callsFake(async() => {
-        throw 'test remove failed';
-      });
+          if (arguments[1] !== localDir) {
+            return;
+          }
 
-      let {
-        stderr
-      } = await merge({
-        localFixtures: 'test/fixtures/local/reset',
-        remoteFixtures: 'test/fixtures/remote/reset',
-        reset: true
-      });
+          expect(await isGitClean({ cwd: localDir })).to.not.be.ok;
+          expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
 
-      expect(await isGitClean({ cwd: localDir })).to.be.ok;
-      expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-      expect(process.cwd()).to.equal(localDir);
+          throw 'test copy failed';
+        });
 
-      expect(stderr).to.contain('test remove failed');
-    });
+        let {
+          stderr
+        } = await merge({
+          localFixtures: `test/fixtures/local/${type}`,
+          remoteFixtures: `test/fixtures/remote/${type}`,
+          [type]: true
+        });
 
-    it('reverts files after copy when error', async function() {
-      let { copy } = utils;
-      sinon.stub(utils, 'copy').callsFake(async function() {
-        await copy.apply(this, arguments);
-
-        if (arguments[1] !== localDir) {
-          return;
-        }
-
-        expect(await isGitClean({ cwd: localDir })).to.not.be.ok;
+        expect(await isGitClean({ cwd: localDir })).to.be.ok;
         expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+        expect(process.cwd()).to.equal(localDir);
 
-        throw 'test copy failed';
+        expect(stderr).to.contain('test copy failed');
       });
 
-      let {
-        stderr
-      } = await merge({
-        localFixtures: 'test/fixtures/local/reset',
-        remoteFixtures: 'test/fixtures/remote/reset',
-        reset: true
+      it('reverts files after reset when error', async function() {
+        let { run } = utils;
+        sinon.stub(utils, 'run').callsFake(async function(command) {
+          if (command === 'git reset') {
+            throw 'test reset failed';
+          }
+
+          return await run.apply(this, arguments);
+        });
+
+        let {
+          stderr
+        } = await merge({
+          localFixtures: `test/fixtures/local/${type}`,
+          remoteFixtures: `test/fixtures/remote/${type}`,
+          [type]: true
+        });
+
+        expect(await isGitClean({ cwd: localDir })).to.be.ok;
+        expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+        expect(process.cwd()).to.equal(localDir);
+
+        expect(stderr).to.contain('test reset failed');
       });
 
-      expect(await isGitClean({ cwd: localDir })).to.be.ok;
-      expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-      expect(process.cwd()).to.equal(localDir);
+      it('preserves locally gitignored', async function() {
+        await merge({
+          localFixtures: 'test/fixtures/local/gitignored',
+          remoteFixtures: 'test/fixtures/remote/gitignored',
+          [type]: true,
+          async beforeMerge() {
+            await Promise.all([
+              fs.ensureFile(path.join(localDir, 'local-and-remote')),
+              fs.ensureFile(path.join(localDir, 'local-only')),
+              fs.ensureFile(path.join(localDir, 'folder/local-and-remote')),
+              fs.ensureFile(path.join(localDir, 'folder/local-only'))
+            ]);
+          }
+        });
 
-      expect(stderr).to.contain('test copy failed');
-    });
-
-    it('reverts files after reset when error', async function() {
-      let { run } = utils;
-      sinon.stub(utils, 'run').callsFake(async function(command) {
-        if (command === 'git reset') {
-          throw 'test reset failed';
-        }
-
-        return await run.apply(this, arguments);
-      });
-
-      let {
-        stderr
-      } = await merge({
-        localFixtures: 'test/fixtures/local/reset',
-        remoteFixtures: 'test/fixtures/remote/reset',
-        reset: true
-      });
-
-      expect(await isGitClean({ cwd: localDir })).to.be.ok;
-      expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-      expect(process.cwd()).to.equal(localDir);
-
-      expect(stderr).to.contain('test reset failed');
-    });
-
-    it('preserves locally gitignored', async function() {
-      await merge({
-        localFixtures: 'test/fixtures/local/gitignored',
-        remoteFixtures: 'test/fixtures/remote/gitignored',
-        reset: true,
-        async beforeMerge() {
-          await Promise.all([
-            fs.ensureFile(path.join(localDir, 'local-and-remote')),
-            fs.ensureFile(path.join(localDir, 'local-only')),
-            fs.ensureFile(path.join(localDir, 'folder/local-and-remote')),
-            fs.ensureFile(path.join(localDir, 'folder/local-only'))
-          ]);
-        }
-      });
-
-      await fixtureCompare({
-        mergeFixtures: `test/fixtures/remote/gitignored/${defaultEndTag}`,
-        async beforeCompare({
-          localMergeDir
-        }) {
-          await Promise.all([
-            fs.ensureFile(path.join(localMergeDir, 'local-and-remote')),
-            fs.ensureFile(path.join(localMergeDir, 'local-only')),
-            fs.ensureFile(path.join(localMergeDir, 'folder/local-and-remote')),
-            fs.ensureFile(path.join(localMergeDir, 'folder/local-only'))
-          ]);
-        }
+        await fixtureCompare({
+          mergeFixtures: type === 'reset' ?
+            `test/fixtures/remote/gitignored/${defaultEndTag}` :
+            'test/fixtures/merge/gitignored',
+          async beforeCompare({
+            localMergeDir,
+            rootMergeDir
+          }) {
+            await Promise.all([
+              fs.ensureFile(path.join(localMergeDir, 'local-and-remote')),
+              fs.ensureFile(path.join(localMergeDir, 'local-only')),
+              fs.ensureFile(path.join(localMergeDir, 'folder/local-and-remote')),
+              fs.ensureFile(path.join(localMergeDir, 'folder/local-only')),
+              fs.copy(
+                path.join(cwd, `test/fixtures/remote/gitignored/${defaultEndTag}/.gitignore`),
+                path.join(rootMergeDir, '.gitignore')
+              )
+            ]);
+          }
+        });
       });
     });
-  });
+  }
 
   it('can create a custom diff', async function() {
     let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
