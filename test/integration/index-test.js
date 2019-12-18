@@ -27,7 +27,6 @@ describe(function() {
   this.timeout(30000);
 
   let cwd;
-  let sandbox;
   let rootDir;
   let localDir;
   let remoteDir;
@@ -36,14 +35,10 @@ describe(function() {
     cwd = process.cwd();
   });
 
-  beforeEach(function() {
-    sandbox = sinon.createSandbox();
-  });
-
   afterEach(function() {
     process.chdir(cwd);
 
-    sandbox.restore();
+    sinon.restore();
   });
 
   async function merge({
@@ -396,7 +391,7 @@ D  removed-unchanged.txt
   describe('error recovery', function() {
     it('deletes temporary branch when error', async function() {
       let { copy } = utils;
-      sandbox.stub(utils, 'copy').callsFake(async function() {
+      sinon.stub(utils, 'copy').callsFake(async function() {
         if (arguments[1] !== localDir) {
           return await copy.apply(this, arguments);
         }
@@ -423,7 +418,7 @@ D  removed-unchanged.txt
 
     it('reverts temporary files after copy when error', async function() {
       let { copy } = utils;
-      sandbox.stub(utils, 'copy').callsFake(async function() {
+      sinon.stub(utils, 'copy').callsFake(async function() {
         await copy.apply(this, arguments);
 
         if (arguments[1] !== localDir) {
@@ -452,7 +447,7 @@ D  removed-unchanged.txt
 
     it('reverts temporary files after apply when error', async function() {
       let { run } = utils;
-      sandbox.stub(utils, 'run').callsFake(async function(command) {
+      sinon.stub(utils, 'run').callsFake(async function(command) {
         let result = await run.apply(this, arguments);
 
         if (command.indexOf('git apply') > -1) {
@@ -481,7 +476,7 @@ D  removed-unchanged.txt
 
     it('preserves cwd when erroring during the orphan step', async function() {
       let { run } = utils;
-      sandbox.stub(utils, 'run').callsFake(async function(command) {
+      sinon.stub(utils, 'run').callsFake(async function(command) {
         if (command.indexOf('git checkout --orphan') > -1) {
           throw 'test orphan failed';
         }
@@ -625,7 +620,7 @@ D  removed-unchanged.txt
     });
 
     it('reverts files after remove when error', async function() {
-      sandbox.stub(utils, 'gitRemoveAll').callsFake(async() => {
+      sinon.stub(utils, 'gitRemoveAll').callsFake(async() => {
         throw 'test remove failed';
       });
 
@@ -646,7 +641,7 @@ D  removed-unchanged.txt
 
     it('reverts files after copy when error', async function() {
       let { copy } = utils;
-      sandbox.stub(utils, 'copy').callsFake(async function() {
+      sinon.stub(utils, 'copy').callsFake(async function() {
         await copy.apply(this, arguments);
 
         if (arguments[1] !== localDir) {
@@ -676,7 +671,7 @@ D  removed-unchanged.txt
 
     it('reverts files after reset when error', async function() {
       let { run } = utils;
-      sandbox.stub(utils, 'run').callsFake(async function(command) {
+      sinon.stub(utils, 'run').callsFake(async function(command) {
         if (command === 'git reset') {
           throw 'test reset failed';
         }
