@@ -23,6 +23,9 @@ const { argv } = require('yargs')
     'reset': {
       type: 'boolean'
     },
+    'init': {
+      type: 'boolean'
+    },
     'create-custom-diff': {
       type: 'boolean'
     },

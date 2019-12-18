@@ -37,6 +37,7 @@ module.exports = async function gitDiffApply({
   resolveConflicts: _resolveConflicts,
   ignoredFiles = [],
   reset,
+  init,
   createCustomDiff,
   startCommand,
   endCommand,
@@ -65,7 +66,7 @@ module.exports = async function gitDiffApply({
   async function buildReturnObject() {
     let from;
 
-    if (reset) {
+    if (reset || init) {
       from = {};
     } else {
       await checkOutTag(_tmpDir, startTag);
@@ -137,12 +138,14 @@ module.exports = async function gitDiffApply({
   }
 
   async function go() {
-    if (reset) {
+    if (reset || init) {
       await checkOutTag(_tmpDir, endTag);
 
       isCodeUntracked = true;
       isCodeModified = true;
-      await utils.gitRemoveAll({ cwd: root });
+      if (reset) {
+        await utils.gitRemoveAll({ cwd: root });
+      }
 
       await copy();
 
@@ -204,7 +207,7 @@ module.exports = async function gitDiffApply({
   }
 
   try {
-    if (startTag === endTag && !reset) {
+    if (startTag === endTag && !(reset || init)) {
       throw 'Tags match, nothing to apply';
     }
 
@@ -226,7 +229,8 @@ module.exports = async function gitDiffApply({
         endCommand,
         startTag,
         endTag,
-        reset
+        reset,
+        init
       });
 
       remoteUrl = tmpPath;
