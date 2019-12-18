@@ -521,6 +521,7 @@ D  removed-unchanged.txt
       });
 
       expect(status).to.equal(` M changed.txt
+ D unchanged.txt
 `);
 
       expect(result.from).to.deep.equal({});
@@ -547,6 +548,7 @@ D  removed-unchanged.txt
       });
 
       expect(status).to.equal(` M changed.txt
+ D unchanged.txt
 `);
 
       expect(result.from).to.deep.equal({});
@@ -574,6 +576,7 @@ D  removed-unchanged.txt
       });
 
       expect(status).to.equal(` M changed.txt
+ D unchanged.txt
 `);
 
       expect(result.from).to.deep.equal({});
@@ -601,6 +604,7 @@ D  removed-unchanged.txt
       });
 
       expect(status).to.equal(` M changed.txt
+ D unchanged.txt
 `);
 
       expect(result.from).to.deep.equal({});
