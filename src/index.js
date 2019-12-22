@@ -249,6 +249,8 @@ module.exports = async function gitDiffApply({
     cwd = process.cwd();
 
     await go();
+
+    debug('success');
   } catch (_err) {
     err = _err;
 
@@ -287,6 +289,8 @@ module.exports = async function gitDiffApply({
   }
 
   if (err) {
+    debug('failure');
+
     throw err;
   }
 
