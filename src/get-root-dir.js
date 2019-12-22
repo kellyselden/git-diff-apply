@@ -2,7 +2,7 @@
 
 const run = require('./run');
 
-module.exports = async function getSubDir() {
+module.exports = async function getRootDir() {
   let root = (await run('git rev-parse --show-toplevel')).trim();
   return root;
 };
