@@ -29,6 +29,8 @@ module.exports.runWithSpawn = async function runWithSpawn(cmd, args, options) {
     });
     child.on('close', function(status) {
       if (status === 0) {
+        debug(stdout);
+
         resolve(stdout);
       } else {
         reject(new Error(`${command} failed with message ${errorMessage}`));
