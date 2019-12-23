@@ -21,7 +21,7 @@ module.exports = async function mergeDir(from, to) {
       }
     }).on('data', item => {
       let fromFile = item.path;
-      let toFile = to + item.path.substr(from.length);
+      let toFile = path.join(to, path.relative(from, item.path));
       debug(`from ${fromFile}`);
       debug(`to ${toFile}`);
 
