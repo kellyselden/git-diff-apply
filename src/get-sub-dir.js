@@ -1,6 +1,8 @@
 'use strict';
 
+const path = require('path');
+
 module.exports = function getSubDir(root) {
-  let subDir = process.cwd().substr(root.length + 1);
+  let subDir = path.relative(root, process.cwd());
   return subDir;
 };
