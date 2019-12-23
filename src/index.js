@@ -241,7 +241,7 @@ module.exports = async function gitDiffApply({
     returnObject = await buildReturnObject();
 
     root = await getRootDir();
-    let subDir = getSubDir(root);
+    let subDir = await getSubDir(root);
     if (subDir) {
       debug('subDir', subDir);
 
