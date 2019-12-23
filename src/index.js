@@ -243,6 +243,8 @@ module.exports = async function gitDiffApply({
     root = await getRootDir();
     let subDir = getSubDir(root);
     if (subDir) {
+      debug('subDir', subDir);
+
       await namespaceRepoWithSubDir(subDir);
     }
 
