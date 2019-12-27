@@ -51,7 +51,14 @@ module.exports = async function gitRemoveAll(options) {
       await fs.remove(path.join(options.cwd, file));
     }
 
-    await runWithSpawn('git', ['add', ...files], options);
+    // force is needed to work around
+    /**
+     * Error: git add foo failed with message The following paths are ignored by one of your .gitignore files:
+     * foo
+     * Use -f if you really want to add them.
+     */
+    // https://github.com/kellyselden/git-diff-apply/issues/306
+    await runWithSpawn('git', ['add', '-f', ...files], options);
   }
 };
 
