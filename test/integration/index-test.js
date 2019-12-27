@@ -19,6 +19,7 @@ const getCheckedOutBranchName = require('../../src/get-checked-out-branch-name')
 const { promisify } = require('util');
 const tmpDir = promisify(require('tmp').dir);
 const Project = require('fixturify-project');
+const os = require('os');
 
 const defaultStartTag = 'v1';
 const defaultEndTag = 'v3';
@@ -789,7 +790,11 @@ D  removed-unchanged.txt
     });
 
     after(async function() {
-      if (realGlobalGitignorePath) {
+      if (!realGlobalGitignorePath) {
+        await utils.run('git config --global --unset core.excludesfile');
+      } else if (realGlobalGitignorePath.startsWith(os.tmpdir())) {
+        await utils.run(`git config --global core.excludesfile "${path.join(os.homedir(), '.gitignore')}"`);
+      } else {
         await utils.run(`git config --global core.excludesfile "${realGlobalGitignorePath}"`);
       }
     });
