@@ -802,7 +802,10 @@ D  removed-unchanged.txt
     it('works', async function() {
       await merge({
         localFixtures: 'test/fixtures/local/globally-gitignored',
-        remoteFixtures: 'test/fixtures/remote/globally-gitignored'
+        remoteFixtures: 'test/fixtures/remote/globally-gitignored',
+        async beforeMerge() {
+          await utils.run('git config --local --unset core.excludesfile', { cwd: rootDir });
+        }
       });
 
       await fixtureCompare({
@@ -819,7 +822,10 @@ D  removed-unchanged.txt
         remoteFixtures,
         createCustomDiff: true,
         startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
-        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
+        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`,
+        async beforeMerge() {
+          await utils.run('git config --local --unset core.excludesfile', { cwd: rootDir });
+        }
       });
 
       await fixtureCompare({
