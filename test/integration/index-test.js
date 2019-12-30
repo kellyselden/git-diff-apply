@@ -546,10 +546,10 @@ D  removed-unchanged.txt
   });
 
   for (let [type, expectedStatus] of [
-    ['reset', ` M changed.txt
- D unchanged.txt
+    ['reset', subDir => ` M ${path.posix.join(subDir, 'changed.txt')}
+ D ${path.posix.join(subDir, 'unchanged.txt')}
 `],
-    ['init', ` M changed.txt
+    ['init', subDir => ` M ${path.posix.join(subDir, 'changed.txt')}
 `]
   ]) {
     describe(type, function() {
@@ -568,7 +568,7 @@ D  removed-unchanged.txt
           mergeFixtures: `test/fixtures/merge/${type}`
         });
 
-        expect(status).to.equal(expectedStatus);
+        expect(status).to.equal(expectedStatus());
 
         expect(result.from).to.deep.equal({});
       });
@@ -593,7 +593,7 @@ D  removed-unchanged.txt
           mergeFixtures: `test/fixtures/merge/${type}`
         });
 
-        expect(status).to.equal(expectedStatus);
+        expect(status).to.equal(expectedStatus());
 
         expect(result.from).to.deep.equal({});
       });
@@ -619,7 +619,7 @@ D  removed-unchanged.txt
           mergeFixtures: `test/fixtures/merge/${type}`
         });
 
-        expect(status).to.equal(expectedStatus);
+        expect(status).to.equal(expectedStatus());
 
         expect(result.from).to.deep.equal({});
       });
@@ -645,7 +645,35 @@ D  removed-unchanged.txt
           mergeFixtures: `test/fixtures/merge/${type}`
         });
 
-        expect(status).to.equal(expectedStatus);
+        expect(status).to.equal(expectedStatus());
+
+        expect(result.from).to.deep.equal({});
+      });
+
+      it(`${type}s using a custom diff and sub dir`, async function() {
+        let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
+        let remoteFixtures = `test/fixtures/remote/${type}`;
+        let subDir = 'foo/bar';
+
+        let {
+          status,
+          result
+        } = await merge({
+          localFixtures: `test/fixtures/local/${type}`,
+          remoteFixtures,
+          [type]: true,
+          ignoredFiles: ['ignored-changed.txt'],
+          createCustomDiff: true,
+          subDir,
+          endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
+        });
+
+        await fixtureCompare({
+          mergeFixtures: `test/fixtures/merge/${type}`,
+          subDir
+        });
+
+        expect(status).to.equal(expectedStatus(subDir));
 
         expect(result.from).to.deep.equal({});
       });
