@@ -598,7 +598,7 @@ D  removed-unchanged.txt
         expect(result.from).to.deep.equal({});
       });
 
-      it('resets using a custom diff on same tag', async function() {
+      it(`${type}s using a custom diff on same tag`, async function() {
         let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
         let remoteFixtures = `test/fixtures/remote/${type}`;
 
@@ -624,7 +624,7 @@ D  removed-unchanged.txt
         expect(result.from).to.deep.equal({});
       });
 
-      it('resets using a custom diff without start tag', async function() {
+      it(`${type}s using a custom diff without start tag`, async function() {
         let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
         let remoteFixtures = `test/fixtures/remote/${type}`;
 
