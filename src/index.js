@@ -101,9 +101,11 @@ module.exports = async function gitDiffApply({
       await commitAndTag(tag, { cwd: newTmpDir });
     }
 
-    await copyToSubDir(startTag);
+    if (!(reset || init)) {
+      await copyToSubDir(startTag);
 
-    await gitRemoveAll({ cwd: newTmpDir });
+      await gitRemoveAll({ cwd: newTmpDir });
+    }
 
     await copyToSubDir(endTag);
 

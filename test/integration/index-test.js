@@ -546,10 +546,10 @@ D  removed-unchanged.txt
   });
 
   for (let [type, expectedStatus] of [
-    ['reset', subDir => ` M ${path.posix.join(subDir, 'changed.txt')}
+    ['reset', (subDir = '') => ` M ${path.posix.join(subDir, 'changed.txt')}
  D ${path.posix.join(subDir, 'unchanged.txt')}
 `],
-    ['init', subDir => ` M ${path.posix.join(subDir, 'changed.txt')}
+    ['init', (subDir = '') => ` M ${path.posix.join(subDir, 'changed.txt')}
 `]
   ]) {
     describe(type, function() {
