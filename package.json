@@ -61,7 +61,7 @@
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-prefer-let": "^1.0.1",
     "fixturify-project": "^1.9.0",
-    "git-fixtures": "^2.0.0",
+    "git-fixtures": "^2.3.0",
     "mocha": "^6.0.2",
     "mocha-helpers": "^4.0.0",
     "renovate-config-standard": "^2.0.0",

@@ -265,6 +265,70 @@ D  removed-unchanged.txt
     expect(stderr).to.be.undefined;
   });
 
+  it('does not error when no changes between tags - custom diff', async function() {
+    let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
+    let remoteFixtures = 'test/fixtures/remote/no-change-between-tags';
+
+    let {
+      stderr
+    } = await merge({
+      localFixtures: 'test/fixtures/local/no-change-between-tags',
+      remoteFixtures,
+      createCustomDiff: true,
+      startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
+      endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
+    });
+
+    expect(await isGitClean({ cwd: localDir })).to.be.ok;
+    expect(process.cwd()).to.equal(localDir);
+
+    await fixtureCompare({
+      mergeFixtures: 'test/fixtures/merge/no-change-between-tags'
+    });
+
+    expect(stderr).to.be.undefined;
+  });
+
+  it('does not error when empty first commit', async function() {
+    let {
+      stderr
+    } = await merge({
+      localFixtures: 'test/fixtures/local/empty-first-commit',
+      remoteFixtures: 'test/fixtures/remote/empty-first-commit'
+    });
+
+    expect(process.cwd()).to.equal(localDir);
+
+    await fixtureCompare({
+      mergeFixtures: 'test/fixtures/merge/empty-first-commit'
+    });
+
+    expect(stderr).to.be.undefined;
+  });
+
+  it('does not error when empty first commit - custom diff', async function() {
+    let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
+    let remoteFixtures = 'test/fixtures/remote/empty-first-commit';
+
+    let {
+      stderr
+    } = await merge({
+      localFixtures: 'test/fixtures/local/empty-first-commit',
+      remoteFixtures,
+      createCustomDiff: true,
+      startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
+      endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
+    });
+
+    expect(process.cwd()).to.equal(localDir);
+
+    await fixtureCompare({
+      mergeFixtures: 'test/fixtures/merge/empty-first-commit'
+    });
+
+    expect(stderr).to.be.undefined;
+  });
+
   describe('sub dir', function() {
     let subDir = 'foo/bar';
 
