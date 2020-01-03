@@ -20,6 +20,7 @@ const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
 const createCustomRemote = require('./create-custom-remote');
 const mergeDir = require('./merge-dir');
+const doesBranchExist = require('./does-branch-exist');
 
 const { isGitClean } = gitStatus;
 
@@ -175,9 +176,9 @@ module.exports = async function gitDiffApply({
     isCodeUntracked = true;
     await copy();
 
+    isTempBranchCommitted = true;
     await commit();
     isCodeUntracked = false;
-    isTempBranchCommitted = true;
 
     isCodeUntracked = true;
     isCodeModified = true;
@@ -284,7 +285,7 @@ module.exports = async function gitDiffApply({
   }
 
   try {
-    if (isTempBranchCommitted) {
+    if (isTempBranchCommitted && await doesBranchExist(tempBranchName)) {
       await utils.run(`git branch -D ${tempBranchName}`);
     }
 
