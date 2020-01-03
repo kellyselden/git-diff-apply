@@ -135,7 +135,9 @@ module.exports = async function gitDiffApply({
     let patchFile = path.join(await tmpDir(), 'file.patch');
     await utils.run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} --binary > ${patchFile}`);
     if (await fs.readFile(patchFile, 'utf8') !== '') {
-      await utils.run(`git apply ${patchFile}`);
+      // --whitespace=fix seems to prevent any unnecessary conflicts with line endings
+      // https://stackoverflow.com/questions/6308625/how-to-avoid-git-apply-changing-line-endings#comment54419617_11189296
+      await utils.run(`git apply --whitespace=fix ${patchFile}`);
     }
   }
 
