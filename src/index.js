@@ -10,7 +10,6 @@ const utils = require('./utils');
 const getRootDir = require('./get-root-dir');
 const getSubDir = require('./get-sub-dir');
 const gitInit = require('./git-init');
-const getCheckedOutBranchName = require('./get-checked-out-branch-name');
 const gitStatus = require('./git-status');
 const commit = require('./commit');
 const checkOutTag = require('./check-out-tag');
@@ -19,10 +18,9 @@ const resolveConflicts = require('./resolve-conflicts');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
 const createCustomRemote = require('./create-custom-remote');
-const mergeDir = require('./merge-dir');
-const doesBranchExist = require('./does-branch-exist');
 
 const { isGitClean } = gitStatus;
+const { gitConfigInit } = gitInit;
 
 const tempBranchName = uuidv1();
 
@@ -47,18 +45,13 @@ module.exports = async function gitDiffApply({
   let _tmpDir;
   let tmpWorkingDir;
 
-  let oldBranchName;
   let hasConflicts;
   let returnObject;
 
-  let isTempBranchCheckedOut;
   let isCodeUntracked;
   let isCodeModified;
-  let shouldReturnGitIgnoredFiles;
-  let isTempBranchCommitted;
 
   let root;
-  let gitIgnoredFiles;
 
   let err;
 
@@ -116,7 +109,7 @@ module.exports = async function gitDiffApply({
     await utils.copy(tmpWorkingDir, cwd);
   }
 
-  async function resetIgnoredFiles() {
+  async function resetIgnoredFiles(cwd) {
     for (let ignoredFile of ignoredFiles) {
       // An exist check is not good enough.
       // `git checkout` will fail unless it is also tracked.
@@ -140,7 +133,7 @@ module.exports = async function gitDiffApply({
   async function applyPatch(patchFile) {
     // --whitespace=fix seems to prevent any unnecessary conflicts with line endings
     // https://stackoverflow.com/questions/6308625/how-to-avoid-git-apply-changing-line-endings#comment54419617_11189296
-    await utils.run(`git apply --whitespace=fix ${patchFile}`, { cwd });
+    await utils.run(`git apply --whitespace=fix ${patchFile}`, { cwd: _tmpDir });
   }
 
   async function go() {
@@ -157,63 +150,42 @@ module.exports = async function gitDiffApply({
 
       await utils.run('git reset', { cwd });
 
-      await resetIgnoredFiles();
+      await resetIgnoredFiles(cwd);
 
       return;
     }
 
     await checkOutTag(startTag, { cwd: _tmpDir });
 
-    oldBranchName = await getCheckedOutBranchName({ cwd });
-    await utils.run(`git checkout --orphan ${tempBranchName}`, { cwd });
-    isTempBranchCheckedOut = true;
-
-    await utils.gitRemoveAll({ cwd: root });
-
-    gitIgnoredFiles = await tmpDir();
-    await mergeDir(cwd, gitIgnoredFiles);
-    shouldReturnGitIgnoredFiles = true;
-
-    isCodeUntracked = true;
-    await copy();
-
-    isTempBranchCommitted = true;
-    await commit({ cwd });
-    isCodeUntracked = false;
+    await utils.run(`git branch ${tempBranchName}`, { cwd: _tmpDir });
+    await utils.run(`git checkout ${tempBranchName}`, { cwd: _tmpDir });
 
     let patchFile = await createPatchFile();
     if (!patchFile) {
       return;
     }
 
-    isCodeUntracked = true;
-    isCodeModified = true;
     await applyPatch(patchFile);
 
-    await resetIgnoredFiles();
+    await resetIgnoredFiles(tmpWorkingDir);
 
-    let wereAnyChanged = !await isGitClean({ cwd });
-
-    if (wereAnyChanged) {
-      await commit({ cwd });
-    }
-    isCodeUntracked = false;
-    isCodeModified = false;
-
-    let sha;
-    if (wereAnyChanged) {
-      sha = await utils.run('git rev-parse HEAD', { cwd });
-    }
-
-    await utils.run(`git checkout ${oldBranchName}`, { cwd });
-    isTempBranchCheckedOut = false;
+    let wereAnyChanged = !await isGitClean({ cwd: _tmpDir });
 
     if (wereAnyChanged) {
+      await commit({ cwd: _tmpDir });
+
+      let sha = await utils.run('git rev-parse HEAD', { cwd: _tmpDir });
+
+      await utils.run(`git remote add ${tempBranchName} ${_tmpDir}`, { cwd });
+      await utils.run(`git fetch ${tempBranchName}`, { cwd });
+
       try {
         await utils.run(`git cherry-pick --no-commit ${sha.trim()}`, { cwd });
       } catch (err) {
         hasConflicts = true;
       }
+
+      await utils.run(`git remote remove ${tempBranchName}`, { cwd });
     }
   }
 
@@ -252,6 +224,9 @@ module.exports = async function gitDiffApply({
 
     await utils.run(`git clone ${remoteUrl} ${_tmpDir}`);
 
+    // needed because we are going to be committing in here
+    await gitConfigInit({ cwd: _tmpDir });
+
     returnObject = await buildReturnObject();
 
     root = await getRootDir({ cwd });
@@ -281,25 +256,6 @@ module.exports = async function gitDiffApply({
         err2
       };
     }
-  }
-
-  try {
-    if (isTempBranchCheckedOut) {
-      await utils.run(`git checkout ${oldBranchName}`, { cwd });
-    }
-
-    if (isTempBranchCommitted && await doesBranchExist(tempBranchName, { cwd })) {
-      await utils.run(`git branch -D ${tempBranchName}`, { cwd });
-    }
-
-    if (shouldReturnGitIgnoredFiles) {
-      await mergeDir(gitIgnoredFiles, cwd);
-    }
-  } catch (err2) {
-    err = {
-      err,
-      err2
-    };
   }
 
   if (err) {
