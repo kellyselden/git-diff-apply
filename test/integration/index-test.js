@@ -16,6 +16,7 @@ const gitDiffApply = require('../../src');
 const utils = require('../../src/utils');
 const { isGitClean } = gitDiffApply;
 const getCheckedOutBranchName = require('../../src/get-checked-out-branch-name');
+const doesBranchExist = require('../../src/does-branch-exist');
 const { promisify } = require('util');
 const tmpDir = promisify(require('tmp').dir);
 const Project = require('fixturify-project');
@@ -499,17 +500,19 @@ D  removed-unchanged.txt
   });
 
   describe('error recovery', function() {
-    it('deletes temporary branch when error', async function() {
-      let { copy } = utils;
-      sinon.stub(utils, 'copy').callsFake(async function() {
-        if (arguments[1] !== localDir) {
-          return await copy.apply(this, arguments);
+    it('deletes temporary branch when error before commit', async function() {
+      let branchName;
+
+      let { run } = utils;
+      sinon.stub(utils, 'run').callsFake(async function(command) {
+        if (command.indexOf('git commit') > -1) {
+          branchName = await getCheckedOutBranchName({ cwd: localDir });
+          expect(branchName).to.not.equal('foo');
+
+          throw 'test commit failed';
         }
 
-        expect(await isGitClean({ cwd: localDir })).to.be.ok;
-        expect(await getCheckedOutBranchName({ cwd: localDir })).to.not.equal('foo');
-
-        throw 'test copy failed';
+        return await run.apply(this, arguments);
       });
 
       let {
@@ -520,10 +523,44 @@ D  removed-unchanged.txt
       });
 
       expect(await isGitClean({ cwd: localDir })).to.be.ok;
-      expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
+      expect(branchName).to.be.ok;
+      expect(await doesBranchExist(branchName, { cwd: localDir })).to.not.be.ok;
       expect(process.cwd()).to.equal(localDir);
 
-      expect(stderr).to.contain('test copy failed');
+      expect(stderr).to.contain('test commit failed');
+    });
+
+    it('deletes temporary branch when error after commit', async function() {
+      let branchName;
+
+      let { run } = utils;
+      sinon.stub(utils, 'run').callsFake(async function(command) {
+        let result = await run.apply(this, arguments);
+
+        if (command.indexOf('git commit') > -1) {
+          branchName = await getCheckedOutBranchName({ cwd: localDir });
+          expect(branchName).to.not.equal('foo');
+          expect(await doesBranchExist(branchName, { cwd: localDir })).to.be.ok;
+
+          throw 'test commit failed';
+        }
+
+        return result;
+      });
+
+      let {
+        stderr
+      } = await merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures: 'test/fixtures/remote/noconflict'
+      });
+
+      expect(await isGitClean({ cwd: localDir })).to.be.ok;
+      expect(branchName).to.be.ok;
+      expect(await doesBranchExist(branchName, { cwd: localDir })).to.not.be.ok;
+      expect(process.cwd()).to.equal(localDir);
+
+      expect(stderr).to.contain('test commit failed');
     });
 
     it('reverts temporary files after copy when error', async function() {
