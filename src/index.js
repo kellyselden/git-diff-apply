@@ -4,27 +4,20 @@ const path = require('path');
 const { promisify } = require('util');
 const tmpDir = promisify(require('tmp').dir);
 const fs = require('fs-extra');
-const uuidv1 = require('uuid/v1');
 const debug = require('debug')('git-diff-apply');
 const utils = require('./utils');
 const getRootDir = require('./get-root-dir');
 const getSubDir = require('./get-sub-dir');
 const gitInit = require('./git-init');
-const getCheckedOutBranchName = require('./get-checked-out-branch-name');
 const gitStatus = require('./git-status');
-const commit = require('./commit');
 const checkOutTag = require('./check-out-tag');
 const convertToObj = require('./convert-to-obj');
 const resolveConflicts = require('./resolve-conflicts');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
 const createCustomRemote = require('./create-custom-remote');
-const mergeDir = require('./merge-dir');
-const doesBranchExist = require('./does-branch-exist');
 
 const { isGitClean } = gitStatus;
-
-const tempBranchName = uuidv1();
 
 async function ensureDir(dir) {
   debug('ensureDir', dir);
@@ -48,19 +41,14 @@ module.exports = async function gitDiffApply({
   let tmpGitDir;
   let tmpWorkingDir;
 
-  let oldBranchName;
   let hasConflicts;
   let returnObject;
 
-  let isTempBranchCheckedOut;
   let isCodeUntracked;
   let isCodeModified;
-  let shouldReturnGitIgnoredFiles;
-  let isTempBranchCommitted;
 
   let root;
   let cwd;
-  let gitIgnoredFiles;
 
   let err;
 
@@ -140,13 +128,12 @@ module.exports = async function gitDiffApply({
     }
   }
 
-  async function applyDiff() {
-    let patchFile = await createPatchFile();
-    if (patchFile) {
-      // --whitespace=fix seems to prevent any unnecessary conflicts with line endings
-      // https://stackoverflow.com/questions/6308625/how-to-avoid-git-apply-changing-line-endings#comment54419617_11189296
-      await utils.run(`git apply --whitespace=fix ${patchFile}`);
-    }
+  async function applyDiff(patchFile) {
+    // --whitespace=fix seems to prevent any unnecessary conflicts with line endings
+    // https://stackoverflow.com/questions/6308625/how-to-avoid-git-apply-changing-line-endings#comment54419617_11189296
+    // -3 gives you conflict markers
+    // https://stackoverflow.com/questions/16190387/when-applying-a-patch-is-there-any-way-to-resolve-conflicts#comment54083817_16968982
+    await utils.run(`git apply --whitespace=fix -3 ${patchFile}`);
   }
 
   async function go() {
@@ -168,53 +155,16 @@ module.exports = async function gitDiffApply({
       return;
     }
 
-    await checkOutTag(_tmpDir, startTag);
+    let patchFile = await createPatchFile();
 
-    oldBranchName = await getCheckedOutBranchName();
-    await utils.run(`git checkout --orphan ${tempBranchName}`);
-    isTempBranchCheckedOut = true;
-
-    await utils.gitRemoveAll({ cwd: root });
-
-    gitIgnoredFiles = await tmpDir();
-    await mergeDir(cwd, gitIgnoredFiles);
-    shouldReturnGitIgnoredFiles = true;
-
-    isCodeUntracked = true;
-    await copy();
-
-    isTempBranchCommitted = true;
-    await commit();
-    isCodeUntracked = false;
-
-    isCodeUntracked = true;
-    isCodeModified = true;
-    await applyDiff();
-
-    await resetIgnoredFiles();
-
-    let wereAnyChanged = !await isGitClean();
-
-    if (wereAnyChanged) {
-      await commit();
-    }
-    isCodeUntracked = false;
-    isCodeModified = false;
-
-    let sha;
-    if (wereAnyChanged) {
-      sha = await utils.run('git rev-parse HEAD');
-    }
-
-    await utils.run(`git checkout ${oldBranchName}`);
-    isTempBranchCheckedOut = false;
-
-    if (wereAnyChanged) {
+    if (patchFile) {
       try {
-        await utils.run(`git cherry-pick --no-commit ${sha.trim()}`);
+        await applyDiff(patchFile);
       } catch (err) {
         hasConflicts = true;
       }
+
+      await resetIgnoredFiles();
     }
   }
 
@@ -279,31 +229,12 @@ module.exports = async function gitDiffApply({
       if (isCodeModified) {
         await utils.run('git reset --hard');
       }
-
-      if (isTempBranchCheckedOut) {
-        await utils.run(`git checkout ${oldBranchName}`);
-      }
     } catch (err2) {
       throw {
         err,
         err2
       };
     }
-  }
-
-  try {
-    if (isTempBranchCommitted && await doesBranchExist(tempBranchName)) {
-      await utils.run(`git branch -D ${tempBranchName}`);
-    }
-
-    if (shouldReturnGitIgnoredFiles) {
-      await mergeDir(gitIgnoredFiles, cwd);
-    }
-  } catch (err2) {
-    err = {
-      err,
-      err2
-    };
   }
 
   if (err) {
