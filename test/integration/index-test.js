@@ -28,18 +28,12 @@ const defaultEndTag = 'v3';
 describe(function() {
   this.timeout(30000);
 
-  let cwd;
+  let cwd = process.cwd();
   let rootDir;
   let localDir;
   let remoteDir;
 
-  before(function() {
-    cwd = process.cwd();
-  });
-
   afterEach(function() {
-    process.chdir(cwd);
-
     sinon.restore();
   });
 
@@ -79,7 +73,10 @@ describe(function() {
     // let's us do === against it later
     localDir = process.cwd();
 
+    process.chdir(cwd);
+
     let promise = gitDiffApply({
+      cwd: localDir,
       remoteUrl: remoteDir,
       startTag,
       endTag,
@@ -214,7 +211,6 @@ D  removed-unchanged.txt
     });
 
     expect(await isGitClean({ cwd: localDir })).to.be.ok;
-    expect(process.cwd()).to.equal(localDir);
   });
 
   it('does nothing when tags match', async function() {
@@ -227,7 +223,6 @@ D  removed-unchanged.txt
     });
 
     expect(await isGitClean({ cwd: localDir })).to.be.ok;
-    expect(process.cwd()).to.equal(localDir);
 
     expect(stderr).to.contain('Tags match, nothing to apply');
     expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
@@ -242,8 +237,6 @@ D  removed-unchanged.txt
       noGit: true
     });
 
-    expect(process.cwd()).to.equal(localDir);
-
     expect(stderr).to.contain('Not a git repository');
     expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
   });
@@ -257,7 +250,6 @@ D  removed-unchanged.txt
     });
 
     expect(await isGitClean({ cwd: localDir })).to.be.ok;
-    expect(process.cwd()).to.equal(localDir);
 
     await fixtureCompare({
       mergeFixtures: 'test/fixtures/merge/no-change-between-tags'
@@ -281,7 +273,6 @@ D  removed-unchanged.txt
     });
 
     expect(await isGitClean({ cwd: localDir })).to.be.ok;
-    expect(process.cwd()).to.equal(localDir);
 
     await fixtureCompare({
       mergeFixtures: 'test/fixtures/merge/no-change-between-tags'
@@ -297,8 +288,6 @@ D  removed-unchanged.txt
       localFixtures: 'test/fixtures/local/empty-first-commit',
       remoteFixtures: 'test/fixtures/remote/empty-first-commit'
     });
-
-    expect(process.cwd()).to.equal(localDir);
 
     await fixtureCompare({
       mergeFixtures: 'test/fixtures/merge/empty-first-commit'
@@ -320,8 +309,6 @@ D  removed-unchanged.txt
       startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
       endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
     });
-
-    expect(process.cwd()).to.equal(localDir);
 
     await fixtureCompare({
       mergeFixtures: 'test/fixtures/merge/empty-first-commit'
@@ -525,7 +512,6 @@ D  removed-unchanged.txt
       expect(await isGitClean({ cwd: localDir })).to.be.ok;
       expect(branchName).to.be.ok;
       expect(await doesBranchExist(branchName, { cwd: localDir })).to.not.be.ok;
-      expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test commit failed');
     });
@@ -558,7 +544,6 @@ D  removed-unchanged.txt
       expect(await isGitClean({ cwd: localDir })).to.be.ok;
       expect(branchName).to.be.ok;
       expect(await doesBranchExist(branchName, { cwd: localDir })).to.not.be.ok;
-      expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test commit failed');
     });
@@ -587,7 +572,6 @@ D  removed-unchanged.txt
 
       expect(await isGitClean({ cwd: localDir })).to.be.ok;
       expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-      expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test copy failed');
     });
@@ -616,7 +600,6 @@ D  removed-unchanged.txt
 
       expect(await isGitClean({ cwd: localDir })).to.be.ok;
       expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-      expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test apply failed');
     });
@@ -640,7 +623,6 @@ D  removed-unchanged.txt
 
       expect(await isGitClean({ cwd: localDir })).to.be.ok;
       expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-      expect(process.cwd()).to.equal(localDir);
 
       expect(stderr).to.contain('test orphan failed');
     });
@@ -809,7 +791,6 @@ D  removed-unchanged.txt
 
           expect(await isGitClean({ cwd: localDir })).to.be.ok;
           expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-          expect(process.cwd()).to.equal(localDir);
 
           expect(stderr).to.contain('test remove failed');
         });
@@ -840,7 +821,6 @@ D  removed-unchanged.txt
 
         expect(await isGitClean({ cwd: localDir })).to.be.ok;
         expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-        expect(process.cwd()).to.equal(localDir);
 
         expect(stderr).to.contain('test copy failed');
       });
@@ -865,7 +845,6 @@ D  removed-unchanged.txt
 
         expect(await isGitClean({ cwd: localDir })).to.be.ok;
         expect(await getCheckedOutBranchName({ cwd: localDir })).to.equal('foo');
-        expect(process.cwd()).to.equal(localDir);
 
         expect(stderr).to.contain('test reset failed');
       });
