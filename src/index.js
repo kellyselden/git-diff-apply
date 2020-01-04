@@ -138,13 +138,10 @@ module.exports = async function gitDiffApply({
     }
   }
 
-  async function applyDiff() {
-    let patchFile = await createPatchFile();
-    if (patchFile) {
-      // --whitespace=fix seems to prevent any unnecessary conflicts with line endings
-      // https://stackoverflow.com/questions/6308625/how-to-avoid-git-apply-changing-line-endings#comment54419617_11189296
-      await utils.run(`git apply --whitespace=fix ${patchFile}`);
-    }
+  async function applyPatch(patchFile) {
+    // --whitespace=fix seems to prevent any unnecessary conflicts with line endings
+    // https://stackoverflow.com/questions/6308625/how-to-avoid-git-apply-changing-line-endings#comment54419617_11189296
+    await utils.run(`git apply --whitespace=fix ${patchFile}`);
   }
 
   async function go() {
@@ -187,7 +184,10 @@ module.exports = async function gitDiffApply({
 
     isCodeUntracked = true;
     isCodeModified = true;
-    await applyDiff();
+    let patchFile = await createPatchFile();
+    if (patchFile) {
+      await applyPatch(patchFile);
+    }
 
     await resetIgnoredFiles();
 
