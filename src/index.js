@@ -41,8 +41,7 @@ module.exports = async function gitDiffApply({
   init,
   createCustomDiff,
   startCommand,
-  endCommand,
-  wasRunAsExecutable
+  endCommand
 }) {
   let _tmpDir;
   let tmpWorkingDir;
@@ -312,9 +311,7 @@ module.exports = async function gitDiffApply({
   }
 
   if (hasConflicts && _resolveConflicts) {
-    returnObject.resolveConflictsProcess = resolveConflicts({
-      shouldPipe: !wasRunAsExecutable
-    });
+    returnObject.resolveConflictsProcess = resolveConflicts();
   }
 
   return returnObject;
