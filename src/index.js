@@ -69,12 +69,12 @@ module.exports = async function gitDiffApply({
     if (reset || init) {
       from = {};
     } else {
-      await checkOutTag(_tmpDir, startTag);
+      await checkOutTag(startTag, { cwd: _tmpDir });
 
       from = convertToObj(_tmpDir, ignoredFiles);
     }
 
-    await checkOutTag(_tmpDir, endTag);
+    await checkOutTag(endTag, { cwd: _tmpDir });
 
     let to = convertToObj(_tmpDir, ignoredFiles);
 
@@ -94,7 +94,7 @@ module.exports = async function gitDiffApply({
     async function copyToSubDir(tag) {
       await ensureDir(newTmpSubDir);
 
-      await checkOutTag(_tmpDir, tag);
+      await checkOutTag(tag, { cwd: _tmpDir });
 
       await utils.copy(_tmpDir, newTmpSubDir);
 
@@ -146,7 +146,7 @@ module.exports = async function gitDiffApply({
 
   async function go() {
     if (reset || init) {
-      await checkOutTag(_tmpDir, endTag);
+      await checkOutTag(endTag, { cwd: _tmpDir });
 
       isCodeUntracked = true;
       isCodeModified = true;
@@ -163,7 +163,7 @@ module.exports = async function gitDiffApply({
       return;
     }
 
-    await checkOutTag(_tmpDir, startTag);
+    await checkOutTag(startTag, { cwd: _tmpDir });
 
     oldBranchName = await getCheckedOutBranchName();
     await utils.run(`git checkout --orphan ${tempBranchName}`);
