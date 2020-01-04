@@ -37,11 +37,14 @@ const { argv } = require('yargs')
     }
   });
 
-argv.wasRunAsExecutable = true;
-
 (async() => {
+  let options = {
+    wasRunAsExecutable: true,
+    ...argv
+  };
+
   try {
-    await gitDiffApply(argv);
+    await gitDiffApply(options);
   } catch (err) {
     console.log(err);
   }
