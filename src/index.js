@@ -182,12 +182,14 @@ module.exports = async function gitDiffApply({
     await commit();
     isCodeUntracked = false;
 
+    let patchFile = await createPatchFile();
+    if (!patchFile) {
+      return;
+    }
+
     isCodeUntracked = true;
     isCodeModified = true;
-    let patchFile = await createPatchFile();
-    if (patchFile) {
-      await applyPatch(patchFile);
-    }
+    await applyPatch(patchFile);
 
     await resetIgnoredFiles();
 
@@ -276,10 +278,6 @@ module.exports = async function gitDiffApply({
       if (isCodeModified) {
         await utils.run('git reset --hard');
       }
-
-      if (isTempBranchCheckedOut) {
-        await utils.run(`git checkout ${oldBranchName}`);
-      }
     } catch (err2) {
       throw {
         err,
@@ -289,6 +287,10 @@ module.exports = async function gitDiffApply({
   }
 
   try {
+    if (isTempBranchCheckedOut) {
+      await utils.run(`git checkout ${oldBranchName}`);
+    }
+
     if (isTempBranchCommitted && await doesBranchExist(tempBranchName)) {
       await utils.run(`git branch -D ${tempBranchName}`);
     }
