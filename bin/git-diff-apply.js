@@ -38,14 +38,9 @@ const { argv } = require('yargs')
   });
 
 (async() => {
-  let options = {
-    cwd: process.cwd(),
-    ...argv
-  };
-
   let returnObject;
   try {
-    returnObject = await gitDiffApply(options);
+    returnObject = await gitDiffApply(argv);
   } catch (err) {
     console.log(err);
     return;
