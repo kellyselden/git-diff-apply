@@ -30,7 +30,7 @@ async function ensureDir(dir) {
 }
 
 module.exports = async function gitDiffApply({
-  cwd,
+  cwd = process.cwd(),
   remoteUrl,
   startTag,
   endTag,
