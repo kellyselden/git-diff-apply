@@ -45,7 +45,6 @@ module.exports = async function gitDiffApply({
   wasRunAsExecutable
 }) {
   let _tmpDir;
-  let tmpGitDir;
   let tmpWorkingDir;
 
   let oldBranchName;
@@ -111,7 +110,6 @@ module.exports = async function gitDiffApply({
     await copyToSubDir(endTag);
 
     _tmpDir = newTmpDir;
-    tmpGitDir = path.join(_tmpDir, '.git');
     tmpWorkingDir = newTmpSubDir;
   }
 
@@ -134,7 +132,7 @@ module.exports = async function gitDiffApply({
 
   async function createPatchFile() {
     let patchFile = path.join(await tmpDir(), 'file.patch');
-    await utils.run(`git --git-dir="${tmpGitDir}" diff ${startTag} ${endTag} --binary > ${patchFile}`);
+    await utils.run(`git diff ${startTag} ${endTag} --binary > ${patchFile}`, { cwd: _tmpDir });
     if (await fs.readFile(patchFile, 'utf8') !== '') {
       return patchFile;
     }
@@ -249,10 +247,9 @@ module.exports = async function gitDiffApply({
     }
 
     _tmpDir = await tmpDir();
-    tmpGitDir = path.join(_tmpDir, '.git');
     tmpWorkingDir = _tmpDir;
 
-    await utils.run(`git clone --mirror ${remoteUrl} ${tmpGitDir}`);
+    await utils.run(`git clone ${remoteUrl} ${_tmpDir}`);
 
     returnObject = await buildReturnObject();
 
