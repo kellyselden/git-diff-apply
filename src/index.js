@@ -177,7 +177,7 @@ module.exports = async function gitDiffApply({
       let sha = await utils.run('git rev-parse HEAD', { cwd: _tmpDir });
 
       await utils.run(`git remote add ${tempBranchName} ${_tmpDir}`, { cwd });
-      await utils.run(`git fetch ${tempBranchName}`, { cwd });
+      await utils.run(`git fetch --no-tags ${tempBranchName}`, { cwd });
 
       try {
         await utils.run(`git cherry-pick --no-commit ${sha.trim()}`, { cwd });
