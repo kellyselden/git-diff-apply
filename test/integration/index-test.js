@@ -134,6 +134,10 @@ describe(function() {
 
     expect(status).to.equal(`M  changed.txt
 `);
+
+    let stagedCommitMessage = await fs.readFile(path.join(rootDir, '.git/MERGE_MSG'), 'utf8');
+
+    expect(stagedCommitMessage.trim()).to.equal('v1...v3');
   });
 
   it('handles dirty', async function() {

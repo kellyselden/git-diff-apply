@@ -173,7 +173,7 @@ module.exports = async function gitDiffApply({
     let wereAnyChanged = !await isGitClean({ cwd: _tmpDir });
 
     if (wereAnyChanged) {
-      await commit({ cwd: _tmpDir });
+      await commit(`${startTag}...${endTag}`, { cwd: _tmpDir });
 
       let sha = await utils.run('git rev-parse HEAD', { cwd: _tmpDir });
 
