@@ -18,6 +18,7 @@ const resolveConflicts = require('./resolve-conflicts');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
 const createCustomRemote = require('./create-custom-remote');
+const { runWithSpawn } = require('./run');
 
 const { isGitClean } = gitStatus;
 const { gitConfigInit } = gitInit;
@@ -222,7 +223,7 @@ module.exports = async function gitDiffApply({
     _tmpDir = await tmpDir();
     tmpWorkingDir = _tmpDir;
 
-    await utils.run(`git clone ${remoteUrl} ${_tmpDir}`);
+    await runWithSpawn('git', ['clone', remoteUrl, _tmpDir]);
 
     // needed because we are going to be committing in here
     await gitConfigInit({ cwd: _tmpDir });
