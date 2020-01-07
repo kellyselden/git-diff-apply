@@ -134,10 +134,6 @@ describe(function() {
 
     expect(status).to.equal(`M  changed.txt
 `);
-
-    let stagedCommitMessage = await fs.readFile(path.join(rootDir, '.git/MERGE_MSG'), 'utf8');
-
-    expect(stagedCommitMessage.trim()).to.equal('v1...v3');
   });
 
   it('handles dirty', async function() {
@@ -154,6 +150,22 @@ describe(function() {
 `);
 
     expect(stderr).to.contain('You must start with a clean working directory');
+    expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
+  });
+
+  it('fails without both tags', async function() {
+    let {
+      status,
+      stderr
+    } = await merge({
+      localFixtures: 'test/fixtures/local/noconflict',
+      remoteFixtures: 'test/fixtures/remote/noconflict',
+      startTag: null
+    });
+
+    expect(status).to.equal('');
+
+    expect(stderr).to.contain('You must supply a start tag and an end tag');
     expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
   });
 
@@ -744,26 +756,104 @@ D  removed-unchanged.txt
     });
   }
 
-  it('can create a custom diff', async function() {
-    let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
-    let remoteFixtures = 'test/fixtures/remote/noconflict';
+  describe('custom diff', function() {
+    it('can create a custom diff', async function() {
+      let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
+      let remoteFixtures = 'test/fixtures/remote/noconflict';
 
-    let {
-      status
-    } = await merge({
-      localFixtures: 'test/fixtures/local/noconflict',
-      remoteFixtures,
-      createCustomDiff: true,
-      startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
-      endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
-    });
+      let {
+        status
+      } = await merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures,
+        createCustomDiff: true,
+        startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
+        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
+      });
 
-    await fixtureCompare({
-      mergeFixtures: 'test/fixtures/merge/noconflict'
-    });
+      await fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/noconflict'
+      });
 
-    expect(status).to.equal(`M  changed.txt
+      expect(status).to.equal(`M  changed.txt
 `);
+
+      let stagedCommitMessage = await fs.readFile(path.join(rootDir, '.git/MERGE_MSG'), 'utf8');
+
+      expect(stagedCommitMessage.trim()).to.equal('v1...v3');
+    });
+
+    it('start tag optional', async function() {
+      let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
+      let remoteFixtures = 'test/fixtures/remote/noconflict';
+
+      let {
+        status
+      } = await merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures,
+        createCustomDiff: true,
+        startTag: null,
+        startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
+        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
+      });
+
+      await fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/noconflict'
+      });
+
+      expect(status).to.equal(`M  changed.txt
+`);
+
+      let stagedCommitMessage = await fs.readFile(path.join(rootDir, '.git/MERGE_MSG'), 'utf8');
+
+      expect(stagedCommitMessage.trim()).to.equal('v3');
+    });
+
+    it('end tag optional', async function() {
+      let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
+      let remoteFixtures = 'test/fixtures/remote/noconflict';
+
+      let {
+        status
+      } = await merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures,
+        createCustomDiff: true,
+        endTag: null,
+        startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
+        endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`
+      });
+
+      await fixtureCompare({
+        mergeFixtures: 'test/fixtures/merge/noconflict'
+      });
+
+      expect(status).to.equal(`M  changed.txt
+`);
+
+      let stagedCommitMessage = await fs.readFile(path.join(rootDir, '.git/MERGE_MSG'), 'utf8');
+
+      expect(stagedCommitMessage.trim()).to.equal('v1');
+    });
+
+    it('fails without either tag', async function() {
+      let {
+        status,
+        stderr
+      } = await merge({
+        localFixtures: 'test/fixtures/local/noconflict',
+        remoteFixtures: 'test/fixtures/remote/noconflict',
+        createCustomDiff: true,
+        startTag: null,
+        endTag: null
+      });
+
+      expect(status).to.equal('');
+
+      expect(stderr).to.contain('You must supply a start tag or an end tag');
+      expect(stderr).to.not.contain('UnhandledPromiseRejectionWarning');
+    });
   });
 
   it('preserves locally gitignored', async function() {

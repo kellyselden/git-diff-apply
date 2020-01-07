@@ -25,6 +25,8 @@ const { gitConfigInit } = gitInit;
 
 const tempBranchName = uuidv1();
 
+const fallbackTagName = 'tag-not-supplied';
+
 async function ensureDir(dir) {
   debug('ensureDir', dir);
   await fs.ensureDir(dir);
@@ -56,18 +58,29 @@ module.exports = async function gitDiffApply({
 
   let err;
 
+  if (!createCustomDiff && !(startTag && endTag)) {
+    throw 'You must supply a start tag and an end tag';
+  }
+
+  if (createCustomDiff && !startTag && !endTag) {
+    throw 'You must supply a start tag or an end tag';
+  }
+
+  let safeStartTag = startTag || fallbackTagName;
+  let safeEndTag = endTag || fallbackTagName;
+
   async function buildReturnObject() {
     let from;
 
     if (reset || init) {
       from = {};
     } else {
-      await checkOutTag(startTag, { cwd: _tmpDir });
+      await checkOutTag(safeStartTag, { cwd: _tmpDir });
 
       from = convertToObj(_tmpDir, ignoredFiles);
     }
 
-    await checkOutTag(endTag, { cwd: _tmpDir });
+    await checkOutTag(safeEndTag, { cwd: _tmpDir });
 
     let to = convertToObj(_tmpDir, ignoredFiles);
 
@@ -95,12 +108,12 @@ module.exports = async function gitDiffApply({
     }
 
     if (!(reset || init)) {
-      await copyToSubDir(startTag);
+      await copyToSubDir(safeStartTag);
 
       await gitRemoveAll({ cwd: newTmpDir });
     }
 
-    await copyToSubDir(endTag);
+    await copyToSubDir(safeEndTag);
 
     _tmpDir = newTmpDir;
     tmpWorkingDir = newTmpSubDir;
@@ -125,7 +138,7 @@ module.exports = async function gitDiffApply({
 
   async function createPatchFile() {
     let patchFile = path.join(await tmpDir(), 'file.patch');
-    await utils.run(`git diff ${startTag} ${endTag} --binary > ${patchFile}`, { cwd: _tmpDir });
+    await utils.run(`git diff ${safeStartTag} ${safeEndTag} --binary > ${patchFile}`, { cwd: _tmpDir });
     if (await fs.readFile(patchFile, 'utf8') !== '') {
       return patchFile;
     }
@@ -139,7 +152,7 @@ module.exports = async function gitDiffApply({
 
   async function go() {
     if (reset || init) {
-      await checkOutTag(endTag, { cwd: _tmpDir });
+      await checkOutTag(safeEndTag, { cwd: _tmpDir });
 
       isCodeUntracked = true;
       isCodeModified = true;
@@ -156,7 +169,7 @@ module.exports = async function gitDiffApply({
       return;
     }
 
-    await checkOutTag(startTag, { cwd: _tmpDir });
+    await checkOutTag(safeStartTag, { cwd: _tmpDir });
 
     await utils.run(`git branch ${tempBranchName}`, { cwd: _tmpDir });
     await utils.run(`git checkout ${tempBranchName}`, { cwd: _tmpDir });
@@ -173,7 +186,9 @@ module.exports = async function gitDiffApply({
     let wereAnyChanged = !await isGitClean({ cwd: _tmpDir });
 
     if (wereAnyChanged) {
-      await commit(`${startTag}...${endTag}`, { cwd: _tmpDir });
+      let message = [startTag, endTag].filter(Boolean).join('...');
+
+      await commit(message, { cwd: _tmpDir });
 
       let sha = await utils.run('git rev-parse HEAD', { cwd: _tmpDir });
 
@@ -211,8 +226,8 @@ module.exports = async function gitDiffApply({
       let tmpPath = await createCustomRemote({
         startCommand,
         endCommand,
-        startTag,
-        endTag,
+        startTag: safeStartTag,
+        endTag: safeEndTag,
         reset,
         init
       });
