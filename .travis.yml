@@ -14,9 +14,8 @@ cache:
   - "$HOME/.npm"
 deploy:
   provider: npm
-  email: kellyselden@gmail.com
-  api_key:
-    secure: k1M4QGTHsjeDK25iwMTTA3cWBKOF4gX1r4GgiLgBNnWgB5TFYfwpI2gaprKWtWpAD77+h/+qow8NCWOjK/zEXyb+wkhN58jPmXmZbanYwM7PC+Pde1hvS7yi7FTzi8Avi26P9RK/IWesqMCgJmq4p1SUIohXEagfxrL+Btarw6neeja8XVJCpVVztVn03EuGgqe4mSJt5voH0H+G6+2eKzzU1kv++WT2gZloJWA40e3CuThHqHQacg9NzuuuEU/9Ke86BwPd9Oc3bKtuP8FonF1GyaBNVekws2YctdJUfhlCzyCeXfwftbGSM/y7vw5CTx4rrJQ7c3YQHFEm0N21IhLam9FwM91tqlouBTuazi0iX804ti1hZv7Lq326cCC6aK6JkRBmepKBXccDu/4c/7UEF6NmfdCgOHlgfgWdkp2aGEOjkDD1xIPNvcvvx2P3NjpkmFY/V9imUlVba3GNNi7NpSV0MsviXvg3EFlmgw4FMr7SPPkKnJIjHBOvvi5UTYZw8kxvBga6wNOPBowR5sQ80W+jYVMj3Ao0k9tts2mdmOemOPAQXCoy9YO88Ik5gu3+gGTWXVZx22Fag3BPDneTDn3RVY4f1KwePlt6hXk+9Y7QP8fVeUfKJ56mVUxgAHD8hby1HCmc6w1iYEgdUJz+AT/muyHdXRYQ6e/ORkI=
+  email: $NPM_EMAIL
+  api_key: $NPM_TOKEN
   on:
     tags: true
     repo: kellyselden/git-diff-apply
