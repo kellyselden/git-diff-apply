@@ -58,12 +58,17 @@ module.exports = async function gitDiffApply({
 
   let err;
 
-  if (!createCustomDiff && !(startTag && endTag)) {
-    throw 'You must supply a start tag and an end tag';
-  }
-
-  if (createCustomDiff && !startTag && !endTag) {
-    throw 'You must supply a start tag or an end tag';
+  if (reset || init) {
+    if (!endTag) {
+      throw 'You must supply an end tag';
+    }
+  } else {
+    if (!createCustomDiff && !(startTag && endTag)) {
+      throw 'You must supply a start tag and an end tag';
+    }
+    if (createCustomDiff && !startTag && !endTag) {
+      throw 'You must supply a start tag or an end tag';
+    }
   }
 
   let safeStartTag = startTag || fallbackTagName;

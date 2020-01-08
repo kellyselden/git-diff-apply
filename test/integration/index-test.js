@@ -528,6 +528,27 @@ D  removed-unchanged.txt
         expect(result.from).to.deep.equal({});
       });
 
+      it(`${type}s without start tag`, async function() {
+        let {
+          status,
+          result
+        } = await merge({
+          localFixtures: `test/fixtures/local/${type}`,
+          remoteFixtures: `test/fixtures/remote/${type}`,
+          [type]: true,
+          ignoredFiles: ['ignored-changed.txt'],
+          startTag: null
+        });
+
+        await fixtureCompare({
+          mergeFixtures: `test/fixtures/merge/${type}`
+        });
+
+        expect(status).to.equal(expectedStatus());
+
+        expect(result.from).to.deep.equal({});
+      });
+
       it(`${type}s using a custom diff`, async function() {
         let cpr = path.resolve(path.dirname(require.resolve('cpr')), '../bin/cpr');
         let remoteFixtures = `test/fixtures/remote/${type}`;
