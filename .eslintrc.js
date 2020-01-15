@@ -9,10 +9,6 @@ module.exports = {
   extends: [
     'sane-node'
   ],
-  rules: {
-    // https://github.com/eslint/eslint/issues/11899
-    'require-atomic-updates': 0
-  },
   overrides: [
     {
       files: ['bin/*.js'],
