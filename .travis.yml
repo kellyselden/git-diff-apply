@@ -12,6 +12,8 @@ branches:
 cache:
   directories:
   - "$HOME/.npm"
+before_script:
+- npm run lint
 deploy:
   provider: npm
   email: $NPM_EMAIL
