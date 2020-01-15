@@ -3,12 +3,12 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2018
   },
-  extends: [
-    'sane-node'
-  ],
   env: {
     es6: true
   },
+  extends: [
+    'sane-node'
+  ],
   rules: {
     // https://github.com/eslint/eslint/issues/11899
     'require-atomic-updates': 0
@@ -21,19 +21,21 @@ module.exports = {
       }
     },
     {
-      files: ['test/**/*-test.js'],
+      files: [
+        'test/**/*-test.js'
+      ],
+      env: {
+        mocha: true
+      },
       plugins: [
         'mocha'
       ],
       extends: [
         'plugin:mocha/recommended'
       ],
-      env: {
-        mocha: true
-      },
       rules: {
-        'mocha/no-setup-in-describe': 0,
-        'mocha/no-exclusive-tests': 2
+        'mocha/no-exclusive-tests': 'error',
+        'mocha/no-setup-in-describe': 'off'
       }
     }
   ]

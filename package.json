@@ -11,11 +11,8 @@
     "git-diff-apply": "bin/git-diff-apply.js"
   },
   "scripts": {
-    "test": "cross-env DEBUG=git-diff-apply,git-fixtures mocha test/**/*-test.js",
-    "posttest": "npm run lint",
-    "prelint": "eslint --version",
     "lint": "eslint . --ext js,json",
-    "lint:fix": "npm run lint -- --fix"
+    "test": "cross-env DEBUG=git-diff-apply,git-fixtures mocha test/**/*-test.js"
   },
   "repository": {
     "type": "git",
@@ -49,14 +46,14 @@
     "yargs": "^15.0.0"
   },
   "devDependencies": {
-    "chai": "^4.1.0",
+    "chai": "^4.2.0",
     "cpr": "^3.0.1",
     "cross-env": "^6.0.0",
-    "eslint": "^6.1.0",
+    "eslint": "^6.8.0",
     "eslint-config-sane": "0.8.5",
     "eslint-config-sane-node": "0.2.2",
     "eslint-plugin-json-files": "0.8.0",
-    "eslint-plugin-mocha": "^6.0.0",
+    "eslint-plugin-mocha": "^6.2.2",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-prefer-let": "^1.0.1",
     "fixturify-project": "^1.9.0",
