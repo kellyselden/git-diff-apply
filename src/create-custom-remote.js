@@ -21,6 +21,12 @@ module.exports = async function createCustomRemote({
     cwd
   });
 
+  // If one tag is CRLF and the other LF, the diff becomes unusable.
+  // This will work around that,
+  await run('git config core.autocrlf true', {
+    cwd
+  });
+
   if (!(reset || init)) {
     await run(startCommand, {
       cwd
