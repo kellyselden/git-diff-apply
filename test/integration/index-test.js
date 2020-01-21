@@ -933,7 +933,7 @@ D  removed-unchanged.txt
         localFixtures: 'test/fixtures/local/globally-gitignored',
         remoteFixtures: 'test/fixtures/remote/globally-gitignored',
         async beforeMerge() {
-          await utils.run('git config --local --unset core.excludesfile', { cwd: rootDir });
+          await utils.run('git config --unset core.excludesfile', { cwd: rootDir });
         }
       });
 
@@ -953,7 +953,7 @@ D  removed-unchanged.txt
         startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
         endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`,
         async beforeMerge() {
-          await utils.run('git config --local --unset core.excludesfile', { cwd: rootDir });
+          await utils.run('git config --unset core.excludesfile', { cwd: rootDir });
         }
       });
 

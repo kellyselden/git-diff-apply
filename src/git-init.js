@@ -12,7 +12,7 @@ async function gitConfigInit(options) {
   await run('git config user.name "Your Name"', options);
 
   // ignore any global .gitignore that will mess with us
-  await run('git config --local core.excludesfile false', options);
+  await run('git config core.excludesfile false', options);
 }
 
 module.exports = gitInit;
