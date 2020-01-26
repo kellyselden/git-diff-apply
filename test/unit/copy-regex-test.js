@@ -1,7 +1,7 @@
 'use strict';
 
 const { describe, it } = require('../helpers/mocha');
-const { expect } = require('chai');
+const { expect } = require('../helpers/chai');
 const copyRegex = require('../../src/copy-regex');
 
 describe(copyRegex, function() {

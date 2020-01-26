@@ -1,7 +1,7 @@
 'use strict';
 
 const { describe, it } = require('../helpers/mocha');
-const { expect } = require('chai');
+const { expect } = require('../helpers/chai');
 const { chunkFilePaths } = require('../../src/git-remove-all');
 const filePaths = [
   'a'.repeat(5),
