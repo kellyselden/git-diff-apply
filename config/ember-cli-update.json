@@ -18,7 +18,8 @@
         {
           "name": "@kellyselden/node-template",
           "options": [
-            "--repo-slug=kellyselden/git-diff-apply"
+            "--repo-slug=kellyselden/git-diff-apply",
+            "--ci-provider=travis-ci"
           ]
         }
       ]
