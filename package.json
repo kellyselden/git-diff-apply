@@ -46,6 +46,7 @@
     "yargs": "^15.0.0"
   },
   "devDependencies": {
+    "@kellyselden/node-template": "0.8.3",
     "chai": "^4.2.0",
     "cpr": "^3.0.1",
     "cross-env": "^6.0.0",
@@ -64,7 +65,6 @@
     "sinon": "^8.0.0"
   },
   "optionalDependencies": {
-    "@kellyselden/node-template": "0.8.3",
     "standard-node-template": "0.0.1"
   }
 }
