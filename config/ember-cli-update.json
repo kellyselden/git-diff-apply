@@ -19,7 +19,8 @@
           "name": "@kellyselden/node-template",
           "options": [
             "--repo-slug=kellyselden/git-diff-apply",
-            "--travis-ci"
+            "--travis-ci",
+            "--appveyor=imgjd20sv5itmnlo"
           ]
         }
       ]
