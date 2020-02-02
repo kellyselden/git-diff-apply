@@ -6,10 +6,14 @@ branches:
   only:
     - master
 
+# Fix line endings in Windows. (runs before repo cloning)
+init:
+  - git config --global core.autocrlf true
+
 # Install scripts. (runs after repo cloning)
 install:
   - ps: Install-Product node $env:nodejs_version
-  - npm install
+  - npm ci
 
 # Post-install test scripts.
 test_script:
