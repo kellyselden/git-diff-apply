@@ -33,6 +33,8 @@ describe(function() {
 
   afterEach(function() {
     sinon.restore();
+
+    process.chdir(cwd);
   });
 
   async function merge({
