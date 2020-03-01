@@ -17,6 +17,9 @@ cache:
   - "$HOME/.npm"
 before_script:
 - npm run lint
+# simulate a system that doesn't generate valid diffs
+# https://github.com/ember-cli/ember-cli-update/issues/995
+- git config --global diff.noprefix true
 jobs:
   include:
   - if: branch = master AND type = pull_request
