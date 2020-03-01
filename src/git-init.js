@@ -13,6 +13,10 @@ async function gitConfigInit(options) {
 
   // ignore any global .gitignore that will mess with us
   await run('git config core.excludesfile false', options);
+
+  // this global setting messes with diffs
+  // https://github.com/ember-cli/ember-cli-update/issues/995
+  await run('git config diff.noprefix false', options);
 }
 
 module.exports = gitInit;
