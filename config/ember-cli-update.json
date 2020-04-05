@@ -20,7 +20,8 @@
           "options": [
             "--repo-slug=kellyselden/git-diff-apply",
             "--travis-ci",
-            "--appveyor=imgjd20sv5itmnlo"
+            "--appveyor=imgjd20sv5itmnlo",
+            "--renovate"
           ]
         }
       ]
