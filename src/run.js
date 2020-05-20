@@ -1,11 +1,11 @@
 'use strict';
 
 const { promisify } = require('util');
-const { exec, spawn: _spawn } = require('child_process');
+const { exec: _exec, spawn: _spawn } = require('child_process');
 const debug = require('debug')('git-diff-apply');
-const execPromise = promisify(exec);
+const execPromise = promisify(_exec);
 
-module.exports = async function run(command, options) {
+module.exports.exec = async function exec(command, options) {
   debug(command);
   let { stdout } = await execPromise(command, options);
   debug(stdout);
