@@ -1,7 +1,6 @@
 'use strict';
 
-const run = require('./run');
-const { spawn } = run;
+const { exec, spawn } = require('./run');
 const gitInit = require('./git-init');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
@@ -29,7 +28,7 @@ module.exports = async function createCustomRemote({
   });
 
   if (!(reset || init)) {
-    await run(startCommand, {
+    await exec(startCommand, {
       cwd
     });
 
@@ -42,7 +41,7 @@ module.exports = async function createCustomRemote({
     });
   }
 
-  await run(endCommand, {
+  await exec(endCommand, {
     cwd
   });
 
