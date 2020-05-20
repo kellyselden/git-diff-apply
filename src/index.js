@@ -133,9 +133,9 @@ module.exports = async function gitDiffApply({
     for (let ignoredFile of ignoredFiles) {
       // An exist check is not good enough.
       // `git checkout` will fail unless it is also tracked.
-      let isTracked = await run(`git ls-files ${ignoredFile}`, { cwd });
+      let isTracked = await runWithSpawn('git', ['ls-files', ignoredFile], { cwd });
       if (isTracked) {
-        await run(`git checkout -- ${ignoredFile}`, { cwd });
+        await runWithSpawn('git', ['checkout', '--', ignoredFile], { cwd });
       } else {
         await fs.remove(path.join(cwd, ignoredFile));
       }
@@ -144,7 +144,9 @@ module.exports = async function gitDiffApply({
 
   async function createPatchFile() {
     let patchFile = path.join(await tmpDir(), 'file.patch');
-    await run(`git diff ${safeStartTag} ${safeEndTag} --binary > ${patchFile}`, { cwd: _tmpDir });
+    let ps = runWithSpawn('git', ['diff', safeStartTag, safeEndTag, '--binary'], { cwd: _tmpDir });
+    ps.stdout.pipe(fs.createWriteStream(patchFile));
+    await ps;
     if (await fs.readFile(patchFile, 'utf8') !== '') {
       return patchFile;
     }
@@ -153,7 +155,7 @@ module.exports = async function gitDiffApply({
   async function applyPatch(patchFile) {
     // --whitespace=fix seems to prevent any unnecessary conflicts with line endings
     // https://stackoverflow.com/questions/6308625/how-to-avoid-git-apply-changing-line-endings#comment54419617_11189296
-    await run(`git apply --whitespace=fix ${patchFile}`, { cwd: _tmpDir });
+    await runWithSpawn('git', ['apply', '--whitespace=fix', patchFile], { cwd: _tmpDir });
   }
 
   async function go() {
@@ -168,7 +170,7 @@ module.exports = async function gitDiffApply({
 
       await copy();
 
-      await utils.run('git reset', { cwd });
+      await utils.runWithSpawn('git', ['reset'], { cwd });
 
       await resetIgnoredFiles(cwd);
 
@@ -177,8 +179,8 @@ module.exports = async function gitDiffApply({
 
     await checkOutTag(safeStartTag, { cwd: _tmpDir });
 
-    await run(`git branch ${tempBranchName}`, { cwd: _tmpDir });
-    await run(`git checkout ${tempBranchName}`, { cwd: _tmpDir });
+    await runWithSpawn('git', ['branch', tempBranchName], { cwd: _tmpDir });
+    await runWithSpawn('git', ['checkout', tempBranchName], { cwd: _tmpDir });
 
     let patchFile = await createPatchFile();
     if (!patchFile) {
@@ -196,18 +198,18 @@ module.exports = async function gitDiffApply({
 
       await commit(message, { cwd: _tmpDir });
 
-      let sha = await run('git rev-parse HEAD', { cwd: _tmpDir });
+      let sha = await runWithSpawn('git', ['rev-parse', 'HEAD'], { cwd: _tmpDir });
 
-      await run(`git remote add ${tempBranchName} ${_tmpDir}`, { cwd });
-      await run(`git fetch --no-tags ${tempBranchName}`, { cwd });
+      await runWithSpawn('git', ['remote', 'add', tempBranchName, _tmpDir], { cwd });
+      await runWithSpawn('git', ['fetch', '--no-tags', tempBranchName], { cwd });
 
       try {
-        await run(`git cherry-pick --no-commit ${sha.trim()}`, { cwd });
+        await runWithSpawn('git', ['cherry-pick', '--no-commit', sha.trim()], { cwd });
       } catch (err) {
         hasConflicts = true;
       }
 
-      await run(`git remote remove ${tempBranchName}`, { cwd });
+      await runWithSpawn('git', ['remote', 'remove', tempBranchName], { cwd });
     }
   }
 
@@ -267,10 +269,10 @@ module.exports = async function gitDiffApply({
 
     try {
       if (isCodeUntracked) {
-        await run('git clean -f', { cwd });
+        await runWithSpawn('git', ['clean', '-f'], { cwd });
       }
       if (isCodeModified) {
-        await run('git reset --hard', { cwd });
+        await runWithSpawn('git', ['reset', '--hard'], { cwd });
       }
     } catch (err2) {
       throw {
@@ -293,7 +295,7 @@ module.exports = async function gitDiffApply({
   return returnObject;
 };
 
-module.exports.run = utils.run;
+module.exports.run = run;
 module.exports.gitInit = gitInit;
 module.exports.gitStatus = gitStatus;
 module.exports.isGitClean = isGitClean;
