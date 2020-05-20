@@ -2,13 +2,13 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const { runWithSpawn } = require('./run');
+const { spawn } = require('./run');
 
 async function lsFiles(options) {
   // Using spawn rather than run here because ls-files produces a lot
   // of output if it gets run in a large repo.
   // See https://github.com/kellyselden/git-diff-apply/pull/277
-  let files = (await runWithSpawn('git', ['ls-files'], options))
+  let files = (await spawn('git', ['ls-files'], options))
     .split(/\r?\n/g)
     .filter(Boolean);
 
@@ -38,7 +38,7 @@ function chunkFilePaths(files, maxChunkSize = 4096) {
 module.exports = async function gitRemoveAll(options) {
   // this removes cwd as well, which trips up your terminal
   // when in a monorepo
-  // await runWithSpawn('git', ['rm', '-rf', '.'], options);
+  // await spawn('git', ['rm', '-rf', '.'], options);
 
   let files = await lsFiles(options);
   let fileGroups = chunkFilePaths(files);
@@ -46,7 +46,7 @@ module.exports = async function gitRemoveAll(options) {
   for (let files of fileGroups) {
     // this removes folders that become empty,
     // which we are trying to avoid
-    // await runWithSpawn('git', ['rm', '-f', file], options);
+    // await spawn('git', ['rm', '-f', file], options);
     for (let file of files) {
       await fs.remove(path.join(options.cwd, file));
     }
@@ -58,7 +58,7 @@ module.exports = async function gitRemoveAll(options) {
      * Use -f if you really want to add them.
      */
     // https://github.com/kellyselden/git-diff-apply/issues/306
-    await runWithSpawn('git', ['add', '-f', ...files], options);
+    await spawn('git', ['add', '-f', ...files], options);
   }
 };
 

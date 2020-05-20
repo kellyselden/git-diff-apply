@@ -1,9 +1,9 @@
 'use strict';
 
-const { runWithSpawn } = require('./run');
+const { spawn } = require('./run');
 
 async function gitStatus(options) {
-  return await runWithSpawn('git', ['status', '--porcelain'], options);
+  return await spawn('git', ['status', '--porcelain'], options);
 }
 
 async function isGitClean(options) {

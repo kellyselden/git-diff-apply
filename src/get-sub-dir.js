@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const { runWithSpawn } = require('./run');
+const { spawn } = require('./run');
 
 module.exports = async function getSubDir(options) {
   // `git rev-parse --show-toplevel` won't work to determine root.
@@ -10,7 +10,7 @@ module.exports = async function getSubDir(options) {
   // https://github.com/ember-cli/ember-cli-update/pull/841/checks?check_run_id=360968913#step:6:329
   // and git returns a normal path. This makes the `path.relative`
   // not bahave as expected.
-  let relative = (await runWithSpawn('git', ['rev-parse', '--show-cdup'], options)).trim();
+  let relative = (await spawn('git', ['rev-parse', '--show-cdup'], options)).trim();
   let subDir = path.relative(path.resolve(options.cwd, relative), options.cwd);
   return subDir;
 };
