@@ -38,7 +38,7 @@ function chunkFilePaths(files, maxChunkSize = 4096) {
 module.exports = async function gitRemoveAll(options) {
   // this removes cwd as well, which trips up your terminal
   // when in a monorepo
-  // await run('git rm -rf .', options);
+  // await runWithSpawn('git', ['rm', '-rf', '.'], options);
 
   let files = await lsFiles(options);
   let fileGroups = chunkFilePaths(files);
@@ -46,7 +46,7 @@ module.exports = async function gitRemoveAll(options) {
   for (let files of fileGroups) {
     // this removes folders that become empty,
     // which we are trying to avoid
-    // await run(`git rm -f "${file}"`, options);
+    // await runWithSpawn('git', ['rm', '-f', file], options);
     for (let file of files) {
       await fs.remove(path.join(options.cwd, file));
     }
