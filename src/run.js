@@ -6,9 +6,16 @@ const execa = require('execa');
 const debug = require('debug')('git-diff-apply');
 const execPromise = promisify(exec);
 
-module.exports = async function run(command, options) {
+module.exports = async function execaCommand(command, options) {
   debug(command);
   let { stdout } = await execPromise(command, options);
+  debug(stdout);
+  return stdout;
+};
+
+module.exports.execaCommand = async function execaCommand(command, options) {
+  debug(command);
+  let { stdout } = await execa.command(command, options);
   debug(stdout);
   return stdout;
 };

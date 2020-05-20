@@ -1,6 +1,6 @@
 'use strict';
 
-const run = require('./run');
+const { execaCommand } = require('./run');
 const gitInit = require('./git-init');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
@@ -23,12 +23,12 @@ module.exports = async function createCustomRemote({
 
   // If one tag is CRLF and the other LF, the diff becomes unusable.
   // This will work around that,
-  await run('git config core.autocrlf true', {
+  await execaCommand('git config core.autocrlf true', {
     cwd
   });
 
   if (!(reset || init)) {
-    await run(startCommand, {
+    await execaCommand(startCommand, {
       cwd
     });
 
@@ -41,7 +41,7 @@ module.exports = async function createCustomRemote({
     });
   }
 
-  await run(endCommand, {
+  await execaCommand(endCommand, {
     cwd
   });
 
