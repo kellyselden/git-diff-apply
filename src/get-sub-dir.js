@@ -10,7 +10,7 @@ module.exports = async function getSubDir(options) {
   // https://github.com/ember-cli/ember-cli-update/pull/841/checks?check_run_id=360968913#step:6:329
   // and git returns a normal path. This makes the `path.relative`
   // not bahave as expected.
-  let relative = (await run('git rev-parse --show-cdup', options)).trim();
+  let relative = await run('git rev-parse --show-cdup', options);
   let subDir = path.relative(path.resolve(options.cwd, relative), options.cwd);
   return subDir;
 };

@@ -3,6 +3,6 @@
 const run = require('./run');
 
 module.exports = async function getRootDir(options) {
-  let root = (await run('git rev-parse --show-toplevel', options)).trim();
+  let root = await run('git rev-parse --show-toplevel', options);
   return root;
 };

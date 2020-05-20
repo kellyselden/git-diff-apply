@@ -803,7 +803,7 @@ D  removed-unchanged.txt
 
       let stagedCommitMessage = await fs.readFile(path.join(rootDir, '.git/MERGE_MSG'), 'utf8');
 
-      expect(stagedCommitMessage.trim()).to.equal('v1...v3');
+      expect(stagedCommitMessage.trim()).to.equal('"v1...v3"');
     });
 
     it('start tag optional', async function() {
@@ -830,7 +830,7 @@ D  removed-unchanged.txt
 
       let stagedCommitMessage = await fs.readFile(path.join(rootDir, '.git/MERGE_MSG'), 'utf8');
 
-      expect(stagedCommitMessage.trim()).to.equal('v3');
+      expect(stagedCommitMessage.trim()).to.equal('"v3"');
     });
 
     it('end tag optional', async function() {
@@ -857,7 +857,7 @@ D  removed-unchanged.txt
 
       let stagedCommitMessage = await fs.readFile(path.join(rootDir, '.git/MERGE_MSG'), 'utf8');
 
-      expect(stagedCommitMessage.trim()).to.equal('v1');
+      expect(stagedCommitMessage.trim()).to.equal('"v1"');
     });
 
     it('fails without either tag', async function() {

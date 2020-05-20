@@ -143,7 +143,7 @@ module.exports = async function gitDiffApply({
 
   async function createPatchFile() {
     let patchFile = path.join(await tmpDir(), 'file.patch');
-    await utils.run(`git diff ${safeStartTag} ${safeEndTag} --binary > ${patchFile}`, { cwd: _tmpDir });
+    await utils.run(`git diff ${safeStartTag} ${safeEndTag} --binary > ${patchFile}`, { cwd: _tmpDir, shell: true });
     if (await fs.readFile(patchFile, 'utf8') !== '') {
       return patchFile;
     }
@@ -201,7 +201,7 @@ module.exports = async function gitDiffApply({
       await utils.run(`git fetch --no-tags ${tempBranchName}`, { cwd });
 
       try {
-        await utils.run(`git cherry-pick --no-commit ${sha.trim()}`, { cwd });
+        await utils.run(`git cherry-pick --no-commit ${sha}`, { cwd });
       } catch (err) {
         hasConflicts = true;
       }
