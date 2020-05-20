@@ -19,7 +19,7 @@ const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
 const createCustomRemote = require('./create-custom-remote');
 const run = require('./run');
-const { runWithSpawn } = run;
+const { spawn } = run;
 
 const { isGitClean } = gitStatus;
 const { gitConfigInit } = gitInit;
@@ -133,9 +133,9 @@ module.exports = async function gitDiffApply({
     for (let ignoredFile of ignoredFiles) {
       // An exist check is not good enough.
       // `git checkout` will fail unless it is also tracked.
-      let isTracked = await runWithSpawn('git', ['ls-files', ignoredFile], { cwd });
+      let isTracked = await spawn('git', ['ls-files', ignoredFile], { cwd });
       if (isTracked) {
-        await runWithSpawn('git', ['checkout', '--', ignoredFile], { cwd });
+        await spawn('git', ['checkout', '--', ignoredFile], { cwd });
       } else {
         await fs.remove(path.join(cwd, ignoredFile));
       }
@@ -144,7 +144,7 @@ module.exports = async function gitDiffApply({
 
   async function createPatchFile() {
     let patchFile = path.join(await tmpDir(), 'file.patch');
-    let ps = runWithSpawn('git', ['diff', safeStartTag, safeEndTag, '--binary'], { cwd: _tmpDir });
+    let ps = spawn('git', ['diff', safeStartTag, safeEndTag, '--binary'], { cwd: _tmpDir });
     ps.stdout.pipe(fs.createWriteStream(patchFile));
     await ps;
     if (await fs.readFile(patchFile, 'utf8') !== '') {
@@ -155,7 +155,7 @@ module.exports = async function gitDiffApply({
   async function applyPatch(patchFile) {
     // --whitespace=fix seems to prevent any unnecessary conflicts with line endings
     // https://stackoverflow.com/questions/6308625/how-to-avoid-git-apply-changing-line-endings#comment54419617_11189296
-    await runWithSpawn('git', ['apply', '--whitespace=fix', patchFile], { cwd: _tmpDir });
+    await spawn('git', ['apply', '--whitespace=fix', patchFile], { cwd: _tmpDir });
   }
 
   async function go() {
@@ -170,7 +170,7 @@ module.exports = async function gitDiffApply({
 
       await copy();
 
-      await utils.runWithSpawn('git', ['reset'], { cwd });
+      await utils.spawn('git', ['reset'], { cwd });
 
       await resetIgnoredFiles(cwd);
 
@@ -179,8 +179,8 @@ module.exports = async function gitDiffApply({
 
     await checkOutTag(safeStartTag, { cwd: _tmpDir });
 
-    await runWithSpawn('git', ['branch', tempBranchName], { cwd: _tmpDir });
-    await runWithSpawn('git', ['checkout', tempBranchName], { cwd: _tmpDir });
+    await spawn('git', ['branch', tempBranchName], { cwd: _tmpDir });
+    await spawn('git', ['checkout', tempBranchName], { cwd: _tmpDir });
 
     let patchFile = await createPatchFile();
     if (!patchFile) {
@@ -198,18 +198,18 @@ module.exports = async function gitDiffApply({
 
       await commit(message, { cwd: _tmpDir });
 
-      let sha = await runWithSpawn('git', ['rev-parse', 'HEAD'], { cwd: _tmpDir });
+      let sha = await spawn('git', ['rev-parse', 'HEAD'], { cwd: _tmpDir });
 
-      await runWithSpawn('git', ['remote', 'add', tempBranchName, _tmpDir], { cwd });
-      await runWithSpawn('git', ['fetch', '--no-tags', tempBranchName], { cwd });
+      await spawn('git', ['remote', 'add', tempBranchName, _tmpDir], { cwd });
+      await spawn('git', ['fetch', '--no-tags', tempBranchName], { cwd });
 
       try {
-        await runWithSpawn('git', ['cherry-pick', '--no-commit', sha.trim()], { cwd });
+        await spawn('git', ['cherry-pick', '--no-commit', sha.trim()], { cwd });
       } catch (err) {
         hasConflicts = true;
       }
 
-      await runWithSpawn('git', ['remote', 'remove', tempBranchName], { cwd });
+      await spawn('git', ['remote', 'remove', tempBranchName], { cwd });
     }
   }
 
@@ -246,7 +246,7 @@ module.exports = async function gitDiffApply({
     _tmpDir = await tmpDir();
     tmpWorkingDir = _tmpDir;
 
-    await runWithSpawn('git', ['clone', remoteUrl, _tmpDir]);
+    await spawn('git', ['clone', remoteUrl, _tmpDir]);
 
     // needed because we are going to be committing in here
     await gitConfigInit({ cwd: _tmpDir });
@@ -269,10 +269,10 @@ module.exports = async function gitDiffApply({
 
     try {
       if (isCodeUntracked) {
-        await runWithSpawn('git', ['clean', '-f'], { cwd });
+        await spawn('git', ['clean', '-f'], { cwd });
       }
       if (isCodeModified) {
-        await runWithSpawn('git', ['reset', '--hard'], { cwd });
+        await spawn('git', ['reset', '--hard'], { cwd });
       }
     } catch (err2) {
       throw {

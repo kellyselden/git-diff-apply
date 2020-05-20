@@ -19,7 +19,7 @@ const { promisify } = require('util');
 const tmpDir = promisify(require('tmp').dir);
 const Project = require('fixturify-project');
 const os = require('os');
-const { runWithSpawn } = require('../../src/run');
+const { spawn } = require('../../src/run');
 
 const defaultStartTag = 'v1';
 const defaultEndTag = 'v3';
@@ -719,13 +719,13 @@ D  removed-unchanged.txt
       });
 
       it('reverts files after reset when error', async function() {
-        let { runWithSpawn } = utils;
-        sinon.stub(utils, 'runWithSpawn').callsFake(async function(cmd, args) {
+        let { spawn } = utils;
+        sinon.stub(utils, 'spawn').callsFake(async function(cmd, args) {
           if (cmd === 'git' && args.length === 1 && args[0] === 'reset') {
             throw 'test reset failed';
           }
 
-          return await runWithSpawn.apply(this, arguments);
+          return await spawn.apply(this, arguments);
         });
 
         let {
@@ -914,20 +914,20 @@ D  removed-unchanged.txt
 
     before(async function() {
       try {
-        realGlobalGitignorePath = (await runWithSpawn('git', ['config', '--global', 'core.excludesfile'])).trim();
+        realGlobalGitignorePath = (await spawn('git', ['config', '--global', 'core.excludesfile'])).trim();
       } catch (err) {}
       let tmpGlobalGitignorePath = path.join(await tmpDir(), '.gitignore');
       await fs.writeFile(tmpGlobalGitignorePath, '.vscode');
-      await runWithSpawn('git', ['config', '--global', 'core.excludesfile', tmpGlobalGitignorePath]);
+      await spawn('git', ['config', '--global', 'core.excludesfile', tmpGlobalGitignorePath]);
     });
 
     after(async function() {
       if (!realGlobalGitignorePath) {
-        await runWithSpawn('git', ['config', '--global', '--unset', 'core.excludesfile']);
+        await spawn('git', ['config', '--global', '--unset', 'core.excludesfile']);
       } else if (realGlobalGitignorePath.startsWith(os.tmpdir())) {
-        await runWithSpawn('git', ['config', '--global', 'core.excludesfile', path.join(os.homedir(), '.gitignore')]);
+        await spawn('git', ['config', '--global', 'core.excludesfile', path.join(os.homedir(), '.gitignore')]);
       } else {
-        await runWithSpawn('git', ['config', '--global', 'core.excludesfile', realGlobalGitignorePath]);
+        await spawn('git', ['config', '--global', 'core.excludesfile', realGlobalGitignorePath]);
       }
     });
 
@@ -936,7 +936,7 @@ D  removed-unchanged.txt
         localFixtures: 'test/fixtures/local/globally-gitignored',
         remoteFixtures: 'test/fixtures/remote/globally-gitignored',
         async beforeMerge() {
-          await runWithSpawn('git', ['config', '--unset', 'core.excludesfile'], { cwd: rootDir });
+          await spawn('git', ['config', '--unset', 'core.excludesfile'], { cwd: rootDir });
         }
       });
 
@@ -956,7 +956,7 @@ D  removed-unchanged.txt
         startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
         endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`,
         async beforeMerge() {
-          await runWithSpawn('git', ['config', '--unset', 'core.excludesfile'], { cwd: rootDir });
+          await spawn('git', ['config', '--unset', 'core.excludesfile'], { cwd: rootDir });
         }
       });
 
