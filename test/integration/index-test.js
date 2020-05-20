@@ -19,6 +19,7 @@ const { promisify } = require('util');
 const tmpDir = promisify(require('tmp').dir);
 const Project = require('fixturify-project');
 const os = require('os');
+const run = require('../../src/run');
 
 const defaultStartTag = 'v1';
 const defaultEndTag = 'v3';
@@ -913,20 +914,20 @@ D  removed-unchanged.txt
 
     before(async function() {
       try {
-        realGlobalGitignorePath = (await utils.run('git config --global core.excludesfile')).trim();
+        realGlobalGitignorePath = (await run('git config --global core.excludesfile')).trim();
       } catch (err) {}
       let tmpGlobalGitignorePath = path.join(await tmpDir(), '.gitignore');
       await fs.writeFile(tmpGlobalGitignorePath, '.vscode');
-      await utils.run(`git config --global core.excludesfile "${tmpGlobalGitignorePath}"`);
+      await run(`git config --global core.excludesfile "${tmpGlobalGitignorePath}"`);
     });
 
     after(async function() {
       if (!realGlobalGitignorePath) {
-        await utils.run('git config --global --unset core.excludesfile');
+        await run('git config --global --unset core.excludesfile');
       } else if (realGlobalGitignorePath.startsWith(os.tmpdir())) {
-        await utils.run(`git config --global core.excludesfile "${path.join(os.homedir(), '.gitignore')}"`);
+        await run(`git config --global core.excludesfile "${path.join(os.homedir(), '.gitignore')}"`);
       } else {
-        await utils.run(`git config --global core.excludesfile "${realGlobalGitignorePath}"`);
+        await run(`git config --global core.excludesfile "${realGlobalGitignorePath}"`);
       }
     });
 
@@ -935,7 +936,7 @@ D  removed-unchanged.txt
         localFixtures: 'test/fixtures/local/globally-gitignored',
         remoteFixtures: 'test/fixtures/remote/globally-gitignored',
         async beforeMerge() {
-          await utils.run('git config --unset core.excludesfile', { cwd: rootDir });
+          await run('git config --unset core.excludesfile', { cwd: rootDir });
         }
       });
 
@@ -955,7 +956,7 @@ D  removed-unchanged.txt
         startCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultStartTag)} .`,
         endCommand: `node ${cpr} ${path.resolve(remoteFixtures, defaultEndTag)} .`,
         async beforeMerge() {
-          await utils.run('git config --unset core.excludesfile', { cwd: rootDir });
+          await run('git config --unset core.excludesfile', { cwd: rootDir });
         }
       });
 
