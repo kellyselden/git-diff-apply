@@ -1,6 +1,7 @@
 'use strict';
 
 const run = require('./run');
+const { runWithSpawn } = run;
 const gitInit = require('./git-init');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
@@ -23,7 +24,7 @@ module.exports = async function createCustomRemote({
 
   // If one tag is CRLF and the other LF, the diff becomes unusable.
   // This will work around that,
-  await run('git config core.autocrlf true', {
+  await runWithSpawn('git', ['config', 'core.autocrlf', 'true'], {
     cwd
   });
 

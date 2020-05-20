@@ -1,8 +1,8 @@
 'use strict';
 
-const run = require('./run');
+const { runWithSpawn } = require('./run');
 
 module.exports = async function getRootDir(options) {
-  let root = (await run('git rev-parse --show-toplevel', options)).trim();
+  let root = (await runWithSpawn('git', ['rev-parse', '--show-toplevel'], options)).trim();
   return root;
 };
