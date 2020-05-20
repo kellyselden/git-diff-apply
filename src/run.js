@@ -12,15 +12,17 @@ module.exports = async function run(command, options) {
   return stdout;
 };
 
-module.exports.runWithSpawn = async function runWithSpawn(cmd, args, options) {
-  return await new Promise(function(resolve, reject) {
-    let command = [cmd, ...args].join(' ');
+module.exports.runWithSpawn = function runWithSpawn(cmd, args, options) {
+  let command = [cmd, ...args].join(' ');
+
+  debug(command);
+
+  let child = spawn(cmd, args, options);
+
+  let promise = new Promise(function(resolve, reject) {
     let stdout = '';
     let errorMessage = '';
 
-    debug(command);
-
-    let child = spawn(cmd, args, options);
     child.stdout.on('data', function(data) {
       stdout += data;
     });
@@ -37,4 +39,6 @@ module.exports.runWithSpawn = async function runWithSpawn(cmd, args, options) {
       }
     });
   });
+
+  return Object.assign(promise, child);
 };

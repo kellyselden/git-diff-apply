@@ -18,8 +18,7 @@ const resolveConflicts = require('./resolve-conflicts');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
 const createCustomRemote = require('./create-custom-remote');
-const run = require('./run');
-const { runWithSpawn } = run;
+const { runWithSpawn } = require('./run');
 
 const { isGitClean } = gitStatus;
 const { gitConfigInit } = gitInit;
@@ -144,7 +143,9 @@ module.exports = async function gitDiffApply({
 
   async function createPatchFile() {
     let patchFile = path.join(await tmpDir(), 'file.patch');
-    await run(`git diff ${safeStartTag} ${safeEndTag} --binary > ${patchFile}`, { cwd: _tmpDir });
+    let ps = runWithSpawn('git', ['diff', safeStartTag, safeEndTag, '--binary'], { cwd: _tmpDir });
+    ps.stdout.pipe(fs.createWriteStream(patchFile));
+    await ps;
     if (await fs.readFile(patchFile, 'utf8') !== '') {
       return patchFile;
     }
