@@ -9,7 +9,8 @@ async function lsFiles(options) {
   // of output if it gets run in a large repo.
   // See https://github.com/kellyselden/git-diff-apply/pull/277
   let files = (await runWithSpawn('git', ['ls-files'], options))
-    .split(/\r?\n/g);
+    .split(/\r?\n/g)
+    .filter(Boolean);
 
   return files;
 }
