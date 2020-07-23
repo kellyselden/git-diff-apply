@@ -288,7 +288,8 @@ module.exports = async function gitDiffApply({
   }
 
   if (hasConflicts && _resolveConflicts) {
-    returnObject.resolveConflictsProcess = resolveConflicts({ cwd });
+    let processOpts = typeof _resolveConflicts === 'object' ? _resolveConflicts : {};
+    returnObject.resolveConflictsProcess = resolveConflicts({ cwd, ...processOpts });
   }
 
   return returnObject;
