@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "debug": "^4.0.0",
-    "fixturify": "^1.0.0",
+    "fixturify": "^2.0.0",
     "fs-extra": "^8.0.0",
     "tmp": "0.2.1",
     "uuid": "^3.1.0",
