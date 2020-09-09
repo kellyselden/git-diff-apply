@@ -43,7 +43,7 @@
     "fs-extra": "^9.0.0",
     "tmp": "0.2.1",
     "uuid": "^3.1.0",
-    "yargs": "^15.0.0"
+    "yargs": "^16.0.0"
   },
   "devDependencies": {
     "@kellyselden/node-template": "1.1.0",
