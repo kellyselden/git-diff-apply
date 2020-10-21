@@ -1,7 +1,7 @@
 {
-  "name": "git-diff-apply",
+  "name": "@phated/git-diff-apply",
   "version": "0.22.10",
-  "description": "Use an unrelated remote repository to apply a git diff",
+  "description": "(Fork) Use an unrelated remote repository to apply a git diff",
   "main": "src",
   "files": [
     "bin",
