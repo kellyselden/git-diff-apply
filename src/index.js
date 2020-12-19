@@ -18,7 +18,7 @@ const resolveConflicts = require('./resolve-conflicts');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
 const createCustomRemote = require('./create-custom-remote');
-const { exec, spawn } = require('./run');
+const { spawn } = require('./run');
 
 const { isGitClean } = gitStatus;
 const { gitConfigInit } = gitInit;
@@ -294,7 +294,6 @@ module.exports = async function gitDiffApply({
   return returnObject;
 };
 
-module.exports.run = exec;
 module.exports.gitInit = gitInit;
 module.exports.gitStatus = gitStatus;
 module.exports.isGitClean = isGitClean;
