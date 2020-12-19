@@ -43,7 +43,7 @@ jobs:
     - run: npm ci
     - run: npm test
       env:
-        DEBUG: git-diff-apply,git-fixtures
+        DEBUG: git-diff-apply
 
   ember-cli-update:
     needs: test
