@@ -5,19 +5,21 @@ const { exec: _exec, spawn: _spawn } = require('child_process');
 const debug = require('./debug');
 const execPromise = promisify(_exec);
 
-module.exports.exec = async function exec(command, options) {
-  debug(command);
-  let { stdout } = await execPromise(command, options);
-  debug(stdout);
+module.exports.exec = async function exec() {
+  debug(...arguments);
+  let { stdout } = await execPromise(...arguments);
+  if (stdout) {
+    debug(stdout);
+  }
   return stdout;
 };
 
 module.exports.spawn = function spawn(cmd, args, options) {
-  let command = [cmd, ...args].join(' ');
+  let command = [cmd, ...args.map(arg => `"${arg}"`)].join(' ');
 
-  debug(command);
+  debug(command, options);
 
-  let child = _spawn(cmd, args, options);
+  let child = _spawn(...arguments);
 
   let promise = new Promise(function(resolve, reject) {
     let stdout = '';
