@@ -2,7 +2,7 @@
 
 const fs = require('fs-extra');
 const copyRegex = require('./copy-regex');
-const debug = require('debug')('git-diff-apply');
+const debug = require('./debug');
 
 module.exports = async function copy(from, to) {
   if (debug.enabled) {

@@ -2,7 +2,7 @@
 
 const { promisify } = require('util');
 const { exec: _exec, spawn: _spawn } = require('child_process');
-const debug = require('debug')('git-diff-apply');
+const debug = require('./debug');
 const execPromise = promisify(_exec);
 
 module.exports.exec = async function exec(command, options) {

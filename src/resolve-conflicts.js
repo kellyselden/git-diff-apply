@@ -1,7 +1,7 @@
 'use strict';
 
 const { spawn } = require('child_process');
-const debug = require('debug')('git-diff-apply');
+const debug = require('./debug');
 
 module.exports = function resolveConflicts(options) {
   debug('git mergetool');
