@@ -7,10 +7,13 @@ const execPromise = promisify(_exec);
 
 module.exports.exec = async function exec() {
   debug(...arguments);
+
   let { stdout } = await execPromise(...arguments);
+
   if (stdout) {
     debug(stdout);
   }
+
   return stdout;
 };
 
