@@ -1,8 +1,7 @@
 'use strict';
 
 const path = require('path');
-const { promisify } = require('util');
-const tmpDir = promisify(require('tmp').dir);
+const { createTmpDir } = require('./tmp');
 const fs = require('fs-extra');
 const uuidv1 = require('uuid').v1;
 const debug = require('./debug');
@@ -96,7 +95,7 @@ module.exports = async function gitDiffApply({
   }
 
   async function namespaceRepoWithSubDir(subDir) {
-    let newTmpDir = await tmpDir();
+    let newTmpDir = await createTmpDir();
 
     await gitInit({ cwd: newTmpDir });
 
@@ -142,7 +141,7 @@ module.exports = async function gitDiffApply({
   }
 
   async function createPatchFile() {
-    let patchFile = path.join(await tmpDir(), 'file.patch');
+    let patchFile = path.join(await createTmpDir(), 'file.patch');
     let ps = spawn('git', ['diff', safeStartTag, safeEndTag, '--binary'], { cwd: _tmpDir });
     ps.stdout.pipe(fs.createWriteStream(patchFile));
     await ps;
@@ -242,7 +241,7 @@ module.exports = async function gitDiffApply({
       remoteUrl = tmpPath;
     }
 
-    _tmpDir = await tmpDir();
+    _tmpDir = await createTmpDir();
     tmpWorkingDir = _tmpDir;
 
     await spawn('git', ['clone', remoteUrl, _tmpDir]);

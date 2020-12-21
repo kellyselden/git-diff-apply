@@ -15,8 +15,7 @@ const {
 const gitDiffApply = require('../../src');
 const utils = require('../../src/utils');
 const { isGitClean } = gitDiffApply;
-const { promisify } = require('util');
-const tmpDir = promisify(require('tmp').dir);
+const { createTmpDir } = require('../../src/tmp');
 const Project = require('fixturify-project');
 const os = require('os');
 const { spawn } = require('../../src/run');
@@ -93,7 +92,7 @@ describe(function() {
     subDir = '',
     beforeCompare = async() => {}
   }) {
-    let localMergeDir = await tmpDir();
+    let localMergeDir = await createTmpDir();
 
     let rootMergeDir = localMergeDir;
     localMergeDir = path.join(rootMergeDir, subDir);
@@ -906,7 +905,7 @@ D  removed-unchanged.txt
       try {
         realGlobalGitignorePath = (await spawn('git', ['config', '--global', 'core.excludesfile'])).trim();
       } catch (err) {}
-      let tmpGlobalGitignorePath = path.join(await tmpDir(), '.gitignore');
+      let tmpGlobalGitignorePath = path.join(await createTmpDir(), '.gitignore');
       await fs.writeFile(tmpGlobalGitignorePath, '.vscode');
       await spawn('git', ['config', '--global', 'core.excludesfile', tmpGlobalGitignorePath]);
     });
