@@ -4,8 +4,7 @@ const { exec, spawn } = require('./run');
 const gitInit = require('./git-init');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
-const { promisify } = require('util');
-const tmpDir = promisify(require('tmp').dir);
+const { createTmpDir } = require('./tmp');
 
 module.exports = async function createCustomRemote({
   startCommand,
@@ -15,7 +14,7 @@ module.exports = async function createCustomRemote({
   reset,
   init
 }) {
-  let cwd = await tmpDir();
+  let cwd = await createTmpDir();
 
   await gitInit({
     cwd
