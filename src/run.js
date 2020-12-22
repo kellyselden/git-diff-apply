@@ -17,7 +17,7 @@ module.exports.exec = async function exec() {
   return stdout;
 };
 
-module.exports.spawn = function spawn(cmd, args, options) {
+module.exports.spawn = function spawn(cmd, args = [], options) {
   let command = [cmd, ...args.map(arg => `"${arg}"`)].join(' ');
 
   debug(command, options);
