@@ -2,9 +2,9 @@
 
 const fixturify = require('fixturify');
 
-module.exports = function convertToObj(dir, include) {
+module.exports = function convertToObj(dir, globs) {
   let obj = fixturify.readSync(dir, {
-    include
+    globs
   });
   delete obj['.git'];
   return obj;
