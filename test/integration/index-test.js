@@ -16,7 +16,7 @@ const gitDiffApply = require('../../src');
 const utils = require('../../src/utils');
 const { isGitClean } = gitDiffApply;
 const { createTmpDir } = require('../../src/tmp');
-const Project = require('fixturify-project');
+const { Project } = require('fixturify-project');
 const os = require('os');
 const { spawn } = require('../../src/run');
 
@@ -1076,7 +1076,9 @@ D  removed-unchanged.txt
           project.files[`index${i}.js`] = 'module.exports = "Hello, World!"';
         }
 
-        project.writeSync(rootDir);
+        project.baseDir = rootDir;
+
+        project.writeSync();
 
         await commit({ m: 'local', cwd: rootDir });
 
