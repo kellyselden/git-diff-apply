@@ -36,8 +36,7 @@ describe(function() {
         '--start-tag',
         defaultStartTag,
         '--end-tag',
-        defaultEndTag,
-        '--resolve-conflicts'
+        defaultEndTag
       ],
       cwd: localDir,
       commitMessage: 'local',
@@ -72,9 +71,10 @@ describe(function() {
 
     expect(status).to.equal(`A  added-changed.txt
 A  added-unchanged.txt
-M  present-added-changed.txt
-M  present-changed.txt
-D  removed-changed.txt
+DU missing-changed.txt
+AA present-added-changed.txt
+UU present-changed.txt
+UD removed-changed.txt
 D  removed-unchanged.txt
 `);
   });
@@ -91,7 +91,7 @@ D  removed-unchanged.txt
       mergeFixtures: 'test/fixtures/merge/git'
     });
 
-    expect(status).to.equal(`M  .gitignore
+    expect(status).to.equal(`UU .gitignore
 `);
   });
 });

@@ -14,9 +14,6 @@ const { argv } = require('yargs')
     'end-tag': {
       type: 'string'
     },
-    'resolve-conflicts': {
-      type: 'boolean'
-    },
     'ignored-files': {
       type: 'array'
     },
@@ -38,22 +35,10 @@ const { argv } = require('yargs')
   });
 
 (async() => {
-  let returnObject;
   try {
-    returnObject = await gitDiffApply(argv);
+    await gitDiffApply(argv);
   } catch (err) {
     console.log(err);
     return;
-  }
-
-  let ps = returnObject.resolveConflictsProcess;
-  if (ps) {
-    process.stdin.pipe(ps.stdin);
-    ps.stdout.pipe(process.stdout);
-    ps.stderr.pipe(process.stderr);
-
-    // since we are piping, not inheriting, the child process
-    // doesn't have the power to close its parent
-    ps.on('exit', process.exit);
   }
 })();
