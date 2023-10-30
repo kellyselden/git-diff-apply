@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/kellyselden/git-diff-apply#readme",
   "engines": {
-    "node": ">=14.15"
+    "node": ">=16.13"
   },
   "dependencies": {
     "debug": "^4.0.0",
