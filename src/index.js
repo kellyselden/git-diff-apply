@@ -13,7 +13,6 @@ const gitStatus = require('./git-status');
 const commit = require('./commit');
 const checkOutTag = require('./check-out-tag');
 const convertToObj = require('./convert-to-obj');
-const resolveConflicts = require('./resolve-conflicts');
 const commitAndTag = require('./commit-and-tag');
 const gitRemoveAll = require('./git-remove-all');
 const createCustomRemote = require('./create-custom-remote');
@@ -36,7 +35,6 @@ module.exports = async function gitDiffApply({
   remoteUrl,
   startTag,
   endTag,
-  resolveConflicts: _resolveConflicts,
   ignoredFiles = [],
   reset,
   init,
@@ -47,7 +45,6 @@ module.exports = async function gitDiffApply({
   let _tmpDir;
   let tmpWorkingDir;
 
-  let hasConflicts;
   let returnObject;
 
   let isCodeUntracked;
@@ -204,7 +201,9 @@ module.exports = async function gitDiffApply({
       try {
         await spawn('git', ['cherry-pick', '--no-commit', sha.trim()], { cwd });
       } catch (err) {
-        hasConflicts = true;
+        if (!err.message.includes('error: could not apply')) {
+          throw err;
+        }
       }
 
       await spawn('git', ['remote', 'remove', tempBranchName], { cwd });
@@ -284,10 +283,6 @@ module.exports = async function gitDiffApply({
     debug('failure');
 
     throw err;
-  }
-
-  if (hasConflicts && _resolveConflicts) {
-    returnObject.resolveConflictsProcess = resolveConflicts({ cwd });
   }
 
   return returnObject;
