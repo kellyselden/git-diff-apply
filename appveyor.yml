@@ -1,6 +1,7 @@
 environment:
   matrix:
-    - nodejs_version: "12"
+    - nodejs_version: "16"
+
   DEBUG: "git-diff-apply"
 
 branches:
