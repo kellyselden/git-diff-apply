@@ -1078,7 +1078,7 @@ D  removed-unchanged.txt
 
         project.baseDir = rootDir;
 
-        project.writeSync();
+        await project.write();
 
         await commit({ m: 'local', cwd: rootDir });
 
