@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@kellyselden/node-template": "5.0.1",
-    "chai": "^4.3.10",
+    "chai": "^5.0.0",
     "cpr": "^3.0.1",
     "eslint": "^8.53.0",
     "eslint-config-sane": "^1.0.2",
