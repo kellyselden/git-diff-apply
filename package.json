@@ -46,7 +46,7 @@
     "yargs": "^17.0.0"
   },
   "devDependencies": {
-    "@kellyselden/node-template": "6.4.0",
+    "@kellyselden/node-template": "6.5.2",
     "chai": "^4.5.0",
     "cpr": "^3.0.1",
     "eslint": "^8.57.1",
