@@ -40,7 +40,7 @@ module.exports = async function gitDiffApply({
   init,
   createCustomDiff,
   startCommand,
-  endCommand
+  endCommand,
 }) {
   let _tmpDir;
   let tmpWorkingDir;
@@ -87,7 +87,7 @@ module.exports = async function gitDiffApply({
 
     return {
       from,
-      to
+      to,
     };
   }
 
@@ -219,7 +219,7 @@ module.exports = async function gitDiffApply({
 
     try {
       isClean = await isGitClean({ cwd });
-    } catch (err) {
+    } catch {
       throw 'Not a git repository';
     }
 
@@ -234,7 +234,7 @@ module.exports = async function gitDiffApply({
         startTag: safeStartTag,
         endTag: safeEndTag,
         reset,
-        init
+        init,
       });
 
       remoteUrl = tmpPath;
@@ -274,7 +274,7 @@ module.exports = async function gitDiffApply({
     } catch (err2) {
       throw {
         err,
-        err2
+        err2,
       };
     }
   }

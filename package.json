@@ -2,22 +2,6 @@
   "name": "git-diff-apply",
   "version": "7.0.2",
   "description": "Use an unrelated remote repository to apply a git diff",
-  "main": "src",
-  "files": [
-    "bin",
-    "src"
-  ],
-  "bin": {
-    "git-diff-apply": "bin/git-diff-apply.js"
-  },
-  "scripts": {
-    "lint": "eslint . --ext js,json",
-    "test": "mocha"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kellyselden/git-diff-apply.git"
-  },
   "keywords": [
     "patch",
     "tag",
@@ -28,14 +12,27 @@
     "update",
     "conflict"
   ],
-  "author": "Kelly Selden",
-  "license": "MIT",
+  "homepage": "https://github.com/kellyselden/git-diff-apply#readme",
   "bugs": {
     "url": "https://github.com/kellyselden/git-diff-apply/issues"
   },
-  "homepage": "https://github.com/kellyselden/git-diff-apply#readme",
-  "engines": {
-    "node": ">=20.9"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kellyselden/git-diff-apply.git"
+  },
+  "license": "MIT",
+  "author": "Kelly Selden",
+  "main": "src",
+  "bin": {
+    "git-diff-apply": "bin/git-diff-apply.js"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "lint": "eslint",
+    "test": "mocha"
   },
   "dependencies": {
     "debug": "^4.0.0",
@@ -46,22 +43,21 @@
     "yargs": "^17.0.0"
   },
   "devDependencies": {
-    "@kellyselden/node-template": "6.5.2",
+    "@kellyselden/node-template": "6.9.0",
     "chai": "^4.5.0",
     "cpr": "^3.0.1",
-    "eslint": "^8.57.1",
-    "eslint-config-sane": "^1.0.2",
-    "eslint-config-sane-node": "^2.0.0",
-    "eslint-plugin-json-files": "^5.1.0",
+    "eslint": "^9.34.0",
+    "eslint-config-sane-node": "^6.0.0",
     "eslint-plugin-mocha": "^10.5.0",
-    "eslint-plugin-n": "^17.20.0",
-    "eslint-plugin-prefer-let": "^4.0.0",
     "fixturify-project": "^7.0.0",
     "git-fixtures": "^9.0.0",
-    "mocha": "^11.7.0",
-    "mocha-helpers": "^10.0.0",
-    "renovate-config-standard": "2.3.0",
+    "mocha": "^11.7.1",
+    "mocha-helpers": "^10.2.1",
+    "renovate-config-standard": "2.4.2",
     "sinon": "^21.0.0",
     "standard-node-template": "7.2.0"
+  },
+  "engines": {
+    "node": ">=20.9"
   }
 }

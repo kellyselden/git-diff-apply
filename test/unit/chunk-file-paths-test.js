@@ -6,7 +6,7 @@ const { chunkFilePaths } = require('../../src/git-remove-all');
 const filePaths = [
   'a'.repeat(5),
   'b'.repeat(4),
-  'c'.repeat(2)
+  'c'.repeat(2),
 ];
 
 describe(chunkFilePaths, function() {
