@@ -6,32 +6,32 @@ const gitDiffApply = require('../src');
 const { argv } = require('yargs')
   .options({
     'remote-url': {
-      type: 'string'
+      type: 'string',
     },
     'start-tag': {
-      type: 'string'
+      type: 'string',
     },
     'end-tag': {
-      type: 'string'
+      type: 'string',
     },
     'ignored-files': {
-      type: 'array'
+      type: 'array',
     },
     'reset': {
-      type: 'boolean'
+      type: 'boolean',
     },
     'init': {
-      type: 'boolean'
+      type: 'boolean',
     },
     'create-custom-diff': {
-      type: 'boolean'
+      type: 'boolean',
     },
     'start-command': {
-      type: 'string'
+      type: 'string',
     },
     'end-command': {
-      type: 'string'
-    }
+      type: 'string',
+    },
   });
 
 (async() => {

@@ -13,6 +13,6 @@ module.exports = async function copy(from, to) {
   await fs.copy(from, to, {
     filter(src) {
       return copyRegex.test(src);
-    }
+    },
   });
 };

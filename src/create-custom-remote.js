@@ -12,40 +12,40 @@ module.exports = async function createCustomRemote({
   startTag,
   endTag,
   reset,
-  init
+  init,
 }) {
   let cwd = await createTmpDir();
 
   await gitInit({
-    cwd
+    cwd,
   });
 
   // If one tag is CRLF and the other LF, the diff becomes unusable.
   // This will work around that,
   await spawn('git', ['config', 'core.autocrlf', 'true'], {
-    cwd
+    cwd,
   });
 
   if (!(reset || init)) {
     await exec(startCommand, {
-      cwd
+      cwd,
     });
 
     await commitAndTag(startTag, {
-      cwd
+      cwd,
     });
 
     await gitRemoveAll({
-      cwd
+      cwd,
     });
   }
 
   await exec(endCommand, {
-    cwd
+    cwd,
   });
 
   await commitAndTag(endTag, {
-    cwd
+    cwd,
   });
 
   return cwd;

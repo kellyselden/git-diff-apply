@@ -5,7 +5,7 @@ const { expect } = require('../helpers/chai');
 const {
   buildTmp,
   processBin,
-  fixtureCompare: _fixtureCompare
+  fixtureCompare: _fixtureCompare,
 } = require('git-fixtures');
 
 const defaultStartTag = 'v1';
@@ -19,13 +19,13 @@ describe(function() {
 
   async function merge({
     localFixtures,
-    remoteFixtures
+    remoteFixtures,
   }) {
     localDir = await buildTmp({
-      fixturesPath: localFixtures
+      fixturesPath: localFixtures,
     });
     remoteDir = await buildTmp({
-      fixturesPath: remoteFixtures
+      fixturesPath: remoteFixtures,
     });
 
     return processBin({
@@ -36,16 +36,16 @@ describe(function() {
         '--start-tag',
         defaultStartTag,
         '--end-tag',
-        defaultEndTag
+        defaultEndTag,
       ],
       cwd: localDir,
       commitMessage: 'local',
-      expect
+      expect,
     }).promise;
   }
 
   function fixtureCompare({
-    mergeFixtures
+    mergeFixtures,
   }) {
     let actual = localDir;
     let expected = mergeFixtures;
@@ -53,20 +53,20 @@ describe(function() {
     _fixtureCompare({
       expect,
       actual,
-      expected
+      expected,
     });
   }
 
   it('handles conflicts', async function() {
     let {
-      status
+      status,
     } = await merge({
       localFixtures: 'test/fixtures/local/conflict',
-      remoteFixtures: 'test/fixtures/remote/conflict'
+      remoteFixtures: 'test/fixtures/remote/conflict',
     });
 
     fixtureCompare({
-      mergeFixtures: 'test/fixtures/merge/conflict'
+      mergeFixtures: 'test/fixtures/merge/conflict',
     });
 
     expect(status).to.equal(`A  added-changed.txt
@@ -81,14 +81,14 @@ D  removed-unchanged.txt
 
   it('ignores .git folder', async function() {
     let {
-      status
+      status,
     } = await merge({
       localFixtures: 'test/fixtures/local/git',
-      remoteFixtures: 'test/fixtures/remote/git'
+      remoteFixtures: 'test/fixtures/remote/git',
     });
 
     fixtureCompare({
-      mergeFixtures: 'test/fixtures/merge/git'
+      mergeFixtures: 'test/fixtures/merge/git',
     });
 
     expect(status).to.equal(`UU .gitignore
