@@ -3,7 +3,6 @@
 const path = require('path');
 const { createTmpDir } = require('./tmp');
 const fs = require('fs-extra');
-const uuidv1 = require('uuid').v1;
 const debug = require('./debug');
 const utils = require('./utils');
 const getRootDir = require('./get-root-dir');
@@ -20,8 +19,6 @@ const { spawn } = require('./run');
 
 const { isGitClean } = gitStatus;
 const { gitConfigInit } = gitInit;
-
-const tempBranchName = uuidv1();
 
 const fallbackTagName = 'tag-not-supplied';
 
@@ -171,6 +168,10 @@ module.exports = async function gitDiffApply({
 
       return;
     }
+
+    let { v1: uuidv1 } = await import('uuid');
+
+    let tempBranchName = uuidv1();
 
     await checkOutTag(safeStartTag, { cwd: _tmpDir });
 
