@@ -43,12 +43,11 @@
     "yargs": "^17.0.0"
   },
   "devDependencies": {
+    "@kellyselden/eslint-config": "^1.0.0",
     "@kellyselden/node-template": "6.11.0",
     "chai": "^4.5.0",
     "cpr": "^3.0.1",
     "eslint": "^9.34.0",
-    "eslint-config-sane-node": "^6.0.0",
-    "eslint-plugin-mocha": "^10.5.0",
     "fixturify-project": "^7.0.0",
     "git-fixtures": "^9.0.0",
     "mocha": "^11.7.1",
