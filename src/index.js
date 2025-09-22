@@ -136,7 +136,7 @@ module.exports = async function gitDiffApply({
 
   async function createPatchFile() {
     let patchFile = path.join(await createTmpDir(), 'file.patch');
-    let ps = spawn('git', ['diff', safeStartTag, safeEndTag, '--binary'], { cwd: _tmpDir });
+    let ps = spawn('git', ['diff', '--no-ext-diff', '--patience', '--binary', safeStartTag, safeEndTag], { cwd: _tmpDir });
     ps.stdout.pipe(fs.createWriteStream(patchFile));
     await ps;
     if (await fs.readFile(patchFile, 'utf8') !== '') {
