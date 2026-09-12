@@ -39,7 +39,7 @@
     "fixturify": "^3.0.0",
     "fs-extra": "^11.0.0",
     "tmp": "0.2.7",
-    "uuid": "^13.0.0",
+    "uuid": "^14.0.0",
     "yargs": "^17.0.0"
   },
   "devDependencies": {
