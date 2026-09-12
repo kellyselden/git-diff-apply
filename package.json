@@ -1,6 +1,6 @@
 {
   "name": "git-diff-apply",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "description": "Use an unrelated remote repository to apply a git diff",
   "keywords": [
     "patch",
