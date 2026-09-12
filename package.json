@@ -49,7 +49,7 @@
     "cpr": "^3.0.1",
     "eslint": "^9.34.0",
     "fixturify-project": "^7.0.0",
-    "git-fixtures": "^9.0.0",
+    "git-fixtures": "^10.0.0",
     "mocha": "^11.7.1",
     "mocha-helpers": "^11.0.0",
     "sinon": "^21.0.0",
